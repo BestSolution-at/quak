@@ -1,4 +1,4 @@
-package at.bestsolution.quack;
+package at.bestsolution.quak;
 
 import java.io.IOException;
 import java.io.InputStream;
