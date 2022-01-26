@@ -36,10 +36,10 @@ import io.quarkus.qute.Template;
 public class QuakResource {
 
 	@ConfigProperty(name = "quak.storage.path", defaultValue = "/tmp/quak-repo")
-	private java.nio.file.Path storagepath;
+	java.nio.file.Path storagepath;
 	
 	@ConfigProperty(name = "quak.allowRedeploy", defaultValue = "false")
-	private boolean allowRedeploy;
+	boolean allowRedeploy;
 
 	@Context
 	private UriInfo urlInfo;
