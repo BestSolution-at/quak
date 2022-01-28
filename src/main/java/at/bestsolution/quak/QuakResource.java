@@ -117,13 +117,13 @@ public class QuakResource {
 						if( size > 1024 ) {
 							if( size > 1024 * 1024 ) {
 								if( size > 1024 * 1024 * 1024 ) {
-									formatted = new DecimalFormat("#,##.0", DecimalFormatSymbols.getInstance(Locale.ENGLISH)).format(size / (1024.0 * 1024.0 * 1024)) + " GB";
+									formatted = new DecimalFormat("#,###.0", DecimalFormatSymbols.getInstance(Locale.ENGLISH)).format(size / (1024.0 * 1024.0 * 1024)) + " GB";
 								} else {
-									formatted = new DecimalFormat("#,##.0", DecimalFormatSymbols.getInstance(Locale.ENGLISH)).format(size / (1024.0 * 1024.0)) + " MB";	
+									formatted = new DecimalFormat("#,###.0", DecimalFormatSymbols.getInstance(Locale.ENGLISH)).format(size / (1024.0 * 1024.0)) + " MB";	
 								}
 								
 							} else {
-								formatted = new DecimalFormat("#,##.0", DecimalFormatSymbols.getInstance(Locale.ENGLISH)).format(size / 1024.0) + " KB";
+								formatted = new DecimalFormat("#,###.0", DecimalFormatSymbols.getInstance(Locale.ENGLISH)).format(size / 1024.0) + " KB";
 							}
 						} else {
 							formatted = size + "";
