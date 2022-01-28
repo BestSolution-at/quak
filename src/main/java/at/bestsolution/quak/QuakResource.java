@@ -28,19 +28,15 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-
+import at.bestsolution.quak.QuakConfiguration.Repository;
 import io.quarkus.qute.Template;
 
 @Path("/{path: .*}")
 public class QuakResource {
 
-	@ConfigProperty(name = "quak.storage.path", defaultValue = "/tmp/quak-repo")
-	java.nio.file.Path storagepath;
+	@Inject
+	QuakConfiguration configuration;
 	
-	@ConfigProperty(name = "quak.allowRedeploy", defaultValue = "false")
-	boolean allowRedeploy;
-
 	@Context
 	private UriInfo urlInfo;
 	
@@ -57,22 +53,57 @@ public class QuakResource {
 			return "Unknown";
 		}
 	}
+	
+	private Repository findRepository(String path) {
+		return configuration.repositories().stream().filter( r -> path.startsWith(r.baseUrl())).findFirst().orElse(null);
+	}
+	
+	private java.nio.file.Path resolveFileSystemPath(Repository repository, String url) {
+		int length = repository.baseUrl().length();
+		String relative = url.substring(length);
+		
+		if( relative.length() > 0 && relative.charAt(0) == '/' ) {
+			relative = relative.substring(1);
+		}
+		
+		if( relative.isEmpty() ) {
+			return repository.storagePath();
+		}
+		
+		return repository.storagePath().resolve(relative);
+	}
+	
+	private String createURL(String baseUrl, String fileName) {
+		if( baseUrl.endsWith("/") ) {
+			return baseUrl + fileName;
+		} else {
+			return baseUrl + "/" + fileName;
+		}
+	}
 
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML, MediaType.APPLICATION_OCTET_STREAM, MediaType.TEXT_HTML })
 	public Response get() {
 		String path = urlInfo.getPath();
 		
-		java.nio.file.Path file = storagepath.resolve(path.substring(1));
+		Repository repository = findRepository(path);
+		
+		if( repository == null ) {
+			return Response.status(Status.NOT_FOUND).build();
+		}
+		
+		java.nio.file.Path file = resolveFileSystemPath(repository, path);
 		
 		if( Files.isDirectory(file) ) {
 			List<DirectoryItem> items = new ArrayList<>();
-			items.add(new DirectoryItem("drive_folder_upload","..",Paths.get(path).getParent().toString(),"-",getLastModified(file)));
+			if( ! repository.storagePath().equals(file) ) {
+				items.add(new DirectoryItem("drive_folder_upload","..",Paths.get(path).getParent().toString(),"-",getLastModified(file)));		
+			}
 			
 			try {
 				items.addAll(Files.list(file).sorted().map( p -> {
 					if( Files.isDirectory(p) ) {
-						return new DirectoryItem("folder",p.getFileName().toString(), path + "/" + p.getFileName(), "-", getLastModified(p));
+						return new DirectoryItem("folder",p.getFileName().toString(), createURL(path,p.getFileName().toString()), "-", getLastModified(p));
 					} else {
 						long size;
 						try {
@@ -97,7 +128,7 @@ public class QuakResource {
 							formatted = size + "";
 						}
 						
-						return new DirectoryItem("description", p.getFileName().toString(), path + "/" + p.getFileName(), formatted, getLastModified(p));
+						return new DirectoryItem("description", p.getFileName().toString(), createURL(path,p.getFileName().toString()), formatted, getLastModified(p));
 					}
 				}).collect(Collectors.toList()));
 			} catch (IOException e) {
@@ -124,12 +155,19 @@ public class QuakResource {
 	@PUT
 	@POST
 	public Response upload(InputStream messageBody) {
-		java.nio.file.Path file = storagepath.resolve(urlInfo.getPath().substring(1));
+		String path = urlInfo.getPath();
+		Repository repository = findRepository(path);
+		
+		if( repository == null ) {
+			return Response.status(Status.NOT_FOUND).build();
+		}
+		
+		java.nio.file.Path file = resolveFileSystemPath(repository, path);
 		
 		try {
 			Files.createDirectories(file.getParent());
 			if( Files.exists(file) ) {
-				if( ! allowRedeploy && ! file.getFileName().toString().startsWith("maven-metadata.xml") ) {
+				if( ! repository.allowRedeploy() && ! file.getFileName().toString().startsWith("maven-metadata.xml") ) {
 					return Response.status(Status.METHOD_NOT_ALLOWED).entity("Redeployment not allowed").build();
 				}
 				Files.copy(messageBody, file, StandardCopyOption.REPLACE_EXISTING);	
