@@ -70,7 +70,13 @@ public class QuakResource {
 			return repository.storagePath();
 		}
 		
-		return repository.storagePath().resolve(relative);
+		java.nio.file.Path path = repository.storagePath().resolve(relative).normalize();
+
+		if( path.startsWith(repository.storagePath()) ) {
+			return path;
+		}
+		
+		return null;
 	}
 	
 	private String createURL(String baseUrl, String fileName) {
@@ -80,7 +86,7 @@ public class QuakResource {
 			return baseUrl + "/" + fileName;
 		}
 	}
-
+	
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML, MediaType.APPLICATION_OCTET_STREAM, MediaType.TEXT_HTML })
 	public Response get() {
@@ -93,6 +99,10 @@ public class QuakResource {
 		}
 		
 		java.nio.file.Path file = resolveFileSystemPath(repository, path);
+		
+		if( file == null ) {
+			return Response.status(Response.Status.NOT_FOUND).build();
+		}
 		
 		if( Files.isDirectory(file) ) {
 			List<DirectoryItem> items = new ArrayList<>();
@@ -163,6 +173,10 @@ public class QuakResource {
 		}
 		
 		java.nio.file.Path file = resolveFileSystemPath(repository, path);
+		
+		if( file == null ) {
+			return Response.status(Response.Status.NOT_FOUND).build();
+		}
 		
 		try {
 			Files.createDirectories(file.getParent());
