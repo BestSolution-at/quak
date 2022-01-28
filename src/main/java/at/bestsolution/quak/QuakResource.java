@@ -144,9 +144,9 @@ public class QuakResource {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 		
-		if (path.endsWith(".xml")) {
+		if (path.endsWith(".xml") || path.endsWith(".pom")) {
 			return Response.ok(file.toFile(), MediaType.APPLICATION_XML).build();
-		} else if( path.endsWith(".sha1") || path.endsWith(".md5") ) {
+		} else if( path.endsWith(".sha1") || path.endsWith(".md5") || path.endsWith("sha256") || path.endsWith("sha512") ) {
 			return Response.ok(file.toFile(), MediaType.TEXT_PLAIN).build();
 		}
 		
