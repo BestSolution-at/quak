@@ -3,7 +3,6 @@ package at.bestsolution.quak;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.FileTime;
 import java.text.DecimalFormat;
@@ -79,14 +78,6 @@ public class QuakResource {
 		return null;
 	}
 	
-	private String createURL(String baseUrl, String fileName) {
-		if( baseUrl.endsWith("/") ) {
-			return baseUrl + fileName;
-		} else {
-			return baseUrl + "/" + fileName;
-		}
-	}
-	
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML, MediaType.APPLICATION_OCTET_STREAM, MediaType.TEXT_HTML })
 	public Response get() {
@@ -107,13 +98,13 @@ public class QuakResource {
 		if( Files.isDirectory(file) ) {
 			List<DirectoryItem> items = new ArrayList<>();
 			if( ! repository.storagePath().equals(file) ) {
-				items.add(new DirectoryItem("drive_folder_upload","..",Paths.get(path).getParent().toString(),"-",getLastModified(file)));		
+				items.add(new DirectoryItem("drive_folder_upload","..","..","-",getLastModified(file)));		
 			}
 			
 			try {
 				items.addAll(Files.list(file).sorted().map( p -> {
 					if( Files.isDirectory(p) ) {
-						return new DirectoryItem("folder",p.getFileName().toString(), createURL(path,p.getFileName().toString()), "-", getLastModified(p));
+						return new DirectoryItem("folder",p.getFileName().toString(), p.getFileName().toString()+"/", "-", getLastModified(p));
 					} else {
 						long size;
 						try {
@@ -138,7 +129,7 @@ public class QuakResource {
 							formatted = size + "";
 						}
 						
-						return new DirectoryItem("description", p.getFileName().toString(), createURL(path,p.getFileName().toString()), formatted, getLastModified(p));
+						return new DirectoryItem("description", p.getFileName().toString(), p.getFileName().toString(), formatted, getLastModified(p));
 					}
 				}).collect(Collectors.toList()));
 			} catch (IOException e) {
