@@ -1,6 +1,10 @@
 # quak Project
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+quak is a Maven repository server which uses Quarkus, the Supersonic Subatomic Java Framework. 
+
+It can be used to deploy or install artifacts. 
+
+Since it is based on Quarkus, it is fast and lightweight compared to Reposilite, Nexus and Archiva. 
 
 If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
 
@@ -46,6 +50,21 @@ Or, if you don't have GraalVM installed, you can run the native executable build
 You can then execute your native executable with: `./target/quack-1.0.0-SNAPSHOT-runner`
 
 If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.
+
+## Configuration
+
+Following is a sample quak configuration in file `src/main/resources/application.properties` . 
+
+```
+quarkus.http.port = 8089
+quarkus.http.limits.max-body-size = 1000M
+
+quak.repositories[0].name = blueprint
+quak.repositories[0].storage-path = repos/blueprint
+quak.repositories[0].base-url = /at/bestsolution/blueprint
+quak.repositories[0].allow-redeploy = true
+```
+For information about Quarkus configuration please see: https://quarkus.io/guides/config-reference .
 
 ## Related Guides
 
