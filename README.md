@@ -87,7 +87,6 @@ quak.repositories[0].allow-redeploy = true
 | `quak.repositories[0].storage-path`    	| Location of the artifacts |
 | `quak.repositories[0].base-url`    		| Repository is served at |
 | `quak.repositories[0].allow-redeploy`    	| If the same version can be redeployed  |
-|-----------------+--------------+
 
 
 Configuration file should be placed in path `../config/application.properties` **where quak runnable jar is running.**
