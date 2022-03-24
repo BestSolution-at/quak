@@ -80,12 +80,12 @@ quak.repositories[0].allow-redeploy = true
 
 | Configuration | Explanation | Default Value
 |-----------------|:-------------|:-------------|
-| `quarkus.http.port` 						| Port Quarkus is running on 				| 8089
+| `quarkus.http.port` 						| Port Quarkus is running on 				| 8080
 | `quarkus.http.limits.max-body-size`     	| Upload limit Quarkus has 					| 1000M
-| `quak.repositories[0].name`    			| Name of the repository 					| blueprint
-| `quak.repositories[0].storage-path`    	| Location of the artifacts 				| repos/blueprint
-| `quak.repositories[0].base-url`    		| Repository is served at 					| /at/bestsolution/blueprint
-| `quak.repositories[0].allow-redeploy`    	| If the same version can be redeployed  	| true
+| `quak.repositories[0].name`    			| Name of the repository 					| 
+| `quak.repositories[0].storage-path`    	| Location of the artifacts 				| 
+| `quak.repositories[0].base-url`    		| Repository is served at 					| 
+| `quak.repositories[0].allow-redeploy`    	| If the same version can be redeployed  	| 
 
 Please note that `quak.repositories` configuration is an **array** and one instance of quak can serve as many as repositories defined here.
 
