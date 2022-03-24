@@ -25,7 +25,7 @@ quak is **NOT**
 
 You can run your application in dev mode that enables live coding using:
 ```shell script
-./mvnw compile quarkus\:dev
+./mvnw compile quarkus:dev
 ```
 
 > **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/q/dev/.
@@ -88,5 +88,7 @@ quak.repositories[0].allow-redeploy = true
 | `quak.repositories[0].allow-redeploy`    	| If the same version can be redeployed  	| true
 
 Please note that `quak.repositories` configuration is an **array** and one instance of quak can serve as many as repositories defined here.
+
+Given "blueprint" name is and example repository to explain how to define a repository.
 
 For information about Quarkus configuration please see: https://quarkus.io/guides/config-reference .
