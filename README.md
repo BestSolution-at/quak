@@ -8,11 +8,24 @@ Since it is based on Quarkus, it is fast and lightweight compared to Reposilite,
 
 If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
 
+## What it is and what it is not
+
+quak is:
+ - a Maven repository server **only**
+ - lightweight
+ - fast
+ - secure
+ - platform intependent
+
+quak is **NOT**
+ - a Maven proxy
+	
+
 ## Running the application in dev mode
 
 You can run your application in dev mode that enables live coding using:
 ```shell script
-./mvnw compile quarkus:dev
+./mvnw compile quarkus\:dev
 ```
 
 > **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/q/dev/.
@@ -53,7 +66,8 @@ If you want to learn more about building native executables, please consult http
 
 ## Configuration
 
-Following is a sample quak configuration in file `src/main/resources/application.properties` . 
+
+Following is a sample quak configuration file: `application.properties` . 
 
 ```
 quarkus.http.port = 8089
@@ -64,16 +78,19 @@ quak.repositories[0].storage-path = repos/blueprint
 quak.repositories[0].base-url = /at/bestsolution/blueprint
 quak.repositories[0].allow-redeploy = true
 ```
+
+| Configuration | Explanation |
+|-----------------|:-------------|
+| `quarkus.http.port` 						| Port Quarkus is running on |
+| `quarkus.http.limits.max-body-size`     	| Upload limit Quarkus has |
+| `quak.repositories[0].name`    			| Name of the repository |
+| `quak.repositories[0].storage-path`    	| Location of the artifacts |
+| `quak.repositories[0].base-url`    		| Repository is served at |
+| `quak.repositories[0].allow-redeploy`    	| If the same version can be redeployed  |
+|-----------------+--------------+
+
+
+Configuration file should be placed in path `../config/application.properties` **where quak runnable jar is running.**
+
+
 For information about Quarkus configuration please see: https://quarkus.io/guides/config-reference .
-
-## Related Guides
-
-- RESTEasy JAX-RS ([guide](https://quarkus.io/guides/rest-json)): REST endpoint framework implementing JAX-RS and more
-
-## Provided Code
-
-### RESTEasy JAX-RS
-
-Easily start your RESTful Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started#the-jax-rs-resources)
