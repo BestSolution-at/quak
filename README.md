@@ -66,7 +66,7 @@ If you want to learn more about building native executables, please consult http
 
 ## Configuration
 
-Following is the default configuration file placed under the path `target/config/application.properties`.
+Following is a sample configuration file placed under the path `target/config/application.properties`.
 
 ```
 quarkus.http.port = 8089
