@@ -66,8 +66,7 @@ If you want to learn more about building native executables, please consult http
 
 ## Configuration
 
-
-Following is a sample quak configuration file: `application.properties` . 
+Following is the default configuration file placed under the path `target/config/application.properties`.
 
 ```
 quarkus.http.port = 8089
@@ -79,17 +78,15 @@ quak.repositories[0].base-url = /at/bestsolution/blueprint
 quak.repositories[0].allow-redeploy = true
 ```
 
-| Configuration | Explanation |
-|-----------------|:-------------|
-| `quarkus.http.port` 						| Port Quarkus is running on |
-| `quarkus.http.limits.max-body-size`     	| Upload limit Quarkus has |
-| `quak.repositories[0].name`    			| Name of the repository |
-| `quak.repositories[0].storage-path`    	| Location of the artifacts |
-| `quak.repositories[0].base-url`    		| Repository is served at |
-| `quak.repositories[0].allow-redeploy`    	| If the same version can be redeployed  |
+| Configuration | Explanation | Default Value
+|-----------------|:-------------|:-------------|
+| `quarkus.http.port` 						| Port Quarkus is running on 				| 8089
+| `quarkus.http.limits.max-body-size`     	| Upload limit Quarkus has 					| 1000M
+| `quak.repositories[0].name`    			| Name of the repository 					| blueprint
+| `quak.repositories[0].storage-path`    	| Location of the artifacts 				| repos/blueprint
+| `quak.repositories[0].base-url`    		| Repository is served at 					| /at/bestsolution/blueprint
+| `quak.repositories[0].allow-redeploy`    	| If the same version can be redeployed  	| true
 
-
-Configuration file should be placed in path `../config/application.properties` **where quak runnable jar is running.**
-
+Please note that `quak.repositories` configuration is an **array** and one instance of quak can serve as many as repositories defined here.
 
 For information about Quarkus configuration please see: https://quarkus.io/guides/config-reference .
