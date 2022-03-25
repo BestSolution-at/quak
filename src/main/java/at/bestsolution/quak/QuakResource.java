@@ -1,3 +1,28 @@
+/*
+ * ----------------------------------------------------------------
+ * Original File Name: Faculty.java
+ * Creation Date:      26.01.2022
+ * Description: Class file of quak instance.       
+ * ----------------------------------------------------------------
+
+ * ----------------------------------------------------------------
+ * Copyright (c) 2022 BestSolution.at EDV Systemhaus GmbH
+ * All Rights Reserved .
+ *
+ * BestSolution.at MAKES NO REPRESENTATIONS OR WARRANTIES ABOUT THE
+ * SUITABILITY OF THE SOFTWARE, EITHER EXPRESS OR IMPLIED, INCLUDING
+ * BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE, OR NON - INFRINGEMENT.
+ * BestSolution.at SHALL NOT BE LIABLE FOR ANY DAMAGES SUFFERED BY
+ * LICENSEE AS A RESULT OF USING, MODIFYING OR DISTRIBUTING THIS
+ * SOFTWARE OR ITS DERIVATIVES.
+ *
+ * This software must not be used, redistributed or based from in
+ * any other than the designated way without prior explicit written
+ * permission by BestSolution.at.
+ * -----------------------------------------------------------------
+ */
+
 package at.bestsolution.quak;
 
 import java.io.IOException;
@@ -30,6 +55,9 @@ import javax.ws.rs.core.UriInfo;
 import at.bestsolution.quak.QuakConfiguration.Repository;
 import io.quarkus.qute.Template;
 
+/**
+ * Represents a quak instance.
+ */
 @Path("/{path: .*}")
 public class QuakResource {
 
@@ -42,6 +70,10 @@ public class QuakResource {
 	@Inject
     Template directory;
 	
+	/**
+	 * @param p path of the file to be checked.
+	 * @return String text displaying last modify date.
+	 */
 	private static String getLastModified(java.nio.file.Path p) {
 		try {
 			FileTime time = Files.getLastModifiedTime(p);
@@ -53,10 +85,21 @@ public class QuakResource {
 		}
 	}
 	
+	/**
+	 * Searches for a repository configuration which has a base URL matching with beginning of the path.
+	 * @param path URL path of the upload request.
+	 * @return Repository a repository configuration or null in case of no match.
+	 */
 	private Repository findRepository(String path) {
 		return configuration.repositories().stream().filter( r -> path.startsWith(r.baseUrl())).findFirst().orElse(null);
 	}
 	
+	/**
+	 * Extracts the path for the artifact file.
+	 * @param repository repository configuration of the artifact.
+	 * @param url current URL path.
+	 * @return path for file or null if no match.
+	 */
 	private java.nio.file.Path resolveFileSystemPath(Repository repository, String url) {
 		int length = repository.baseUrl().length();
 		String relative = url.substring(length);
@@ -78,6 +121,10 @@ public class QuakResource {
 		return null;
 	}
 	
+	/**
+	 * A directory item listing GET method.
+	 * @return Response containing files related to the repository of the URL.
+	 */
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML, MediaType.APPLICATION_OCTET_STREAM, MediaType.TEXT_HTML })
 	public Response get() {
@@ -153,6 +200,11 @@ public class QuakResource {
 		return Response.ok(file.toFile(), MediaType.APPLICATION_OCTET_STREAM).build();
 	}
 
+	/** 
+	 * Uploads an artifact for a defined repository to it's pre-defined path.
+	 * @param messageBody an artifact file to be uploaded.
+	 * @return Response representing status of the upload.
+	 */
 	@PUT
 	@POST
 	public Response upload(InputStream messageBody) {
@@ -188,6 +240,9 @@ public class QuakResource {
 		return Response.ok().build();
 	}
 	
+	/**
+	 * Represents a directory item to be listed.
+	 */
 	public static class DirectoryItem {
 		public String name;
 		public String path;
