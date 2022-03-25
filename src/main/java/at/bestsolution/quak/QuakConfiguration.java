@@ -29,6 +29,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import io.smallrye.config.ConfigMapping;
+import io.smallrye.config.WithDefault;
 
 /**
  * Represents a quak configuration. Contains a list of repository configurations.
@@ -45,6 +46,8 @@ public interface QuakConfiguration {
 		public String name();
 		public Path storagePath();
 		public String baseUrl();
+		
+		@WithDefault("true")
 		public boolean allowRedeploy();
 	}
 }
