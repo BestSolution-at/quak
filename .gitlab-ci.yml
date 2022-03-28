@@ -1,4 +1,4 @@
-image: registry.bestsolution.dev/bestsolution.at/docker-images/docker-zulufx-mvn/beso-zulufx11-mvn:latest
+image: registry.bestsolution.dev/bestsolution.at/docker-images/docker-zulufx-mvn/beso-zulufx11-mvn
 
 stages:
   - compile
