@@ -6,23 +6,11 @@ stages:
   - build
   - verify
   
-variables:
-  MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
-  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
-
-cache: &global_cache
-  paths:
-    - $CI_PROJECT_DIR/.m2/repository
-  key: ${CI_COMMIT_REF_SLUG}
-  policy: pull
-
-
 master-compile:
   stage: compile
   script:
     - echo "<--- compiling --->"
     - mvn clean compile
-#    - mvn sonar:sonar   -Dsonar.host.url=https://$SONAR_HOST    -Dsonar.login=$SONAR_LOGIN
   artifacts:
     expire_in: 10 mins
 
@@ -40,14 +28,10 @@ master-test:
 master-verify:
   stage: verify
   script:
-    - wget http://p2.ci.bestsolution.at/dependency-check/mariadb-current.jar -O /tmp/mariadb-current.jar
-    - mvn verify sonar:sonar -Dsonar.qualitygate.wait=true org.owasp:dependency-check-maven:7.0.0:check -DcveUrlModified=http://nist.ci.bestsolution.at/nvdcve-1.1-modified.json.gz -DcveUrlBase=http://nist.ci.bestsolution.at/nvdcve-1.1-%d.json.gz -DconnectionString=jdbc:mariadb://nist.ci.bestsolution.at/dependencycheck -DdatabaseUser='dcreader' -DdatabaseDriverPath=/tmp/mariadb-current.jar -Dformats=html,json -DdatabaseDriverName=org.mariadb.jdbc.Driver -DdatabasePassword='dcreader' sonar:sonar -Dsonar.projectKey=$SONAR_KEY -Dsonar.host.url=$SONAR_HOST -Dsonar.login=$SONAR_LOGIN -Dsonar.dependencyCheck.xmlReportPath=target/dependency-check-report.xml -Dsonar.dependencyCheck.jsonReportPath=target/dependency-check-report.json -Dsonar.dependencyCheck.htmlReportPath=target/dependency-check-report.html -Dsonar.dependencyCheck.summarize=true -Dsonar.dependencyCheck.securityHotspot=true   
-  tags:
-    - lin64
+    - mvn sonar:sonar   -Dsonar.host.url=https://$SONAR_HOST    -Dsonar.login=$SONAR_LOGIN
   artifacts:
     expire_in: 10 mins
     paths: ['target/']
-
 
 master-build:
   stage: build
