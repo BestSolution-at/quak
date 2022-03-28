@@ -28,7 +28,7 @@ master-test:
 master-verify:
   stage: verify
   script:
-    - mvn sonar:sonar   -Dsonar.host.url=https://$SONAR_HOST    -Dsonar.login=$SONAR_LOGIN
+    - mvn sonar:sonar  -Dsonar.projectKey=$SONAR_KEY  -Dsonar.host.url=$SONAR_HOST  -Dsonar.login=$SONAR_LOGIN
   artifacts:
     expire_in: 10 mins
     paths: ['target/']
