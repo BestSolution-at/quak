@@ -131,20 +131,20 @@ public class QuakResource {
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML, MediaType.APPLICATION_OCTET_STREAM, MediaType.TEXT_HTML })
 	public Response get() {
-		LOG.debug( "Get request received with: " + urlInfo.getRequestUri() );
+		LOG.debugf( "Get request received with: %s", urlInfo.getRequestUri() );
 		String path = urlInfo.getPath();
 		
 		Repository repository = findRepository(path);
 		
 		if( repository == null ) {
-			LOG.error( "No repository found for path: " + path );
+			LOG.errorf( "No repository found for path: %s", path );
 			return Response.status(Status.NOT_FOUND).build();
 		}
 		
 		java.nio.file.Path file = resolveFileSystemPath(repository, path);
 		
 		if( file == null ) {
-			LOG.error( "Can not resolve path: " + path );
+			LOG.errorf( "Can not resolve path: %s", path );
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 		
@@ -193,7 +193,7 @@ public class QuakResource {
 		}
 		
 		if (!Files.exists(file) && !Files.isRegularFile(file)) {
-			LOG.error( "File (" + file.toAbsolutePath() + ") does not exist or could not be read." );
+			LOG.errorf( "File (%s) does not exist or could not be read.", file.toAbsolutePath() );
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 		
@@ -214,19 +214,19 @@ public class QuakResource {
 	@PUT
 	@POST
 	public Response upload(InputStream messageBody) {
-		LOG.info( "Upload request received with: " + urlInfo.getRequestUri() );
+		LOG.infof( "Upload request received with: %s", urlInfo.getRequestUri() );
 		String path = urlInfo.getPath();
 		Repository repository = findRepository(path);
 		
 		if( repository == null ) {
-			LOG.error( "No repository found for path: " + path );
+			LOG.errorf( "No repository found for path: %s", path );
 			return Response.status(Status.NOT_FOUND).build();
 		}
 		
 		java.nio.file.Path file = resolveFileSystemPath(repository, path);
 		
 		if( file == null ) {
-			LOG.error( "Can not resolve path: " + path );
+			LOG.errorf( "Can not resolve path: %s", path );
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 		
@@ -234,7 +234,7 @@ public class QuakResource {
 			Files.createDirectories(file.getParent());
 			if( Files.exists(file) ) {
 				if( ! repository.allowRedeploy() && ! file.getFileName().toString().startsWith("maven-metadata.xml") ) {
-					LOG.info( "Redeploy for " + repository.name() + " is not allowed. Artifact (" + file.getFileName() + ") is NOT uploaded." );
+					LOG.infof( "Redeploy for %s is not allowed. Artifact (%s) is NOT uploaded.", repository.name(), file.getFileName() );
 					return Response.status(Status.METHOD_NOT_ALLOWED).entity("Redeployment not allowed").build();
 				}
 				Files.copy(messageBody, file, StandardCopyOption.REPLACE_EXISTING);	
@@ -247,7 +247,7 @@ public class QuakResource {
 			return Response.serverError().build();
 		}
 		
-		LOG.info( "Artifact (" + file.getFileName() + ") is successfully uploaded for repository: " + repository.name() );
+		LOG.infof( "Artifact (%s) is successfully uploaded for repository: %s", file.getFileName(), repository.name() );
 		return Response.ok().build();
 	}
 	
