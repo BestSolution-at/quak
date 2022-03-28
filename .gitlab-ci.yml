@@ -1,0 +1,36 @@
+image: registry.bestsolution.dev/bestsolution.at/docker-images/docker-zulufx-mvn/beso-zulufx11-mvn:latest
+
+stages:
+  - compile
+  - test
+  - build
+
+master-compile:
+  stage: compile
+  script:
+    - echo "<--- compiling --->"
+    - mvn clean compile
+#    - mvn sonar:sonar   -Dsonar.host.url=https://$SONAR_HOST    -Dsonar.login=$SONAR_LOGIN
+
+master-test:
+  stage: test
+  script:
+    - echo "<--- testing --->"
+    - mvn clean test
+  artifacts:
+    reports:
+      junit:
+        - target/surefire-reports/TEST-*.xml
+
+master-build:
+  stage: build
+  script:
+    - echo "<-- building --->"
+    - mvn clean package
+  artifacts:
+    paths:
+      # create an artifact for the build jar
+      - target/quak-0.0.1-SNAPSHOT.jar
+
+
+
