@@ -4,6 +4,7 @@ stages:
   - compile
   - test
   - build
+  - verify
 
 master-compile:
   stage: compile
@@ -11,6 +12,8 @@ master-compile:
     - echo "<--- compiling --->"
     - mvn clean compile
 #    - mvn sonar:sonar   -Dsonar.host.url=https://$SONAR_HOST    -Dsonar.login=$SONAR_LOGIN
+  artifacts:
+    expire_in: 10 mins
 
 master-test:
   stage: test
@@ -18,9 +21,22 @@ master-test:
     - echo "<--- testing --->"
     - mvn clean test
   artifacts:
+    expire_in: 10 mins
     reports:
       junit:
         - target/surefire-reports/TEST-*.xml
+        
+master-verify:
+  stage: verify
+  script:
+    - wget http://p2.ci.bestsolution.at/dependency-check/mariadb-current.jar -O /tmp/mariadb-current.jar
+    - mvn verify sonar:sonar -Dsonar.qualitygate.wait=true org.owasp:dependency-check-maven:7.0.0:check -DcveUrlModified=http://nist.ci.bestsolution.at/nvdcve-1.1-modified.json.gz -DcveUrlBase=http://nist.ci.bestsolution.at/nvdcve-1.1-%d.json.gz -DconnectionString=jdbc:mariadb://nist.ci.bestsolution.at/dependencycheck -DdatabaseUser='dcreader' -DdatabaseDriverPath=/tmp/mariadb-current.jar -Dformats=html,json -DdatabaseDriverName=org.mariadb.jdbc.Driver -DdatabasePassword='dcreader' sonar:sonar -Dsonar.projectKey=$SONAR_KEY -Dsonar.host.url=$SONAR_HOST -Dsonar.login=$SONAR_LOGIN -Dsonar.dependencyCheck.xmlReportPath=target/dependency-check-report.xml -Dsonar.dependencyCheck.jsonReportPath=target/dependency-check-report.json -Dsonar.dependencyCheck.htmlReportPath=target/dependency-check-report.html -Dsonar.dependencyCheck.summarize=true -Dsonar.dependencyCheck.securityHotspot=true   
+  tags:
+    - lin64
+  artifacts:
+    expire_in: 10 mins
+    paths: ['target/']
+
 
 master-build:
   stage: build
@@ -28,9 +44,10 @@ master-build:
     - echo "<-- building --->"
     - mvn clean package
   artifacts:
+    expire_in: 10 mins
     paths:
       # create an artifact for the build jar
-      - target/quak-0.0.1-SNAPSHOT.jar
+      - target/quak-1.0.0-SNAPSHOT.jar
 
 
 
