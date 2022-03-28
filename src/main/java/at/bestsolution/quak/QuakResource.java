@@ -52,6 +52,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.jboss.logging.Logger;
+
 import at.bestsolution.quak.QuakConfiguration.Repository;
 import io.quarkus.qute.Template;
 
@@ -60,6 +62,8 @@ import io.quarkus.qute.Template;
  */
 @Path("/{path: .*}")
 public class QuakResource {
+	
+	private static final Logger LOG = Logger.getLogger(QuakResource.class);
 
 	@Inject
 	QuakConfiguration configuration;
@@ -79,8 +83,7 @@ public class QuakResource {
 			FileTime time = Files.getLastModifiedTime(p);
 			return DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm", Locale.ENGLISH).format(LocalDateTime.ofInstant(time.toInstant(),ZoneId.systemDefault()));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error( "Exception while reading file modification time!", e );
 			return "Unknown";
 		}
 	}
@@ -128,17 +131,20 @@ public class QuakResource {
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML, MediaType.APPLICATION_OCTET_STREAM, MediaType.TEXT_HTML })
 	public Response get() {
+		LOG.debug( "Get request received with: " + urlInfo.getRequestUri() );
 		String path = urlInfo.getPath();
 		
 		Repository repository = findRepository(path);
 		
 		if( repository == null ) {
+			LOG.error( "No repository found for path: " + path );
 			return Response.status(Status.NOT_FOUND).build();
 		}
 		
 		java.nio.file.Path file = resolveFileSystemPath(repository, path);
 		
 		if( file == null ) {
+			LOG.error( "Can not resolve path: " + path );
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 		
@@ -180,14 +186,14 @@ public class QuakResource {
 					}
 				}).collect(Collectors.toList()));
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOG.error( "Exception while reading directories!", e );
 			}
 			
 			return Response.ok(directory.data("items", items).render(),MediaType.TEXT_HTML).build();
 		}
 		
 		if (!Files.exists(file) && !Files.isRegularFile(file)) {
+			LOG.error( "File (" + file.toAbsolutePath() + ") does not exist or could not be read." );
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 		
@@ -208,16 +214,19 @@ public class QuakResource {
 	@PUT
 	@POST
 	public Response upload(InputStream messageBody) {
+		LOG.info( "Upload request received with: " + urlInfo.getRequestUri() );
 		String path = urlInfo.getPath();
 		Repository repository = findRepository(path);
 		
 		if( repository == null ) {
+			LOG.error( "No repository found for path: " + path );
 			return Response.status(Status.NOT_FOUND).build();
 		}
 		
 		java.nio.file.Path file = resolveFileSystemPath(repository, path);
 		
 		if( file == null ) {
+			LOG.error( "Can not resolve path: " + path );
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 		
@@ -225,6 +234,7 @@ public class QuakResource {
 			Files.createDirectories(file.getParent());
 			if( Files.exists(file) ) {
 				if( ! repository.allowRedeploy() && ! file.getFileName().toString().startsWith("maven-metadata.xml") ) {
+					LOG.info( "Redeploy for " + repository.name() + " is not allowed. Artifact (" + file.getFileName() + ") is NOT uploaded." );
 					return Response.status(Status.METHOD_NOT_ALLOWED).entity("Redeployment not allowed").build();
 				}
 				Files.copy(messageBody, file, StandardCopyOption.REPLACE_EXISTING);	
@@ -233,10 +243,11 @@ public class QuakResource {
 			}
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error( "Exception while creating directories!", e );
 			return Response.serverError().build();
 		}
+		
+		LOG.info( "Artifact (" + file.getFileName() + ") is successfully uploaded for repository: " + repository.name() );
 		return Response.ok().build();
 	}
 	
