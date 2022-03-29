@@ -3,15 +3,17 @@ package at.bestsolution.quak;
 import static io.restassured.RestAssured.given;
 
 import javax.ws.rs.core.Response.Status;
-
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
+import org.junit.jupiter.api.TestMethodOrder;
 
 @QuarkusTest
 @TestProfile( QuakTestProfile.class )
+@TestMethodOrder( OrderAnnotation.class )
 public class QuakResourceTest {
 
 	@Test
