@@ -1,6 +1,5 @@
 stages:
   - maven-compile
-  - maven-test
   - maven-verify
   
 include:
@@ -11,8 +10,7 @@ include:
       - '/jobs/maven/compile.yml'
       - '/jobs/maven/verify.yml'
 
-master-test:
-  stage: maven-test
+maven-compile:
   script:
     - echo "<--- testing --->"
     - mvn clean test
