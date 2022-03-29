@@ -9,16 +9,6 @@ include:
       - '/templates/maven-base.yml'
       - '/jobs/maven/compile.yml'
       - '/jobs/maven/verify.yml'
-
-maven-compile:
-  script:
-    - echo "<--- testing --->"
-    - mvn clean test
-  artifacts:
-    expire_in: 10 mins
-    reports:
-      junit:
-        - target/surefire-reports/TEST-*.xml
         
 
 
