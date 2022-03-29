@@ -3,11 +3,6 @@ stages:
   - maven-test
   - maven-verify
   
-## The maven variables can be set globally because they are used in every single job
-variables:
-  ADDITIONAL_MAVEN_OPTS: "-Dtest.bla=true"
-  PARENT_POM_LOCATION: "releng/"
-
 include:
   - project: 'BestSolution.at/gitlab-pipelines'
     ref: 1.4.3
