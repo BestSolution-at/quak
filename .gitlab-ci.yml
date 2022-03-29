@@ -1,54 +1,19 @@
-image: registry.bestsolution.dev/bestsolution.at/docker-images/docker-zulufx-mvn/beso-zulufx11-mvn
-
 stages:
-  - compile
-  - test
-  - build
-  - verify
+  - maven-compile
+  - maven-test
+  - maven-verify
+
   
+## The maven variables can be set globally because they are used in every single job
 variables:
- 
-  MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
-  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
+  ADDITIONAL_MAVEN_OPTS: "-Dtest.bla=true"
+  PARENT_POM_LOCATION: "releng/"
 
-  
-master-compile:
-  stage: compile
-  script:
-    - echo "<--- compiling --->"
-    - mvn clean compile
-  artifacts:
-    expire_in: 10 mins
-
-master-test:
-  stage: test
-  script:
-    - echo "<--- testing --->"
-    - mvn clean test
-  artifacts:
-    expire_in: 10 mins
-    reports:
-      junit:
-        - target/surefire-reports/TEST-*.xml
-        
-master-verify:
-  stage: verify
-  script:
-    - mvn sonar:sonar  -Dsonar.projectKey=$SONAR_KEY  -Dsonar.host.url=$SONAR_HOST  -Dsonar.login=$SONAR_LOGIN
-  artifacts:
-    expire_in: 10 mins
-    paths: ['target/']
-
-master-build:
-  stage: build
-  script:
-    - echo "<-- building --->"
-    - mvn clean package
-  artifacts:
-    expire_in: 10 mins
-    paths:
-      # create an artifact for the build jar
-      - target/quak-1.0.0-SNAPSHOT.jar
-
-
-
+include:
+  - project: 'BestSolution.at/gitlab-pipelines'
+    ref: 1.4.3
+    file: 
+      - '/templates/maven-base.yml'
+      - '/jobs/maven/compile.yml'
+      - '/jobs/maven/test.yml'
+      - '/jobs/maven/verify.yml'
