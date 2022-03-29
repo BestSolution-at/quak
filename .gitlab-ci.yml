@@ -17,7 +17,7 @@ include:
       - '/jobs/maven/verify.yml'
 
 master-test:
-  stage: test
+  stage: maven-test
   script:
     - echo "<--- testing --->"
     - mvn clean test
