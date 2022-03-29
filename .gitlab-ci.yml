@@ -1,6 +1,7 @@
 stages:
   - maven-compile
   - maven-verify
+  - maven-sonar
   
 include:
   - project: 'BestSolution.at/gitlab-pipelines'
@@ -9,7 +10,4 @@ include:
       - '/templates/maven-base.yml'
       - '/jobs/maven/compile.yml'
       - '/jobs/maven/verify.yml'
-        
-
-
-
+      - '/jobs/maven/sonar.yml'
