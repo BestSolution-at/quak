@@ -12,7 +12,7 @@ import io.restassured.response.Response;
 
 @QuarkusTest
 @TestProfile( QuakTestProfileRedeployNotAllowed.class )
-public class QuakResourceTestRedeploy {
+public class QuakResourceRedeployTest {
 
 	@Test
 	void testUploadRedeploy() {
