@@ -2,7 +2,6 @@ stages:
   - maven-compile
   - maven-test
   - maven-verify
-
   
 ## The maven variables can be set globally because they are used in every single job
 variables:
@@ -15,5 +14,19 @@ include:
     file: 
       - '/templates/maven-base.yml'
       - '/jobs/maven/compile.yml'
-      - '/jobs/maven/test.yml'
       - '/jobs/maven/verify.yml'
+
+master-test:
+  stage: test
+  script:
+    - echo "<--- testing --->"
+    - mvn clean test
+  artifacts:
+    expire_in: 10 mins
+    reports:
+      junit:
+        - target/surefire-reports/TEST-*.xml
+        
+
+
+
