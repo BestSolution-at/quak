@@ -3,13 +3,14 @@ package at.bestsolution.quak;
 import static io.restassured.RestAssured.given;
 
 import javax.ws.rs.core.Response.Status;
+
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
-import org.junit.jupiter.api.TestMethodOrder;
 
 @QuarkusTest
 @TestProfile( QuakTestProfile.class )
@@ -41,5 +42,11 @@ public class QuakResourceTest {
 	@Order( 1 )
 	void testUploadWrongPath() {
 		given().request().body( "dummy file" ).put( "/at/wrong/path/dummy_file.foo" ).then().statusCode( Status.NOT_FOUND.getStatusCode() );
+	}
+	
+	@Test
+	@Order( 5 )
+	void testUploadNoFilename() {
+		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/" ).then().statusCode( Status.INTERNAL_SERVER_ERROR.getStatusCode() );
 	}
 }
