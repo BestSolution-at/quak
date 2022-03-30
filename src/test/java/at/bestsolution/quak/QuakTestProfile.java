@@ -20,6 +20,7 @@ public class QuakTestProfile implements QuarkusTestProfile {
     	testConfigurations.put( "quak.repositories[0].storage-path", "repos/blueprint" );
     	testConfigurations.put( "quak.repositories[0].base-url", "/at/bestsolution/blueprint" );
     	testConfigurations.put( "quak.repositories[0].allow-redeploy", "true" );
+    	testConfigurations.put( "quarkus.http.limits.max-body-size", "10M" );
     	
         return testConfigurations;
     }

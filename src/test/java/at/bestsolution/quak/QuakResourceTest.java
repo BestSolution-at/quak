@@ -26,14 +26,19 @@
 package at.bestsolution.quak;
 
 import static io.restassured.RestAssured.given;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.net.SocketException;
 
 import javax.ws.rs.core.Response.Status;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
+import io.quarkus.runtime.configuration.MemorySizeConverter;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 
@@ -41,7 +46,10 @@ import io.quarkus.test.junit.TestProfile;
 @TestProfile( QuakTestProfile.class )
 @TestMethodOrder( OrderAnnotation.class )
 class QuakResourceTest {
-	
+
+	@ConfigProperty( name = "quarkus.http.limits.max-body-size" )
+	String confMaxUploadLimit;
+
 	private static final int KB = 1024;
 	private static final int MB = 1024 * 1024;
 
@@ -75,8 +83,10 @@ class QuakResourceTest {
 	@Order( 2 )
 	void testUpload() {
 		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.foo" ).then().statusCode( Status.OK.getStatusCode() );
-		given().request().body( createStringDataOfSize( KB + 1 ) ).put( "/at/bestsolution/blueprint/dummy_file_1KB.foo" ).then().statusCode( Status.OK.getStatusCode() );
-		given().request().body( createStringDataOfSize( MB + 1 ) ).put( "/at/bestsolution/blueprint/dummy_file_1MB.foo" ).then().statusCode( Status.OK.getStatusCode() );
+		given().request().body( createStringDataOfSize( KB + 1 ) ).put( "/at/bestsolution/blueprint/dummy_file_1KB.foo" ).then()
+				.statusCode( Status.OK.getStatusCode() );
+		given().request().body( createStringDataOfSize( MB + 1 ) ).put( "/at/bestsolution/blueprint/dummy_file_1MB.foo" ).then()
+				.statusCode( Status.OK.getStatusCode() );
 		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.xml" ).then().statusCode( Status.OK.getStatusCode() );
 		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.pom" ).then().statusCode( Status.OK.getStatusCode() );
 		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.sha1" ).then().statusCode( Status.OK.getStatusCode() );
@@ -100,6 +110,16 @@ class QuakResourceTest {
 	@Order( 5 )
 	void testUploadNoFilename() {
 		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/" ).then().statusCode( Status.INTERNAL_SERVER_ERROR.getStatusCode() );
+	}
+
+	@Test
+	@Order( 7 )
+	void testUploadLimit() {
+		Long maxUploadLimit = new MemorySizeConverter().convert( confMaxUploadLimit ).asLongValue();
+		given().request().body( createStringDataOfSize( maxUploadLimit.intValue() ) ).put( "/at/bestsolution/blueprint/at_limit.foo" ).then()
+				.statusCode( Status.OK.getStatusCode() );
+		assertThrows( SocketException.class, () -> given().request().body( createStringDataOfSize( maxUploadLimit.intValue() + 1 ) )
+				.put( "/at/bestsolution/blueprint/above_limit.foo" ).andReturn() );
 	}
 
 	private String createStringDataOfSize( int size ) {
