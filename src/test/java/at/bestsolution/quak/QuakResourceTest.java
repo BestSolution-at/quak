@@ -61,8 +61,8 @@ class QuakResourceTest {
 	@Order( 6 )
 	void testGetFiles() {
 		given().when().get( "/at/bestsolution/blueprint/dummy_file.foo" ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().get( "/at/bestsolution/blueprint/dummy_file.foo_1KB" ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().get( "/at/bestsolution/blueprint/dummy_file.foo_1MB" ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().get( "/at/bestsolution/blueprint/dummy_file_1KB.foo" ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().get( "/at/bestsolution/blueprint/dummy_file_1MB.foo" ).then().statusCode( Status.OK.getStatusCode() );
 		given().when().get( "/at/bestsolution/blueprint/dummy_file.xml" ).then().statusCode( Status.OK.getStatusCode() );
 		given().when().get( "/at/bestsolution/blueprint/dummy_file.pom" ).then().statusCode( Status.OK.getStatusCode() );
 		given().when().get( "/at/bestsolution/blueprint/dummy_file.sha1" ).then().statusCode( Status.OK.getStatusCode() );
