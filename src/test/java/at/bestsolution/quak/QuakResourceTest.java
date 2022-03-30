@@ -1,3 +1,28 @@
+/*
+ * ----------------------------------------------------------------
+ * Original File Name: Faculty.java
+ * Creation Date:      29.03.2022
+ * Description: Class file of quak instance.       
+ * ----------------------------------------------------------------
+
+ * ----------------------------------------------------------------
+ * Copyright (c) 2022 BestSolution.at EDV Systemhaus GmbH
+ * All Rights Reserved .
+ *
+ * BestSolution.at MAKES NO REPRESENTATIONS OR WARRANTIES ABOUT THE
+ * SUITABILITY OF THE SOFTWARE, EITHER EXPRESS OR IMPLIED, INCLUDING
+ * BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE, OR NON - INFRINGEMENT.
+ * BestSolution.at SHALL NOT BE LIABLE FOR ANY DAMAGES SUFFERED BY
+ * LICENSEE AS A RESULT OF USING, MODIFYING OR DISTRIBUTING THIS
+ * SOFTWARE OR ITS DERIVATIVES.
+ *
+ * This software must not be used, redistributed or based from in
+ * any other than the designated way without prior explicit written
+ * permission by BestSolution.at.
+ * -----------------------------------------------------------------
+ */
+
 package at.bestsolution.quak;
 
 import static io.restassured.RestAssured.given;
@@ -15,7 +40,10 @@ import io.quarkus.test.junit.TestProfile;
 @QuarkusTest
 @TestProfile( QuakTestProfile.class )
 @TestMethodOrder( OrderAnnotation.class )
-public class QuakResourceTest {
+class QuakResourceTest {
+	
+	private static final int KB = 1024;
+	private static final int MB = 1024 * 1024;
 
 	@Test
 	@Order( 4 )
@@ -28,11 +56,13 @@ public class QuakResourceTest {
 	void testGetWrongPath() {
 		given().when().get( "/at/wrong/path/" ).then().statusCode( Status.NOT_FOUND.getStatusCode() );
 	}
-	
+
 	@Test
 	@Order( 6 )
 	void testGetFiles() {
 		given().when().get( "/at/bestsolution/blueprint/dummy_file.foo" ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().get( "/at/bestsolution/blueprint/dummy_file.foo_1KB" ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().get( "/at/bestsolution/blueprint/dummy_file.foo_1MB" ).then().statusCode( Status.OK.getStatusCode() );
 		given().when().get( "/at/bestsolution/blueprint/dummy_file.xml" ).then().statusCode( Status.OK.getStatusCode() );
 		given().when().get( "/at/bestsolution/blueprint/dummy_file.pom" ).then().statusCode( Status.OK.getStatusCode() );
 		given().when().get( "/at/bestsolution/blueprint/dummy_file.sha1" ).then().statusCode( Status.OK.getStatusCode() );
@@ -45,6 +75,8 @@ public class QuakResourceTest {
 	@Order( 2 )
 	void testUpload() {
 		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.foo" ).then().statusCode( Status.OK.getStatusCode() );
+		given().request().body( createStringDataOfSize( KB ) ).put( "/at/bestsolution/blueprint/dummy_file_1KB.foo" ).then().statusCode( Status.OK.getStatusCode() );
+		given().request().body( createStringDataOfSize( MB ) ).put( "/at/bestsolution/blueprint/dummy_file_1MB.foo" ).then().statusCode( Status.OK.getStatusCode() );
 		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.xml" ).then().statusCode( Status.OK.getStatusCode() );
 		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.pom" ).then().statusCode( Status.OK.getStatusCode() );
 		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.sha1" ).then().statusCode( Status.OK.getStatusCode() );
@@ -62,10 +94,18 @@ public class QuakResourceTest {
 	void testUploadWrongPath() {
 		given().request().body( "dummy file" ).put( "/at/wrong/path/dummy_file.foo" ).then().statusCode( Status.NOT_FOUND.getStatusCode() );
 	}
-	
+
 	@Test
 	@Order( 5 )
 	void testUploadNoFilename() {
 		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/" ).then().statusCode( Status.INTERNAL_SERVER_ERROR.getStatusCode() );
+	}
+
+	private String createStringDataOfSize( int size ) {
+		StringBuilder sb = new StringBuilder( size );
+		for ( int i = 0; i < size; i++ ) {
+			sb.append( '.' );
+		}
+		return sb.toString();
 	}
 }
