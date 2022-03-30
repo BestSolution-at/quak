@@ -1,8 +1,8 @@
 /*
  * ----------------------------------------------------------------
- * Original File Name: Faculty.java
+ * Original File Name: QuakResourceRedeployTest.java
  * Creation Date:      29.03.2022
- * Description: Class file of quak instance.       
+ * Description: Test class file of quak instance.       
  * ----------------------------------------------------------------
 
  * ----------------------------------------------------------------
