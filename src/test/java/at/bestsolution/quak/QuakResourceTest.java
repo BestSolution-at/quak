@@ -127,7 +127,7 @@ class QuakResourceTest {
 	}
 
 	/**
-	 * Asserts that upload with no filename returns INTERNAL SERVER ERROR.
+	 * Asserts that upload with no filename returns BAD_REQUEST.
 	 */
 	@Test
 	@Order( 5 )
