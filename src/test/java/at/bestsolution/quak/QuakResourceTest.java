@@ -132,7 +132,7 @@ class QuakResourceTest {
 	@Test
 	@Order( 5 )
 	void testUploadNoFilename() {
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/" ).then().statusCode( Status.INTERNAL_SERVER_ERROR.getStatusCode() );
+		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/" ).then().statusCode( Status.BAD_REQUEST.getStatusCode() );
 	}
 
 	/**
