@@ -42,6 +42,9 @@ import io.quarkus.runtime.configuration.MemorySizeConverter;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 
+/**
+ * JUnit test cases for basic functionalities of quak.
+ */
 @QuarkusTest
 @TestProfile( QuakTestProfile.class )
 @TestMethodOrder( OrderAnnotation.class )
@@ -53,18 +56,27 @@ class QuakResourceTest {
 	private static final int KB = 1024;
 	private static final int MB = 1024 * 1024;
 
+	/**
+	 * Asserts that get on folder returns OK.
+	 */
 	@Test
 	@Order( 4 )
 	void testGetFolder() {
 		given().when().get( "/at/bestsolution/blueprint/" ).then().statusCode( Status.OK.getStatusCode() );
 	}
 
+	/**
+	 * Asserts that get for wrong path returns NOT FOUND.
+	 */
 	@Test
 	@Order( 3 )
 	void testGetWrongPath() {
 		given().when().get( "/at/wrong/path/" ).then().statusCode( Status.NOT_FOUND.getStatusCode() );
 	}
 
+	/**
+	 * Asserts that get returns OK for various file types. 
+	 */
 	@Test
 	@Order( 6 )
 	void testGetFiles() {
@@ -79,6 +91,9 @@ class QuakResourceTest {
 		given().when().get( "/at/bestsolution/blueprint/dummy_file.sha512" ).then().statusCode( Status.OK.getStatusCode() );
 	}
 
+	/**
+	 * Asserts that upload returns OK for various files.
+	 */
 	@Test
 	@Order( 2 )
 	void testUpload() {
@@ -100,18 +115,27 @@ class QuakResourceTest {
 		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.foo" ).then().statusCode( Status.OK.getStatusCode() );
 	}
 
+	/**
+	 * Asserts that upload to wrong path returns NOT FOUND.
+	 */
 	@Test
 	@Order( 1 )
 	void testUploadWrongPath() {
 		given().request().body( "dummy file" ).put( "/at/wrong/path/dummy_file.foo" ).then().statusCode( Status.NOT_FOUND.getStatusCode() );
 	}
 
+	/**
+	 * Asserts that upload with no filename returns INTERNAL SERVER ERROR.
+	 */
 	@Test
 	@Order( 5 )
 	void testUploadNoFilename() {
 		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/" ).then().statusCode( Status.INTERNAL_SERVER_ERROR.getStatusCode() );
 	}
 
+	/**
+	 * Asserts that upload limitation is applied.
+	 */
 	@Test
 	@Order( 7 )
 	void testUploadLimit() {

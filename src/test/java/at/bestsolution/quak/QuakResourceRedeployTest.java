@@ -36,10 +36,16 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.restassured.response.Response;
 
+/**
+ * JUnit test cases for redeploy functionality of quak.
+ */
 @QuarkusTest
 @TestProfile( QuakTestProfileRedeployNotAllowed.class )
 class QuakResourceRedeployTest {
 
+	/**
+	 * For redeploy tests, the file must be created before.
+	 */
 	@BeforeEach
 	void createFileIfNotExists() {
 		Response response = given().when().get( "/at/bestsolution/blueprint/dummy_file.foo" ).andReturn();
@@ -48,6 +54,9 @@ class QuakResourceRedeployTest {
 		}
 	}
 
+	/**
+	 * Asserts that redeploy not allowed.
+	 */
 	@Test
 	void testUploadRedeployNotAllowed() {
 		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.foo" ).then()
