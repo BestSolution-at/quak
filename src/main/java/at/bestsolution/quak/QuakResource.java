@@ -228,6 +228,9 @@ public class QuakResource {
 		if( file == null ) {
 			LOG.errorf( "Can not resolve path: %s", path );
 			return Response.status(Response.Status.NOT_FOUND).build();
+		} 
+		else if (urlInfo.getPath().endsWith( "/" )) {
+			return Response.status(Response.Status.BAD_REQUEST).build();
 		}
 		
 		try {
