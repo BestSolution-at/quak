@@ -32,14 +32,14 @@ import io.quarkus.test.junit.QuarkusTestProfile;
 
 /**
  * Test profile for redeploy not allowed tests.
+ * 
+ * @author: kerim.yeniduenya@bestsolution.at
  */
 public class QuakTestProfileRedeployNotAllowed implements QuarkusTestProfile {
 
     /**
-     * Returns additional config to be applied to the test. This
-     * will override any existing config (including in application.properties),
-     * however existing config will be merged with this (i.e. application.properties
-     * config will still take effect, unless a specific config key has been overridden).
+     * @return Returns additional basic quak configuration with false redeploy field, 
+     * to be applied to the test. 
      */
     @Override
     public Map<String, String> getConfigOverrides() {

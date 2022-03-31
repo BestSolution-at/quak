@@ -32,14 +32,13 @@ import io.quarkus.test.junit.QuarkusTestProfile;
 
 /**
  * Test profile class for basic tests.
+ * 
+ * @author: kerim.yeniduenya@bestsolution.at
  */
 public class QuakTestProfile implements QuarkusTestProfile {
 
     /**
-     * Returns additional config to be applied to the test. This
-     * will override any existing config (including in application.properties),
-     * however existing config will be merged with this (i.e. application.properties
-     * config will still take effect, unless a specific config key has been overridden).
+     * @return Returns additional basic quak configuration to be applied to the test. 
      */
     @Override
     public Map<String, String> getConfigOverrides() {

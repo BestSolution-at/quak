@@ -44,6 +44,8 @@ import io.quarkus.test.junit.TestProfile;
 
 /**
  * JUnit test cases for basic functionalities of quak.
+ * 
+ * @author: kerim.yeniduenya@bestsolution.at
  */
 @QuarkusTest
 @TestProfile( QuakTestProfile.class )
@@ -134,7 +136,7 @@ class QuakResourceTest {
 	}
 
 	/**
-	 * Asserts that upload limitation is applied.
+	 * Asserts that the upload size limit is enforced.
 	 */
 	@Test
 	@Order( 7 )

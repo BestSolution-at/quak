@@ -38,6 +38,8 @@ import io.restassured.response.Response;
 
 /**
  * JUnit test cases for redeploy functionality of quak.
+ * 
+ * @author: kerim.yeniduenya@bestsolution.at
  */
 @QuarkusTest
 @TestProfile( QuakTestProfileRedeployNotAllowed.class )
