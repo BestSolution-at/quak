@@ -28,16 +28,19 @@ package at.bestsolution.quak;
 import java.nio.file.Path;
 import java.util.List;
 
+import io.quarkus.runtime.annotations.StaticInitSafe;
 import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithDefault;
 
 /**
  * Represents a quak configuration. Contains a list of repository configurations.
  */
+@StaticInitSafe
 @ConfigMapping( prefix = "quak" )
 public interface QuakConfiguration {
 	
 	public List<Repository> repositories();
+	public List<User> users();
 	
 	/**
 	 * Represents a repository configuration.
@@ -49,5 +52,14 @@ public interface QuakConfiguration {
 		
 		@WithDefault("true")
 		public boolean allowRedeploy();
+	}
+	
+	/**
+	 * Represents a quak user.
+	 *
+	 */
+	public interface User {
+		public String username();
+		public String password();
 	}
 }
