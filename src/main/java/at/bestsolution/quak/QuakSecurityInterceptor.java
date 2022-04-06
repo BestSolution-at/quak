@@ -42,7 +42,7 @@ import org.jboss.logging.Logger;
 /**
  * Security Interceptor to verify the access permissions for a user.
  * 
- * @author kerim
+ * @author: kerim.yeniduenya@bestsolution.at
  */
 @Provider
 public class QuakSecurityInterceptor implements ContainerRequestFilter {
@@ -67,7 +67,7 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 		final List<String> authorization = headers.get( AUTHORIZATION_PROPERTY );
 
 		if( authorization == null || authorization.isEmpty() ) {
-			LOG.debugf( "No crededentials given for authentication." );
+			LOG.debugf( "No credentials given for authentication." );
 			context.abortWith( Response.status( Response.Status.UNAUTHORIZED ).build() );
 		} else {
 			final String encodedUserPassword = authorization.get( 0 ).replaceFirst( AUTHENTICATION_SCHEME + " ", "" );

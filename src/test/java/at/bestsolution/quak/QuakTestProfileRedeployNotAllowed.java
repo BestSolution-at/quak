@@ -48,7 +48,8 @@ public class QuakTestProfileRedeployNotAllowed implements QuarkusTestProfile {
     	testConfigurations.put( "quak.repositories[0].storage-path", "repos/blueprint" );
     	testConfigurations.put( "quak.repositories[0].base-url", "/at/bestsolution/blueprint" );
     	testConfigurations.put( "quak.repositories[0].allow-redeploy", "false" );
-    	
+    	testConfigurations.put( "quak.users[0].username", "user1" );
+    	testConfigurations.put( "quak.users[0].password", "pass123" );
         return testConfigurations;
     }
 }

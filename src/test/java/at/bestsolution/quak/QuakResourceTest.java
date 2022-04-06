@@ -64,7 +64,7 @@ class QuakResourceTest {
 	@Test
 	@Order( 4 )
 	void testGetFolder() {
-		given().when().get( "/at/bestsolution/blueprint/" ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( "user1", "pass123" ).get( "/at/bestsolution/blueprint/" ).then().statusCode( Status.OK.getStatusCode() );
 	}
 
 	/**
@@ -73,7 +73,7 @@ class QuakResourceTest {
 	@Test
 	@Order( 3 )
 	void testGetWrongPath() {
-		given().when().get( "/at/wrong/path/" ).then().statusCode( Status.NOT_FOUND.getStatusCode() );
+		given().when().auth().preemptive().basic( "user1", "pass123" ).get( "/at/wrong/path/" ).then().statusCode( Status.NOT_FOUND.getStatusCode() );
 	}
 
 	/**
@@ -82,15 +82,15 @@ class QuakResourceTest {
 	@Test
 	@Order( 6 )
 	void testGetFiles() {
-		given().when().get( "/at/bestsolution/blueprint/dummy_file.foo" ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().get( "/at/bestsolution/blueprint/dummy_file_1KB.foo" ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().get( "/at/bestsolution/blueprint/dummy_file_1MB.foo" ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().get( "/at/bestsolution/blueprint/dummy_file.xml" ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().get( "/at/bestsolution/blueprint/dummy_file.pom" ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().get( "/at/bestsolution/blueprint/dummy_file.sha1" ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().get( "/at/bestsolution/blueprint/dummy_file.md5" ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().get( "/at/bestsolution/blueprint/dummy_file.sha256" ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().get( "/at/bestsolution/blueprint/dummy_file.sha512" ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( "user1", "pass123" ).get( "/at/bestsolution/blueprint/dummy_file.foo" ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( "user1", "pass123" ).get( "/at/bestsolution/blueprint/dummy_file_1KB.foo" ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( "user1", "pass123" ).get( "/at/bestsolution/blueprint/dummy_file_1MB.foo" ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( "user1", "pass123" ).get( "/at/bestsolution/blueprint/dummy_file.xml" ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( "user1", "pass123" ).get( "/at/bestsolution/blueprint/dummy_file.pom" ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( "user1", "pass123" ).get( "/at/bestsolution/blueprint/dummy_file.sha1" ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( "user1", "pass123" ).get( "/at/bestsolution/blueprint/dummy_file.md5" ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( "user1", "pass123" ).get( "/at/bestsolution/blueprint/dummy_file.sha256" ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( "user1", "pass123" ).get( "/at/bestsolution/blueprint/dummy_file.sha512" ).then().statusCode( Status.OK.getStatusCode() );
 	}
 
 	/**
@@ -99,22 +99,32 @@ class QuakResourceTest {
 	@Test
 	@Order( 2 )
 	void testUpload() {
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.foo" ).then().statusCode( Status.OK.getStatusCode() );
-		given().request().body( createStringDataOfSize( KB + 1 ) ).put( "/at/bestsolution/blueprint/dummy_file_1KB.foo" ).then()
-				.statusCode( Status.OK.getStatusCode() );
-		given().request().body( createStringDataOfSize( MB + 1 ) ).put( "/at/bestsolution/blueprint/dummy_file_1MB.foo" ).then()
-				.statusCode( Status.OK.getStatusCode() );
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.xml" ).then().statusCode( Status.OK.getStatusCode() );
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.pom" ).then().statusCode( Status.OK.getStatusCode() );
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.sha1" ).then().statusCode( Status.OK.getStatusCode() );
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.md5" ).then().statusCode( Status.OK.getStatusCode() );
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.sha256" ).then().statusCode( Status.OK.getStatusCode() );
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.sha512" ).then().statusCode( Status.OK.getStatusCode() );
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/subFolder/dummy_file.foo" ).then().statusCode( Status.OK.getStatusCode() );
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/maven-metadata.xml" ).then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( "user1", "pass123" ).request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.foo" )
+			.then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( "user1", "pass123" ).request().body( createStringDataOfSize( KB + 1 ) ).put( "/at/bestsolution/blueprint/dummy_file_1KB.foo" )
+			.then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( "user1", "pass123" ).request().body( createStringDataOfSize( MB + 1 ) ).put( "/at/bestsolution/blueprint/dummy_file_1MB.foo" )
+			.then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( "user1", "pass123" ).request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.xml" )
+			.then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( "user1", "pass123" ).request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.pom" )
+			.then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( "user1", "pass123" ).request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.sha1" )
+			.then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( "user1", "pass123" ).request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.md5" )
+			.then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( "user1", "pass123" ).request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.sha256" )
+			.then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( "user1", "pass123" ).request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.sha512" )
+			.then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( "user1", "pass123" ).request().body( "dummy file" ).put( "/at/bestsolution/blueprint/subFolder/dummy_file.foo" )
+			.then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( "user1", "pass123" ).request().body( "dummy file" ).put( "/at/bestsolution/blueprint/maven-metadata.xml" )
+			.then().statusCode( Status.OK.getStatusCode() );
 
 		// Re-deploy
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.foo" ).then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( "user1", "pass123" ).request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.foo" )
+			.then().statusCode( Status.OK.getStatusCode() );
 	}
 
 	/**
@@ -123,7 +133,8 @@ class QuakResourceTest {
 	@Test
 	@Order( 1 )
 	void testUploadWrongPath() {
-		given().request().body( "dummy file" ).put( "/at/wrong/path/dummy_file.foo" ).then().statusCode( Status.NOT_FOUND.getStatusCode() );
+		given().auth().preemptive().basic( "user1", "pass123" ).request().body( "dummy file" ).put( "/at/wrong/path/dummy_file.foo" )
+			.then().statusCode( Status.NOT_FOUND.getStatusCode() );
 	}
 
 	/**
@@ -132,7 +143,8 @@ class QuakResourceTest {
 	@Test
 	@Order( 5 )
 	void testUploadNoFilename() {
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/" ).then().statusCode( Status.BAD_REQUEST.getStatusCode() );
+		given().auth().preemptive().basic( "user1", "pass123" ).request().body( "dummy file" ).put( "/at/bestsolution/blueprint/" )
+			.then().statusCode( Status.BAD_REQUEST.getStatusCode() );
 	}
 
 	/**
@@ -142,10 +154,10 @@ class QuakResourceTest {
 	@Order( 7 )
 	void testUploadLimit() {
 		Long maxUploadLimit = new MemorySizeConverter().convert( confMaxUploadLimit ).asLongValue();
-		given().request().body( createStringDataOfSize( maxUploadLimit.intValue() ) ).put( "/at/bestsolution/blueprint/at_limit.foo" ).then()
-				.statusCode( Status.OK.getStatusCode() );
-		assertThrows( SocketException.class, () -> given().request().body( createStringDataOfSize( maxUploadLimit.intValue() + 1 ) )
-				.put( "/at/bestsolution/blueprint/above_limit.foo" ).andReturn() );
+		given().auth().preemptive().basic( "user1", "pass123" ).request().body( createStringDataOfSize( maxUploadLimit.intValue() ) ).put( "/at/bestsolution/blueprint/at_limit.foo" )
+			.then().statusCode( Status.OK.getStatusCode() );
+		assertThrows( SocketException.class, () -> given().auth().preemptive().basic( "user1", "pass123" ).request().body( createStringDataOfSize( maxUploadLimit.intValue() + 1 ) )
+			.put( "/at/bestsolution/blueprint/above_limit.foo" ).andReturn() );
 	}
 
 	private String createStringDataOfSize( int size ) {
