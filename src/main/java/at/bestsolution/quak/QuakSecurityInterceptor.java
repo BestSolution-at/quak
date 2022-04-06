@@ -66,10 +66,11 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 		MultivaluedMap<String, String> headers = context.getHeaders();
 		final List<String> authorization = headers.get( AUTHORIZATION_PROPERTY );
 
-		if( authorization == null || authorization.isEmpty() ) {
+		if ( authorization == null || authorization.isEmpty() ) {
 			LOG.debugf( "No credentials given for authentication." );
 			context.abortWith( Response.status( Response.Status.UNAUTHORIZED ).build() );
-		} else {
+		} 
+		else {
 			final String encodedUserPassword = authorization.get( 0 ).replaceFirst( AUTHENTICATION_SCHEME + " ", "" );
 			String usernameAndPassword = new String( Base64.getDecoder().decode( encodedUserPassword ) );
 			final StringTokenizer tokenizer = new StringTokenizer( usernameAndPassword, ":" );
