@@ -81,7 +81,7 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 				final String username = tokenizer.nextToken();
 				final String password = tokenizer.nextToken();
 				
-				LOG.debugf( "Verifying username and password: %s, %s", username, password );
+				LOG.debugf( "Verifying the user: %s", username );
 				if ( configuration.users().stream().noneMatch( ( t -> t.username().equals( username ) && t.password().equals( password ) ) ) ) {
 					context.abortWith( Response.status( Response.Status.UNAUTHORIZED ).build() );
 				}
