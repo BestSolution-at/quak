@@ -39,6 +39,8 @@ import javax.ws.rs.ext.Provider;
 
 import org.jboss.logging.Logger;
 
+import io.netty.handler.codec.http.HttpMethod;
+
 /**
  * Security Interceptor to verify the access permissions for a user.
  * 
@@ -65,21 +67,24 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 
 		MultivaluedMap<String, String> headers = context.getHeaders();
 		final List<String> authorization = headers.get( AUTHORIZATION_PROPERTY );
-
-		if ( authorization == null || authorization.isEmpty() ) {
-			LOG.debugf( "No credentials given for authentication." );
-			context.abortWith( Response.status( Response.Status.UNAUTHORIZED ).build() );
-		} 
-		else {
-			final String encodedUserPassword = authorization.get( 0 ).replaceFirst( AUTHENTICATION_SCHEME + " ", "" );
-			String usernameAndPassword = new String( Base64.getDecoder().decode( encodedUserPassword ) );
-			final StringTokenizer tokenizer = new StringTokenizer( usernameAndPassword, ":" );
-			final String username = tokenizer.nextToken();
-			final String password = tokenizer.nextToken();
-			
-			LOG.debugf( "Verifying username and password: %s, %s", username, password );
-			if ( configuration.users().stream().noneMatch( ( t -> t.username().equals( username ) && t.password().equals( password ) ) ) ) {
+		final String method = context.getRequest().getMethod();
+		
+		if ( !method.equals( HttpMethod.GET.toString() ) ) {
+			if ( authorization == null || authorization.isEmpty() ) {
+				LOG.debugf( "No credentials given for authentication." );
 				context.abortWith( Response.status( Response.Status.UNAUTHORIZED ).build() );
+			} 
+			else {
+				final String encodedUserPassword = authorization.get( 0 ).replaceFirst( AUTHENTICATION_SCHEME + " ", "" );
+				String usernameAndPassword = new String( Base64.getDecoder().decode( encodedUserPassword ) );
+				final StringTokenizer tokenizer = new StringTokenizer( usernameAndPassword, ":" );
+				final String username = tokenizer.nextToken();
+				final String password = tokenizer.nextToken();
+				
+				LOG.debugf( "Verifying username and password: %s, %s", username, password );
+				if ( configuration.users().stream().noneMatch( ( t -> t.username().equals( username ) && t.password().equals( password ) ) ) ) {
+					context.abortWith( Response.status( Response.Status.UNAUTHORIZED ).build() );
+				}
 			}
 		}
 	}
