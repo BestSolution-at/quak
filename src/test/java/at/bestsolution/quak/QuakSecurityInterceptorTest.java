@@ -53,9 +53,9 @@ class QuakSecurityInterceptorTest {
 	@Test
 	@Order( 1 )
 	void testAuthentication() {
-		given().auth().preemptive().basic( "wrongname", "wrongpass" ).get( "/at/bestsolution/blueprint/" ).then().statusCode( Status.OK.getStatusCode() );		
-		given().auth().preemptive().basic( "user1", "wrongpass" ).get( "/at/bestsolution/blueprint/" ).then().statusCode( Status.OK.getStatusCode() );
-		given().auth().preemptive().basic( "wrongname", "pass123" ).get( "/at/bestsolution/blueprint/" ).then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( "wrongname", "wrongpass" ).get( "/at/bestsolution/blueprint/" ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );		
+		given().auth().preemptive().basic( "user1", "wrongpass" ).get( "/at/bestsolution/blueprint/" ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
+		given().auth().preemptive().basic( "wrongname", "pass123" ).get( "/at/bestsolution/blueprint/" ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
 		given().auth().preemptive().basic( "user1", "pass123" ).get( "/at/bestsolution/blueprint/" ).then().statusCode( Status.OK.getStatusCode() );
 		
 		given().auth().preemptive().basic( "wrongname", "wrongpass" ).request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.foo" )

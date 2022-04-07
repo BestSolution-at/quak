@@ -55,6 +55,7 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	private static final Logger LOG = Logger.getLogger( QuakSecurityInterceptor.class );
 	private static final String AUTHORIZATION_PROPERTY = "Authorization";
 	private static final String AUTHENTICATION_SCHEME = "Basic";
+	private static final String AUTHENTICATION_RESPONSE_HEADER = "WWW-Authenticate";
 
 	/**
 	 * Filters out the unauthorized access to quak service or path.
@@ -62,29 +63,27 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	 */
 	@Override
 	public void filter( ContainerRequestContext context ) {
-
 		LOG.debugf( "Verifying the credentials for request: %s", context.getUriInfo().getRequestUri().toString() );
 
 		MultivaluedMap<String, String> headers = context.getHeaders();
 		final List<String> authorization = headers.get( AUTHORIZATION_PROPERTY );
-		final String method = context.getRequest().getMethod();
+		Response responseUnauthorized = Response.status( Response.Status.UNAUTHORIZED ).build();
 		
-		if ( !method.equals( HttpMethod.GET.toString() ) ) {
-			if ( authorization == null || authorization.isEmpty() ) {
-				LOG.debugf( "No credentials given for authentication." );
-				context.abortWith( Response.status( Response.Status.UNAUTHORIZED ).build() );
-			} 
-			else {
-				final String encodedUserPassword = authorization.get( 0 ).replaceFirst( AUTHENTICATION_SCHEME + " ", "" );
-				String usernameAndPassword = new String( Base64.getDecoder().decode( encodedUserPassword ) );
-				final StringTokenizer tokenizer = new StringTokenizer( usernameAndPassword, ":" );
-				final String username = tokenizer.nextToken();
-				final String password = tokenizer.nextToken();
-				
-				LOG.debugf( "Verifying the user: %s", username );
-				if ( configuration.users().stream().noneMatch( ( t -> t.username().equals( username ) && t.password().equals( password ) ) ) ) {
-					context.abortWith( Response.status( Response.Status.UNAUTHORIZED ).build() );
-				}
+		if ( authorization == null || authorization.isEmpty() ) {
+			LOG.debugf( "No credentials given for authentication." );
+			responseUnauthorized.getHeaders().add( AUTHENTICATION_RESPONSE_HEADER, AUTHENTICATION_SCHEME );
+			context.abortWith( responseUnauthorized );
+		} 
+		else {
+			final String encodedUserPassword = authorization.get( 0 ).replaceFirst( AUTHENTICATION_SCHEME + " ", "" );
+			String usernameAndPassword = new String( Base64.getDecoder().decode( encodedUserPassword ) );
+			final StringTokenizer tokenizer = new StringTokenizer( usernameAndPassword, ":" );
+			final String username = tokenizer.nextToken();
+			final String password = tokenizer.nextToken();
+			
+			LOG.debugf( "Verifying the user: %s", username );
+			if ( configuration.users().stream().noneMatch( ( t -> t.username().equals( username ) && t.password().equals( password ) ) ) ) {
+				context.abortWith( responseUnauthorized );
 			}
 		}
 	}
