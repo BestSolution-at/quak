@@ -39,8 +39,6 @@ import javax.ws.rs.ext.Provider;
 
 import org.jboss.logging.Logger;
 
-import io.netty.handler.codec.http.HttpMethod;
-
 /**
  * Security Interceptor to verify the access permissions for a user.
  * 
