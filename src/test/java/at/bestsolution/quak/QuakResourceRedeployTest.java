@@ -50,10 +50,10 @@ class QuakResourceRedeployTest {
 	 */
 	@BeforeEach
 	void createFileIfNotExists() {
-		Response response = given().when().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD )
+		Response response = given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD )
 				.get( QuakResourceTest.DUMMY_FILE_FOO ).andReturn();
 		if ( response.getStatusCode() == Status.NOT_FOUND.getStatusCode() ) {
-			given().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT )
+			given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT )
 				.put( QuakResourceTest.DUMMY_FILE_FOO ).andReturn();
 		}
 	}
@@ -63,7 +63,7 @@ class QuakResourceRedeployTest {
 	 */
 	@Test
 	void testUploadRedeployNotAllowed() {
-		given().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT )
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT )
 			.put( QuakResourceTest.DUMMY_FILE_FOO ).then().statusCode( Status.METHOD_NOT_ALLOWED.getStatusCode() );
 	}
 }

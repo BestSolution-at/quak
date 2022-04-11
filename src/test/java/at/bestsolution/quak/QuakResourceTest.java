@@ -78,7 +78,7 @@ class QuakResourceTest {
 	@Test
 	@Order( 4 )
 	void testGetFolder() {
-		given().when().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.OK.getStatusCode() );
 	}
 
 	/**
@@ -87,7 +87,7 @@ class QuakResourceTest {
 	@Test
 	@Order( 3 )
 	void testGetWrongPath() {
-		given().when().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).get( WRONG_PATH.concat( "/" ) ).then().statusCode( Status.NOT_FOUND.getStatusCode() );
+		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( WRONG_PATH.concat( "/" ) ).then().statusCode( Status.NOT_FOUND.getStatusCode() );
 	}
 
 	/**
@@ -96,15 +96,15 @@ class QuakResourceTest {
 	@Test
 	@Order( 6 )
 	void testGetFiles() {
-		given().when().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).get( DUMMY_FILE_FOO ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).get( DUMMY_FILE_FOO_1KB ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).get( DUMMY_FILE_FOO_1MB ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).get( DUMMY_FILE_XML ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).get( DUMMY_FILE_POM ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).get( DUMMY_FILE_SHA1 ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).get( DUMMY_FILE_MD5 ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).get( DUMMY_FILE_SHA256 ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).get( DUMMY_FILE_SHA512 ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( DUMMY_FILE_FOO ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( DUMMY_FILE_FOO_1KB ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( DUMMY_FILE_FOO_1MB ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( DUMMY_FILE_XML ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( DUMMY_FILE_POM ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( DUMMY_FILE_SHA1 ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( DUMMY_FILE_MD5 ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( DUMMY_FILE_SHA256 ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( DUMMY_FILE_SHA512 ).then().statusCode( Status.OK.getStatusCode() );
 	}
 
 	/**
@@ -113,29 +113,29 @@ class QuakResourceTest {
 	@Test
 	@Order( 2 )
 	void testUpload() {
-		given().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_FOO )
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_FOO )
 			.then().statusCode( Status.OK.getStatusCode() );
-		given().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).request().body( createStringDataOfSize( KB + 1 ) ).put( DUMMY_FILE_FOO_1KB )
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( createStringDataOfSize( KB + 1 ) ).put( DUMMY_FILE_FOO_1KB )
 			.then().statusCode( Status.OK.getStatusCode() );
-		given().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).request().body( createStringDataOfSize( MB + 1 ) ).put( DUMMY_FILE_FOO_1MB )
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( createStringDataOfSize( MB + 1 ) ).put( DUMMY_FILE_FOO_1MB )
 			.then().statusCode( Status.OK.getStatusCode() );
-		given().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_XML )
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_XML )
 			.then().statusCode( Status.OK.getStatusCode() );
-		given().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_POM )
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_POM )
 			.then().statusCode( Status.OK.getStatusCode() );
-		given().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_SHA1 )
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_SHA1 )
 			.then().statusCode( Status.OK.getStatusCode() );
-		given().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_MD5 )
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_MD5 )
 			.then().statusCode( Status.OK.getStatusCode() );
-		given().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_SHA256 )
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_SHA256 )
 			.then().statusCode( Status.OK.getStatusCode() );
-		given().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_SHA512 )
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_SHA512 )
 			.then().statusCode( Status.OK.getStatusCode() );
-		given().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( SUB_FOLDER_DUMMY_FILE_FOO )
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( SUB_FOLDER_DUMMY_FILE_FOO )
 			.then().statusCode( Status.OK.getStatusCode() );
 		
 		// Re-deploy
-		given().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_FOO )
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_FOO )
 			.then().statusCode( Status.OK.getStatusCode() );
 	}
 
@@ -145,7 +145,7 @@ class QuakResourceTest {
 	@Test
 	@Order( 1 )
 	void testUploadWrongPath() {
-		given().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( WRONG_PATH.concat( DUMMY_FILE_FOO ) )
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( WRONG_PATH.concat( DUMMY_FILE_FOO ) )
 			.then().statusCode( Status.NOT_FOUND.getStatusCode() );
 	}
 
@@ -155,7 +155,7 @@ class QuakResourceTest {
 	@Test
 	@Order( 5 )
 	void testUploadNoFilename() {
-		given().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( QuakTestProfile.BASE_URL.concat( "/" ) )
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( QuakTestProfile.BASE_URL.concat( "/" ) )
 			.then().statusCode( Status.BAD_REQUEST.getStatusCode() );
 	}
 
@@ -166,9 +166,9 @@ class QuakResourceTest {
 	@Order( 7 )
 	void testUploadLimit() {
 		Long maxUploadLimit = new MemorySizeConverter().convert( confMaxUploadLimit ).asLongValue();
-		given().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).request().body( createStringDataOfSize( maxUploadLimit.intValue() ) ).put( DUMMY_FILE_AT_LIMIT )
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( createStringDataOfSize( maxUploadLimit.intValue() ) ).put( DUMMY_FILE_AT_LIMIT )
 			.then().statusCode( Status.OK.getStatusCode() );
-		assertThrows( SocketException.class, () -> given().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).request().body( createStringDataOfSize( maxUploadLimit.intValue() + 1 ) )
+		assertThrows( SocketException.class, () -> given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( createStringDataOfSize( maxUploadLimit.intValue() + 1 ) )
 			.put( DUMMY_FILE_ABOVE_LIMIT ).andReturn() );
 	}
 
