@@ -36,6 +36,15 @@ import io.quarkus.test.junit.QuarkusTestProfile;
  * @author: kerim.yeniduenya@bestsolution.at
  */
 public class QuakTestProfile implements QuarkusTestProfile {
+	
+	public static final String USERNAME = "user1";
+	public static final String PASSWORD = "pass123";
+	public static final String NAME = "blueprint";
+	public static final String STORAGE_PATH = "repos/blueprint";
+	public static final String BASE_URL = "/at/bestsolution/blueprint";
+	public static final String ALLOW_REDEPLOY = "true";
+	public static final String DO_NOT_ALLOW_REDEPLOY = "false";
+	public static final String MAX_BODY_SIZE = "10M";
 
     /**
      * @return Returns additional basic quak configuration to be applied to the test. 
@@ -43,13 +52,13 @@ public class QuakTestProfile implements QuarkusTestProfile {
     @Override
     public Map<String, String> getConfigOverrides() {
     	Map<String, String> testConfigurations = new HashMap<String, String>();
-    	testConfigurations.put( "quak.repositories[0].name", "blueprint" );
-    	testConfigurations.put( "quak.repositories[0].storage-path", "repos/blueprint" );
-    	testConfigurations.put( "quak.repositories[0].base-url", "/at/bestsolution/blueprint" );
-    	testConfigurations.put( "quak.repositories[0].allow-redeploy", "true" );
-    	testConfigurations.put( "quak.users[0].username", "user1" );
-    	testConfigurations.put( "quak.users[0].password", "pass123" );
-    	testConfigurations.put( "quarkus.http.limits.max-body-size", "10M" );
+    	testConfigurations.put( "quak.repositories[0].name", NAME );
+    	testConfigurations.put( "quak.repositories[0].storage-path", STORAGE_PATH );
+    	testConfigurations.put( "quak.repositories[0].base-url", BASE_URL );
+    	testConfigurations.put( "quak.repositories[0].allow-redeploy", ALLOW_REDEPLOY );
+    	testConfigurations.put( "quak.users[0].username", USERNAME );
+    	testConfigurations.put( "quak.users[0].password", PASSWORD );
+    	testConfigurations.put( "quarkus.http.limits.max-body-size", MAX_BODY_SIZE );
     	
         return testConfigurations;
     }

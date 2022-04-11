@@ -47,27 +47,30 @@ import io.quarkus.test.junit.TestProfile;
 @TestMethodOrder( OrderAnnotation.class )
 class QuakSecurityInterceptorTest {
 	
+	private static final String WRONG_USERNAME = "wrongname";
+	private static final String WRONG_PASSWORD = "wrongpass";
+	
 	/**
 	 * Asserts authentication is done correctly.
 	 */
 	@Test
 	@Order( 1 )
 	void testAuthentication() {
-		given().get( "/at/bestsolution/blueprint/" ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
-		given().auth().preemptive().basic( "wrongname", "wrongpass" ).get( "/at/bestsolution/blueprint/" ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );		
-		given().auth().preemptive().basic( "user1", "wrongpass" ).get( "/at/bestsolution/blueprint/" ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
-		given().auth().preemptive().basic( "wrongname", "pass123" ).get( "/at/bestsolution/blueprint/" ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
-		given().auth().preemptive().basic( "user1", "pass123" ).get( "/at/bestsolution/blueprint/" ).then().statusCode( Status.OK.getStatusCode() );
+		given().get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
+		given().auth().preemptive().basic( WRONG_USERNAME, WRONG_PASSWORD ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );		
+		given().auth().preemptive().basic( QuakTestProfile.USERNAME, WRONG_PASSWORD ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
+		given().auth().preemptive().basic( WRONG_USERNAME, QuakTestProfile.PASSWORD ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
+		given().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.OK.getStatusCode() );
 		
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.foo" )
+		given().request().body( "dummy file" ).put( QuakResourceTest.DUMMY_FILE_FOO )
 			.then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
-		given().auth().preemptive().basic( "wrongname", "wrongpass" ).request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.foo" )
+		given().auth().preemptive().basic( WRONG_USERNAME, WRONG_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT ).put( QuakResourceTest.DUMMY_FILE_FOO )
 			.then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
-		given().auth().preemptive().basic( "user1", "wrongpass" ).request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.foo" )
+		given().auth().preemptive().basic( QuakTestProfile.USERNAME, WRONG_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT ).put( QuakResourceTest.DUMMY_FILE_FOO )
 			.then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
-		given().auth().preemptive().basic( "wrongname", "pass123" ).request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.foo" )
+		given().auth().preemptive().basic( WRONG_USERNAME, QuakTestProfile.PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT ).put( QuakResourceTest.DUMMY_FILE_FOO )
 			.then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
-		given().auth().preemptive().basic( "user1", "pass123" ).request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.foo" )
+		given().auth().preemptive().basic( QuakTestProfile.USERNAME, QuakTestProfile.PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT ).put( QuakResourceTest.DUMMY_FILE_FOO )
 			.then().statusCode( Status.OK.getStatusCode() );
 	}
 }
