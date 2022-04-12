@@ -39,6 +39,7 @@ public class QuakTestProfile implements QuarkusTestProfile {
 	
 	public static final String GOOD_USERNAME = "user1";
 	public static final String GOOD_PASSWORD = "pass123";
+	public static final String GODD_PASSWORD_HASH = "$2a$10$Nfw5dwvR8ly0HPzhVE92TuqqUORzw1WBs9f4hmPBdkaqctmJQVtNu";
 	public static final String NAME = "blueprint";
 	public static final String STORAGE_PATH = "repos/blueprint";
 	public static final String BASE_URL = "/at/bestsolution/blueprint";
@@ -57,7 +58,7 @@ public class QuakTestProfile implements QuarkusTestProfile {
     	testConfigurations.put( "quak.repositories[0].base-url", BASE_URL );
     	testConfigurations.put( "quak.repositories[0].allow-redeploy", ALLOW_REDEPLOY );
     	testConfigurations.put( "quak.users[0].username", GOOD_USERNAME );
-    	testConfigurations.put( "quak.users[0].password", GOOD_PASSWORD );
+    	testConfigurations.put( "quak.users[0].password", GODD_PASSWORD_HASH );
     	testConfigurations.put( "quarkus.http.limits.max-body-size", MAX_BODY_SIZE );
     	
         return testConfigurations;

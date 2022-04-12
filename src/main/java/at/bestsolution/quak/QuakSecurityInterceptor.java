@@ -37,6 +37,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
+import org.apache.directory.api.ldap.model.password.BCrypt;
 import org.jboss.logging.Logger;
 
 /**
@@ -79,8 +80,14 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 			final String username = tokenizer.nextToken();
 			final String password = tokenizer.nextToken();
 			
-			LOG.debugf( "Verifying the user: %s", username );
-			if ( configuration.users().stream().noneMatch( ( t -> t.username().equals( username ) && t.password().equals( password ) ) ) ) {
+			try {		    
+				LOG.debugf( "Verifying the user: %s", username );
+				if ( configuration.users().stream().noneMatch( ( t -> t.username().equals( username ) && BCrypt.checkPw( password, t.password() ) ) ) ) {
+					context.abortWith( responseUnauthorized );
+				}
+			} 
+			catch ( Exception e ) {
+				LOG.error( "Exception while decrypting password!", e );
 				context.abortWith( responseUnauthorized );
 			}
 		}
