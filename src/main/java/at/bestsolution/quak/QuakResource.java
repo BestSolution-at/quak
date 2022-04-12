@@ -156,9 +156,10 @@ public class QuakResource {
 		} 
 		else if ( filePath.endsWith( ".sha1" ) || filePath.endsWith( ".md5" ) || filePath.endsWith( "sha256" ) || filePath.endsWith( "sha512" ) ) {
 			return Response.ok( filePath.toFile(), MediaType.TEXT_PLAIN ).build();
+		} 
+		else {
+			return Response.ok( filePath.toFile(), MediaType.APPLICATION_OCTET_STREAM ).build();
 		}
-		
-		return Response.ok( filePath.toFile(), MediaType.APPLICATION_OCTET_STREAM ).build();
 	}
 	
 	/**
