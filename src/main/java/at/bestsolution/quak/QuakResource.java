@@ -151,10 +151,11 @@ public class QuakResource {
 			LOG.errorf( "File (%s) does not exist or could not be read.", filePath.toAbsolutePath() );
 			return Response.status( Response.Status.NOT_FOUND ).build();
 		}
-		else if ( filePath.endsWith( ".xml" ) || filePath.endsWith( ".pom" ) ) {
+		else if ( filePath.toString().endsWith( ".xml" ) || filePath.toString().endsWith( ".pom" ) ) {
 			return Response.ok( filePath.toFile(), MediaType.APPLICATION_XML ).build();
 		} 
-		else if ( filePath.endsWith( ".sha1" ) || filePath.endsWith( ".md5" ) || filePath.endsWith( "sha256" ) || filePath.endsWith( "sha512" ) ) {
+		else if ( filePath.toString().endsWith( ".sha1" ) || filePath.toString().endsWith( ".md5" ) 
+				|| filePath.toString().endsWith( "sha256" ) || filePath.toString().endsWith( "sha512" ) ) {
 			return Response.ok( filePath.toFile(), MediaType.TEXT_PLAIN ).build();
 		} 
 		else {
