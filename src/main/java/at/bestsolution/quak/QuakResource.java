@@ -118,13 +118,7 @@ public class QuakResource {
 			return repository.storagePath();
 		}
 		
-		java.nio.file.Path path = repository.storagePath().resolve( relative ).normalize();
-
-		if ( path.startsWith( repository.storagePath() ) ) {
-			return path;
-		}
-		
-		return null;
+		return repository.storagePath().resolve( relative ).normalize();
 	}
 	
 	private String getFormattedFileSize(long size) {
