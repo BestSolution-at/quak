@@ -50,9 +50,11 @@ class QuakResourceRedeployTest {
 	 */
 	@BeforeEach
 	void createFileIfNotExists() {
-		Response response = given().when().get( "/at/bestsolution/blueprint/dummy_file.foo" ).andReturn();
+		Response response = given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD )
+				.get( QuakResourceTest.DUMMY_FILE_FOO ).andReturn();
 		if ( response.getStatusCode() == Status.NOT_FOUND.getStatusCode() ) {
-			given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.foo" ).andReturn();
+			given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT )
+				.put( QuakResourceTest.DUMMY_FILE_FOO ).andReturn();
 		}
 	}
 
@@ -61,7 +63,7 @@ class QuakResourceRedeployTest {
 	 */
 	@Test
 	void testUploadRedeployNotAllowed() {
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.foo" ).then()
-				.statusCode( Status.METHOD_NOT_ALLOWED.getStatusCode() );
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT )
+			.put( QuakResourceTest.DUMMY_FILE_FOO ).then().statusCode( Status.METHOD_NOT_ALLOWED.getStatusCode() );
 	}
 }

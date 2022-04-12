@@ -55,16 +55,30 @@ class QuakResourceTest {
 	@ConfigProperty( name = "quarkus.http.limits.max-body-size" )
 	String confMaxUploadLimit;
 
-	private static final int KB = 1024;
-	private static final int MB = 1024 * 1024;
-
+	public static final int KB = 1024;
+	public static final int MB = 1024 * 1024;
+	public static final String DUMMY_FILE_CONTENT = "dummy file";
+	public static final String DUMMY_FILE_FOO = QuakTestProfile.BASE_URL.concat( "/dummy_file.foo" );
+	public static final String SUB_FOLDER_DUMMY_FILE_FOO = QuakTestProfile.BASE_URL.concat( "/subFolder/dummy_file.foo" );
+	public static final String DUMMY_FILE_FOO_1KB = QuakTestProfile.BASE_URL.concat( "/dummy_file_1KB.foo" );
+	public static final String DUMMY_FILE_FOO_1MB = QuakTestProfile.BASE_URL.concat( "/dummy_file_1MB.foo" );
+	public static final String DUMMY_FILE_XML = QuakTestProfile.BASE_URL.concat( "/dummy_file.xml" );
+	public static final String DUMMY_FILE_POM = QuakTestProfile.BASE_URL.concat( "/dummy_file.pom" );
+	public static final String DUMMY_FILE_SHA1 = QuakTestProfile.BASE_URL.concat( "/dummy_file.sha1" );
+	public static final String DUMMY_FILE_MD5 = QuakTestProfile.BASE_URL.concat( "/dummy_file.md5" );
+	public static final String DUMMY_FILE_SHA256 = QuakTestProfile.BASE_URL.concat( "/dummy_file.sha256" );
+	public static final String DUMMY_FILE_SHA512 = QuakTestProfile.BASE_URL.concat( "/dummy_file.sha512" );
+	public static final String DUMMY_FILE_AT_LIMIT = QuakTestProfile.BASE_URL.concat( "/at_limit.foo" );
+	public static final String DUMMY_FILE_ABOVE_LIMIT = QuakTestProfile.BASE_URL.concat( "/above_limit.foo" );
+	public static final String WRONG_PATH = "/at/wrong/path";
+	
 	/**
 	 * Asserts that get on folder returns OK.
 	 */
 	@Test
 	@Order( 4 )
 	void testGetFolder() {
-		given().when().get( "/at/bestsolution/blueprint/" ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.OK.getStatusCode() );
 	}
 
 	/**
@@ -73,7 +87,7 @@ class QuakResourceTest {
 	@Test
 	@Order( 3 )
 	void testGetWrongPath() {
-		given().when().get( "/at/wrong/path/" ).then().statusCode( Status.NOT_FOUND.getStatusCode() );
+		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( WRONG_PATH.concat( "/" ) ).then().statusCode( Status.NOT_FOUND.getStatusCode() );
 	}
 
 	/**
@@ -82,15 +96,15 @@ class QuakResourceTest {
 	@Test
 	@Order( 6 )
 	void testGetFiles() {
-		given().when().get( "/at/bestsolution/blueprint/dummy_file.foo" ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().get( "/at/bestsolution/blueprint/dummy_file_1KB.foo" ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().get( "/at/bestsolution/blueprint/dummy_file_1MB.foo" ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().get( "/at/bestsolution/blueprint/dummy_file.xml" ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().get( "/at/bestsolution/blueprint/dummy_file.pom" ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().get( "/at/bestsolution/blueprint/dummy_file.sha1" ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().get( "/at/bestsolution/blueprint/dummy_file.md5" ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().get( "/at/bestsolution/blueprint/dummy_file.sha256" ).then().statusCode( Status.OK.getStatusCode() );
-		given().when().get( "/at/bestsolution/blueprint/dummy_file.sha512" ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( DUMMY_FILE_FOO ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( DUMMY_FILE_FOO_1KB ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( DUMMY_FILE_FOO_1MB ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( DUMMY_FILE_XML ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( DUMMY_FILE_POM ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( DUMMY_FILE_SHA1 ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( DUMMY_FILE_MD5 ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( DUMMY_FILE_SHA256 ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( DUMMY_FILE_SHA512 ).then().statusCode( Status.OK.getStatusCode() );
 	}
 
 	/**
@@ -99,22 +113,30 @@ class QuakResourceTest {
 	@Test
 	@Order( 2 )
 	void testUpload() {
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.foo" ).then().statusCode( Status.OK.getStatusCode() );
-		given().request().body( createStringDataOfSize( KB + 1 ) ).put( "/at/bestsolution/blueprint/dummy_file_1KB.foo" ).then()
-				.statusCode( Status.OK.getStatusCode() );
-		given().request().body( createStringDataOfSize( MB + 1 ) ).put( "/at/bestsolution/blueprint/dummy_file_1MB.foo" ).then()
-				.statusCode( Status.OK.getStatusCode() );
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.xml" ).then().statusCode( Status.OK.getStatusCode() );
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.pom" ).then().statusCode( Status.OK.getStatusCode() );
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.sha1" ).then().statusCode( Status.OK.getStatusCode() );
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.md5" ).then().statusCode( Status.OK.getStatusCode() );
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.sha256" ).then().statusCode( Status.OK.getStatusCode() );
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.sha512" ).then().statusCode( Status.OK.getStatusCode() );
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/subFolder/dummy_file.foo" ).then().statusCode( Status.OK.getStatusCode() );
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/maven-metadata.xml" ).then().statusCode( Status.OK.getStatusCode() );
-
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_FOO )
+			.then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( createStringDataOfSize( KB + 1 ) ).put( DUMMY_FILE_FOO_1KB )
+			.then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( createStringDataOfSize( MB + 1 ) ).put( DUMMY_FILE_FOO_1MB )
+			.then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_XML )
+			.then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_POM )
+			.then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_SHA1 )
+			.then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_MD5 )
+			.then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_SHA256 )
+			.then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_SHA512 )
+			.then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( SUB_FOLDER_DUMMY_FILE_FOO )
+			.then().statusCode( Status.OK.getStatusCode() );
+		
 		// Re-deploy
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/dummy_file.foo" ).then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_FOO )
+			.then().statusCode( Status.OK.getStatusCode() );
 	}
 
 	/**
@@ -123,7 +145,8 @@ class QuakResourceTest {
 	@Test
 	@Order( 1 )
 	void testUploadWrongPath() {
-		given().request().body( "dummy file" ).put( "/at/wrong/path/dummy_file.foo" ).then().statusCode( Status.NOT_FOUND.getStatusCode() );
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( WRONG_PATH.concat( DUMMY_FILE_FOO ) )
+			.then().statusCode( Status.NOT_FOUND.getStatusCode() );
 	}
 
 	/**
@@ -132,7 +155,8 @@ class QuakResourceTest {
 	@Test
 	@Order( 5 )
 	void testUploadNoFilename() {
-		given().request().body( "dummy file" ).put( "/at/bestsolution/blueprint/" ).then().statusCode( Status.BAD_REQUEST.getStatusCode() );
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( QuakTestProfile.BASE_URL.concat( "/" ) )
+			.then().statusCode( Status.BAD_REQUEST.getStatusCode() );
 	}
 
 	/**
@@ -142,10 +166,10 @@ class QuakResourceTest {
 	@Order( 7 )
 	void testUploadLimit() {
 		Long maxUploadLimit = new MemorySizeConverter().convert( confMaxUploadLimit ).asLongValue();
-		given().request().body( createStringDataOfSize( maxUploadLimit.intValue() ) ).put( "/at/bestsolution/blueprint/at_limit.foo" ).then()
-				.statusCode( Status.OK.getStatusCode() );
-		assertThrows( SocketException.class, () -> given().request().body( createStringDataOfSize( maxUploadLimit.intValue() + 1 ) )
-				.put( "/at/bestsolution/blueprint/above_limit.foo" ).andReturn() );
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( createStringDataOfSize( maxUploadLimit.intValue() ) ).put( DUMMY_FILE_AT_LIMIT )
+			.then().statusCode( Status.OK.getStatusCode() );
+		assertThrows( SocketException.class, () -> given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( createStringDataOfSize( maxUploadLimit.intValue() + 1 ) )
+			.put( DUMMY_FILE_ABOVE_LIMIT ).andReturn() );
 	}
 
 	private String createStringDataOfSize( int size ) {

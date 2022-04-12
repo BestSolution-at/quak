@@ -25,30 +25,23 @@
 
 package at.bestsolution.quak;
 
-import java.util.HashMap;
 import java.util.Map;
-
-import io.quarkus.test.junit.QuarkusTestProfile;
 
 /**
  * Test profile for redeploy not allowed tests.
  * 
  * @author: kerim.yeniduenya@bestsolution.at
  */
-public class QuakTestProfileRedeployNotAllowed implements QuarkusTestProfile {
-
+public class QuakTestProfileRedeployNotAllowed extends QuakTestProfile {
+	
     /**
      * @return Returns additional basic quak configuration with false redeploy field, 
      * to be applied to the test. 
      */
     @Override
     public Map<String, String> getConfigOverrides() {
-    	Map<String, String> testConfigurations = new HashMap<String, String>();
-    	testConfigurations.put( "quak.repositories[0].name", "blueprint" );
-    	testConfigurations.put( "quak.repositories[0].storage-path", "repos/blueprint" );
-    	testConfigurations.put( "quak.repositories[0].base-url", "/at/bestsolution/blueprint" );
-    	testConfigurations.put( "quak.repositories[0].allow-redeploy", "false" );
-    	
+    	Map<String, String> testConfigurations = super.getConfigOverrides();
+    	testConfigurations.put( "quak.repositories[0].allow-redeploy", DO_NOT_ALLOW_REDEPLOY );
         return testConfigurations;
     }
 }
