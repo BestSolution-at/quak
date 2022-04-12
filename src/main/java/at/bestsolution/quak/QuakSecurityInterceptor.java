@@ -87,7 +87,7 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 				}
 			} 
 			catch ( Exception e ) {
-				LOG.error( "Exception while decrypting password!", e );
+				LOG.errorf( "Exception while checking password for: %s, %s", username, e );
 				context.abortWith( responseUnauthorized );
 			}
 		}
