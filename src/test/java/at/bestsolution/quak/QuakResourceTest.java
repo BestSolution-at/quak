@@ -70,6 +70,7 @@ class QuakResourceTest {
 	public static final String DUMMY_FILE_SHA512 = QuakTestProfile.BASE_URL.concat( "/dummy_file.sha512" );
 	public static final String DUMMY_FILE_AT_LIMIT = QuakTestProfile.BASE_URL.concat( "/at_limit.foo" );
 	public static final String DUMMY_FILE_ABOVE_LIMIT = QuakTestProfile.BASE_URL.concat( "/above_limit.foo" );
+	public static final String NON_EXISTING_FILE = QuakTestProfile.BASE_URL.concat( "/doesnt_exist.foo" );
 	public static final String WRONG_PATH = "/at/wrong/path";
 	
 	/**
@@ -105,6 +106,7 @@ class QuakResourceTest {
 		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( DUMMY_FILE_MD5 ).then().statusCode( Status.OK.getStatusCode() );
 		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( DUMMY_FILE_SHA256 ).then().statusCode( Status.OK.getStatusCode() );
 		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( DUMMY_FILE_SHA512 ).then().statusCode( Status.OK.getStatusCode() );
+		given().when().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( NON_EXISTING_FILE ).then().statusCode( Status.NOT_FOUND.getStatusCode() );
 	}
 
 	/**
