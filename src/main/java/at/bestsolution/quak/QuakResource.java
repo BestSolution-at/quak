@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -63,8 +64,6 @@ import io.quarkus.qute.Template;
 @Path("/{path: .*}")
 public class QuakResource {
 	
-	private static final Logger LOG = Logger.getLogger(QuakResource.class);
-
 	@Inject
 	QuakConfiguration configuration;
 	
@@ -74,15 +73,19 @@ public class QuakResource {
 	@Inject
     Template directory;
 	
+	private static final Logger LOG = Logger.getLogger(QuakResource.class);
+	private static final String FILE_SIZE_PATTERN = "#,###.0";
+	
 	/**
 	 * @param p path of the file to be checked.
 	 * @return String text displaying last modify date.
 	 */
 	private static String getLastModified(java.nio.file.Path p) {
 		try {
-			FileTime time = Files.getLastModifiedTime(p);
-			return DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm", Locale.ENGLISH).format(LocalDateTime.ofInstant(time.toInstant(),ZoneId.systemDefault()));
-		} catch (IOException e) {
+			FileTime time = Files.getLastModifiedTime( p );
+			return DateTimeFormatter.ofPattern( "dd-MMM-yyyy HH:mm", Locale.ENGLISH ).format( LocalDateTime.ofInstant( time.toInstant(), ZoneId.systemDefault() ) );
+		} 
+		catch ( IOException e ) {
 			LOG.error( "Exception while reading file modification time!", e );
 			return "Unknown";
 		}
@@ -94,7 +97,7 @@ public class QuakResource {
 	 * @return Repository a repository configuration or null in case of no match.
 	 */
 	private Repository findRepository(String path) {
-		return configuration.repositories().stream().filter( r -> path.startsWith(r.baseUrl())).findFirst().orElse(null);
+		return configuration.repositories().stream().filter( r -> path.startsWith( r.baseUrl() ) ).findFirst().orElse( null );
 	}
 	
 	/**
@@ -105,23 +108,59 @@ public class QuakResource {
 	 */
 	private java.nio.file.Path resolveFileSystemPath(Repository repository, String url) {
 		int length = repository.baseUrl().length();
-		String relative = url.substring(length);
+		String relative = url.substring( length );
 		
-		if( relative.length() > 0 && relative.charAt(0) == '/' ) {
-			relative = relative.substring(1);
+		if ( relative.length() > 0 && relative.charAt( 0 ) == '/' ) {
+			relative = relative.substring( 1 );
 		}
 		
-		if( relative.isEmpty() ) {
+		if ( relative.isEmpty() ) {
 			return repository.storagePath();
 		}
 		
-		java.nio.file.Path path = repository.storagePath().resolve(relative).normalize();
-
-		if( path.startsWith(repository.storagePath()) ) {
-			return path;
+		return repository.storagePath().resolve( relative ).normalize();
+	}
+	
+	private String getFormattedFileSize(long size) {
+		String formatted;
+		if ( size > 1024 ) {
+			if ( size > 1024 * 1024 ) {
+				if ( size > 1024 * 1024 * 1024 ) {
+					formatted = new DecimalFormat(FILE_SIZE_PATTERN, DecimalFormatSymbols.getInstance( Locale.ENGLISH ) )
+							.format( size / ( 1024.0 * 1024.0 * 1024 ) ) + " GB";
+				} 
+				else {
+					formatted = new DecimalFormat(FILE_SIZE_PATTERN, DecimalFormatSymbols.getInstance( Locale.ENGLISH ) )
+							.format( size / ( 1024.0 * 1024.0 ) ) + " MB";	
+				}
+			} 
+			else {
+				formatted = new DecimalFormat(FILE_SIZE_PATTERN, DecimalFormatSymbols.getInstance( Locale.ENGLISH ) )
+							.format( size / 1024.0 ) + " KB";
+			}
+		} 
+		else {
+			formatted = size + "";
 		}
 		
-		return null;
+		return formatted;
+	}
+	
+	private Response getResponseForFileType(java.nio.file.Path filePath) {
+		if ( !Files.exists( filePath ) && !Files.isRegularFile( filePath ) ) {
+			LOG.errorf( "File (%s) does not exist or could not be read.", filePath.toAbsolutePath() );
+			return Response.status( Response.Status.NOT_FOUND ).build();
+		}
+		else if ( filePath.toString().endsWith( ".xml" ) || filePath.toString().endsWith( ".pom" ) ) {
+			return Response.ok( filePath.toFile(), MediaType.APPLICATION_XML ).build();
+		} 
+		else if ( filePath.toString().endsWith( ".sha1" ) || filePath.toString().endsWith( ".md5" ) 
+				|| filePath.toString().endsWith( "sha256" ) || filePath.toString().endsWith( "sha512" ) ) {
+			return Response.ok( filePath.toFile(), MediaType.TEXT_PLAIN ).build();
+		} 
+		else {
+			return Response.ok( filePath.toFile(), MediaType.APPLICATION_OCTET_STREAM ).build();
+		}
 	}
 	
 	/**
@@ -134,76 +173,56 @@ public class QuakResource {
 		LOG.debugf( "Get request received with: %s", urlInfo.getRequestUri() );
 		String path = urlInfo.getPath();
 		
-		Repository repository = findRepository(path);
+		Repository repository = findRepository( path );
 		
-		if( repository == null ) {
+		if ( repository == null ) {
 			LOG.errorf( "No repository found for path: %s", path );
-			return Response.status(Status.NOT_FOUND).build();
+			return Response.status( Status.NOT_FOUND ).build();
 		}
 		
-		java.nio.file.Path file = resolveFileSystemPath(repository, path);
+		java.nio.file.Path file = resolveFileSystemPath( repository, path );
 		
-		if( file == null ) {
+		if ( file == null ) {
 			LOG.errorf( "Can not resolve path: %s", path );
-			return Response.status(Response.Status.NOT_FOUND).build();
+			return Response.status( Response.Status.NOT_FOUND ).build();
 		}
 		
-		if( Files.isDirectory(file) ) {
+		if ( Files.isDirectory( file ) ) {
 			List<DirectoryItem> items = new ArrayList<>();
-			if( ! repository.storagePath().equals(file) ) {
-				items.add(new DirectoryItem("drive_folder_upload","..","..","-",getLastModified(file)));		
+			if ( !repository.storagePath().equals( file ) ) {
+				items.add( new DirectoryItem( "drive_folder_upload", "..", "..", "-", getLastModified( file ) ) );		
 			}
-			
 			try {
-				items.addAll(Files.list(file).sorted().map( p -> {
-					if( Files.isDirectory(p) ) {
-						return new DirectoryItem("folder",p.getFileName().toString(), p.getFileName().toString()+"/", "-", getLastModified(p));
-					} else {
-						long size;
-						try {
-							size = Files.size(p);
-						} catch (IOException e) {
-							size = -1;
-						}
-						
-						String formatted = "-";
-						if( size > 1024 ) {
-							if( size > 1024 * 1024 ) {
-								if( size > 1024 * 1024 * 1024 ) {
-									formatted = new DecimalFormat("#,###.0", DecimalFormatSymbols.getInstance(Locale.ENGLISH)).format(size / (1024.0 * 1024.0 * 1024)) + " GB";
-								} else {
-									formatted = new DecimalFormat("#,###.0", DecimalFormatSymbols.getInstance(Locale.ENGLISH)).format(size / (1024.0 * 1024.0)) + " MB";	
-								}
-								
-							} else {
-								formatted = new DecimalFormat("#,###.0", DecimalFormatSymbols.getInstance(Locale.ENGLISH)).format(size / 1024.0) + " KB";
+				Stream<java.nio.file.Path> paths = Files.list( file );
+				try {
+					items.addAll( paths.sorted().map( p -> {
+						if ( Files.isDirectory( p ) ) {
+							return new DirectoryItem( "folder", p.getFileName().toString(), p.getFileName().toString() + "/", "-", getLastModified( p ) );
+						} 
+						else {
+							long size;
+							try {
+								size = Files.size( p );
+							} 
+							catch ( IOException e ) {
+								size = -1;
 							}
-						} else {
-							formatted = size + "";
+							return new DirectoryItem("description", p.getFileName().toString(), p.getFileName().toString(), getFormattedFileSize( size ), getLastModified( p ));
 						}
-						
-						return new DirectoryItem("description", p.getFileName().toString(), p.getFileName().toString(), formatted, getLastModified(p));
-					}
-				}).collect(Collectors.toList()));
-			} catch (IOException e) {
+					} ).collect( Collectors.toList() ) );
+				}
+				finally {
+					paths.close();
+				}
+			} 
+			catch ( IOException e ) {
 				LOG.error( "Exception while reading directories!", e );
 			}
 			
-			return Response.ok(directory.data("items", items).render(),MediaType.TEXT_HTML).build();
+			return Response.ok( directory.data( "items", items ).render(), MediaType.TEXT_HTML ).build();
 		}
-		
-		if (!Files.exists(file) && !Files.isRegularFile(file)) {
-			LOG.errorf( "File (%s) does not exist or could not be read.", file.toAbsolutePath() );
-			return Response.status(Response.Status.NOT_FOUND).build();
-		}
-		
-		if (path.endsWith(".xml") || path.endsWith(".pom")) {
-			return Response.ok(file.toFile(), MediaType.APPLICATION_XML).build();
-		} else if( path.endsWith(".sha1") || path.endsWith(".md5") || path.endsWith("sha256") || path.endsWith("sha512") ) {
-			return Response.ok(file.toFile(), MediaType.TEXT_PLAIN).build();
-		}
-		
-		return Response.ok(file.toFile(), MediaType.APPLICATION_OCTET_STREAM).build();
+			
+		return getResponseForFileType( file );
 	}
 
 	/** 
@@ -216,36 +235,38 @@ public class QuakResource {
 	public Response upload(InputStream messageBody) {
 		LOG.infof( "Upload request received with: %s", urlInfo.getRequestUri() );
 		String path = urlInfo.getPath();
-		Repository repository = findRepository(path);
+		Repository repository = findRepository( path );
 		
-		if( repository == null ) {
+		if ( repository == null ) {
 			LOG.errorf( "No repository found for path: %s", path );
-			return Response.status(Status.NOT_FOUND).build();
+			return Response.status( Status.NOT_FOUND ).build();
 		}
 		
-		java.nio.file.Path file = resolveFileSystemPath(repository, path);
+		java.nio.file.Path file = resolveFileSystemPath( repository, path );
 		
-		if( file == null ) {
+		if ( file == null ) {
 			LOG.errorf( "Can not resolve path: %s", path );
-			return Response.status(Response.Status.NOT_FOUND).build();
+			return Response.status( Response.Status.NOT_FOUND ).build();
 		} 
 		else if (urlInfo.getPath().endsWith( "/" )) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
+			return Response.status( Response.Status.BAD_REQUEST ).build();
 		}
 		
 		try {
-			Files.createDirectories(file.getParent());
-			if( Files.exists(file) ) {
-				if( ! repository.allowRedeploy() && ! file.getFileName().toString().startsWith("maven-metadata.xml") ) {
+			Files.createDirectories( file.getParent() );
+			if ( Files.exists( file ) ) {
+				if ( !repository.allowRedeploy() && !file.getFileName().toString().startsWith( "maven-metadata.xml" ) ) {
 					LOG.infof( "Redeploy for %s is not allowed. Artifact (%s) is NOT uploaded.", repository.name(), file.getFileName() );
-					return Response.status(Status.METHOD_NOT_ALLOWED).entity("Redeployment not allowed").build();
+					return Response.status( Status.METHOD_NOT_ALLOWED ).entity( "Redeployment not allowed" ).build();
 				}
-				Files.copy(messageBody, file, StandardCopyOption.REPLACE_EXISTING);	
-			} else {
-				Files.copy(messageBody, file);
+				Files.copy( messageBody, file, StandardCopyOption.REPLACE_EXISTING );	
+			} 
+			else {
+				Files.copy( messageBody, file );
 			}
 			
-		} catch (IOException e) {
+		} 
+		catch (IOException e) {
 			LOG.error( "Exception while creating directories!", e );
 			return Response.serverError().build();
 		}
@@ -272,55 +293,4 @@ public class QuakResource {
 			this.icon = icon;
 		}
 	}
-	
-	/*
-
-	private static Artifact fromPath(String path) {
-		String[] parts = path.split("/");
-
-		String file = parts[parts.length - 1];
-
-		String versionOrArtifact = parts[parts.length - 2];
-
-		Artifact artifact = new Artifact();
-
-		if (Character.isDigit(versionOrArtifact.charAt(0))) {
-			artifact.version = versionOrArtifact;
-			artifact.artifactId = parts[parts.length - 3];
-			artifact.group = getGroup(parts, 3);
-		} else {
-			artifact.artifactId = parts[parts.length - 2];
-			artifact.group = getGroup(parts, 2);
-		}
-
-		return artifact;
-	}
-
-	private static String getGroup(String[] parts, int cutOff) {
-		StringBuilder b = new StringBuilder();
-
-		for (int i = 0; i < parts.length - cutOff; i++) {
-			if (b.length() > 0) {
-				b.append(".");
-			}
-			b.append(parts[i]);
-		}
-
-		return b.toString();
-	}
-
-	private static class Artifact {
-		private String group;
-		private String artifactId;
-		private String version;
-		private String classifier;
-
-		@Override
-		public String toString() {
-			return "Artifact [group=" + group + ", artifactId=" + artifactId + ", version=" + version + ", classifier="
-					+ classifier + "]";
-		}
-
-	}*/
-
 }

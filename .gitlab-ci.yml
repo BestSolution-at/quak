@@ -5,9 +5,15 @@ stages:
   
 include:
   - project: 'BestSolution.at/gitlab-pipelines'
-    ref: 1.4.3
+    ref: 1.11.0
     file: 
       - '/templates/maven-base.yml'
       - '/jobs/maven/compile.yml'
       - '/jobs/maven/verify.yml'
       - '/jobs/maven/sonar.yml'
+
+maven-verify:
+  artifacts:
+    reports:
+      junit:
+        - ./**/target/surefire-reports/TEST-*Test.xml
