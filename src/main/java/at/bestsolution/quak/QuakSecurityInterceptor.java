@@ -43,6 +43,7 @@ import org.apache.directory.api.ldap.model.password.BCrypt;
 import org.jboss.logging.Logger;
 
 import at.bestsolution.quak.QuakConfiguration.Repository;
+import io.netty.handler.codec.http.HttpMethod;
 
 /**
  * Security Interceptor to verify the access permissions for a user.
@@ -72,7 +73,9 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 		LOG.debugf( "Verifying the credentials for request: %s", context.getUriInfo().getRequestUri().toString() );
 		
 		Repository repository = confController.getRepository( urlInfo.getPath() );
-		if ( repository != null && repository.isPrivate() ) {
+		boolean isWriteOperation = context.getMethod().equals( HttpMethod.PUT.toString() ) || context.getMethod().equals( HttpMethod.POST.toString() );
+		
+		if ( repository != null && ( repository.isPrivate() || isWriteOperation ) ) {
 			MultivaluedMap<String, String> headers = context.getHeaders();
 			final List<String> authorization = headers.get( AUTHORIZATION_PROPERTY );
 			Response responseUnauthorized = Response.status( Response.Status.UNAUTHORIZED ).build();

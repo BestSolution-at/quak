@@ -64,13 +64,13 @@ class QuakSecurityInterceptorPublicRepositoryTest {
 		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.OK.getStatusCode() );
 		
 		given().request().body( "dummy file" ).put( QuakResourceTest.DUMMY_FILE_FOO )
-			.then().statusCode( Status.OK.getStatusCode() );
+			.then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
 		given().auth().preemptive().basic( WRONG_USERNAME, WRONG_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT ).put( QuakResourceTest.DUMMY_FILE_FOO )
-			.then().statusCode( Status.OK.getStatusCode() );
+			.then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
 		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, WRONG_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT ).put( QuakResourceTest.DUMMY_FILE_FOO )
-			.then().statusCode( Status.OK.getStatusCode() );
+			.then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
 		given().auth().preemptive().basic( WRONG_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT ).put( QuakResourceTest.DUMMY_FILE_FOO )
-			.then().statusCode( Status.OK.getStatusCode() );
+			.then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
 		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT ).put( QuakResourceTest.DUMMY_FILE_FOO )
 			.then().statusCode( Status.OK.getStatusCode() );
 	}
