@@ -47,6 +47,8 @@ public class QuakTestProfile implements QuarkusTestProfile {
 	public static final String ALLOW_REDEPLOY = "true";
 	public static final String DO_NOT_ALLOW_REDEPLOY = "false";
 	public static final String MAX_BODY_SIZE = "10M";
+	public static final String PRIVATE_REPOSITORY = "true";
+	public static final String PUBLIC_REPOSITORY = "false";
 
     /**
      * @return Returns additional basic quak configuration to be applied to the test. 
@@ -58,6 +60,7 @@ public class QuakTestProfile implements QuarkusTestProfile {
     	testConfigurations.put( "quak.repositories[0].storage-path", STORAGE_PATH );
     	testConfigurations.put( "quak.repositories[0].base-url", BASE_URL );
     	testConfigurations.put( "quak.repositories[0].allow-redeploy", ALLOW_REDEPLOY );
+    	testConfigurations.put( "quak.repositories[0].is-private", PRIVATE_REPOSITORY );
     	testConfigurations.put( "quak.users[0].username", GOOD_USERNAME );
     	testConfigurations.put( "quak.users[0].password", GOOD_PASSWORD_HASH );
     	testConfigurations.put( "quarkus.http.limits.max-body-size", MAX_BODY_SIZE );

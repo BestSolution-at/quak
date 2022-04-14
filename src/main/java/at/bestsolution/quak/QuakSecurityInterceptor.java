@@ -33,12 +33,16 @@ import java.util.StringTokenizer;
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
 import org.apache.directory.api.ldap.model.password.BCrypt;
 import org.jboss.logging.Logger;
+
+import at.bestsolution.quak.QuakConfiguration.Repository;
 
 /**
  * Security Interceptor to verify the access permissions for a user.
@@ -50,6 +54,9 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	
 	@Inject
 	QuakConfigurationController confController;
+	
+	@Context
+	private UriInfo urlInfo;
 
 	private static final Logger LOG = Logger.getLogger( QuakSecurityInterceptor.class );
 	private static final String AUTHORIZATION_PROPERTY = "Authorization";
@@ -63,32 +70,35 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	@Override
 	public void filter( ContainerRequestContext context ) {
 		LOG.debugf( "Verifying the credentials for request: %s", context.getUriInfo().getRequestUri().toString() );
-
-		MultivaluedMap<String, String> headers = context.getHeaders();
-		final List<String> authorization = headers.get( AUTHORIZATION_PROPERTY );
-		Response responseUnauthorized = Response.status( Response.Status.UNAUTHORIZED ).build();
 		
-		if ( authorization == null || authorization.isEmpty() ) {
-			LOG.debugf( "No credentials given for authentication." );
-			responseUnauthorized.getHeaders().add( AUTHENTICATION_RESPONSE_HEADER, AUTHENTICATION_SCHEME );
-			context.abortWith( responseUnauthorized );
-		} 
-		else {
-			final String encodedUserPassword = authorization.get( 0 ).replaceFirst( AUTHENTICATION_SCHEME + " ", "" );
-			String usernameAndPassword = new String( Base64.getDecoder().decode( encodedUserPassword ) );
-			final StringTokenizer tokenizer = new StringTokenizer( usernameAndPassword, ":" );
-			final String username = tokenizer.nextToken();
-			final String password = tokenizer.nextToken();
+		Repository repository = confController.getRepository( urlInfo.getPath() );
+		if ( repository != null && repository.isPrivate() ) {
+			MultivaluedMap<String, String> headers = context.getHeaders();
+			final List<String> authorization = headers.get( AUTHORIZATION_PROPERTY );
+			Response responseUnauthorized = Response.status( Response.Status.UNAUTHORIZED ).build();
 			
-			try {		    
-				LOG.debugf( "Verifying the user: %s", username );
-				if ( confController.getUsers().stream().noneMatch( ( t -> t.username().equals( username ) && BCrypt.checkPw( password, t.password() ) ) ) ) {
+			if ( authorization == null || authorization.isEmpty() ) {
+				LOG.debugf( "No credentials given for authentication." );
+				responseUnauthorized.getHeaders().add( AUTHENTICATION_RESPONSE_HEADER, AUTHENTICATION_SCHEME );
+				context.abortWith( responseUnauthorized );
+			} 
+			else {
+				final String encodedUserPassword = authorization.get( 0 ).replaceFirst( AUTHENTICATION_SCHEME + " ", "" );
+				String usernameAndPassword = new String( Base64.getDecoder().decode( encodedUserPassword ) );
+				final StringTokenizer tokenizer = new StringTokenizer( usernameAndPassword, ":" );
+				final String username = tokenizer.nextToken();
+				final String password = tokenizer.nextToken();
+				
+				try {		    
+					LOG.debugf( "Verifying the user: %s", username );
+					if ( confController.getUsers().stream().noneMatch( ( t -> t.username().equals( username ) && BCrypt.checkPw( password, t.password() ) ) ) ) {
+						context.abortWith( responseUnauthorized );
+					}
+				} 
+				catch ( Exception e ) {
+					LOG.errorf( "Exception while checking password for: %s, %s", username, e );
 					context.abortWith( responseUnauthorized );
 				}
-			} 
-			catch ( Exception e ) {
-				LOG.errorf( "Exception while checking password for: %s, %s", username, e );
-				context.abortWith( responseUnauthorized );
 			}
 		}
 	}
