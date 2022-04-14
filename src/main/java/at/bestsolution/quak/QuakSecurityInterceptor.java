@@ -94,7 +94,7 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 				
 				try {		    
 					LOG.debugf( "Verifying the user: %s", username );
-					if ( confController.getUsers().stream().noneMatch( ( t -> t.username().equals( username ) && BCrypt.checkPw( password, t.password() ) ) ) ) {
+					if ( checkUsernamePassword( username, password ) ) {
 						context.abortWith( responseUnauthorized );
 					}
 				} 
@@ -104,5 +104,9 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 				}
 			}
 		}
+	}
+	
+	private boolean checkUsernamePassword(String username, String password) {
+		 return confController.getUsers().stream().noneMatch( ( t -> t.username().equals( username ) && BCrypt.checkPw( password, t.password() ) ) );
 	}
 }
