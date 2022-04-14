@@ -65,7 +65,7 @@ import io.quarkus.qute.Template;
 public class QuakResource {
 	
 	@Inject
-	QuakConfiguration configuration;
+	QuakConfigurationController confController;
 	
 	@Context
 	private UriInfo urlInfo;
@@ -89,15 +89,6 @@ public class QuakResource {
 			LOG.error( "Exception while reading file modification time!", e );
 			return "Unknown";
 		}
-	}
-	
-	/**
-	 * Searches for a repository configuration which has a base URL matching with beginning of the path.
-	 * @param path URL path of the upload request.
-	 * @return Repository a repository configuration or null in case of no match.
-	 */
-	private Repository findRepository(String path) {
-		return configuration.repositories().stream().filter( r -> path.startsWith( r.baseUrl() ) ).findFirst().orElse( null );
 	}
 	
 	/**
@@ -173,8 +164,7 @@ public class QuakResource {
 		LOG.debugf( "Get request received with: %s", urlInfo.getRequestUri() );
 		String path = urlInfo.getPath();
 		
-		Repository repository = findRepository( path );
-		
+		Repository repository = confController.getRepository( path );
 		if ( repository == null ) {
 			LOG.errorf( "No repository found for path: %s", path );
 			return Response.status( Status.NOT_FOUND ).build();
@@ -235,8 +225,8 @@ public class QuakResource {
 	public Response upload(InputStream messageBody) {
 		LOG.infof( "Upload request received with: %s", urlInfo.getRequestUri() );
 		String path = urlInfo.getPath();
-		Repository repository = findRepository( path );
 		
+		Repository repository = confController.getRepository( path );
 		if ( repository == null ) {
 			LOG.errorf( "No repository found for path: %s", path );
 			return Response.status( Status.NOT_FOUND ).build();

@@ -50,6 +50,9 @@ public interface QuakConfiguration {
 		public Path storagePath();
 		public String baseUrl();
 		
+		@WithDefault("false")
+		public boolean isPrivate();
+		
 		@WithDefault("true")
 		public boolean allowRedeploy();
 	}

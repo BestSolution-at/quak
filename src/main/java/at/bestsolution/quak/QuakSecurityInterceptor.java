@@ -49,7 +49,7 @@ import org.jboss.logging.Logger;
 public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	
 	@Inject
-	QuakConfiguration configuration;
+	QuakConfigurationController confController;
 
 	private static final Logger LOG = Logger.getLogger( QuakSecurityInterceptor.class );
 	private static final String AUTHORIZATION_PROPERTY = "Authorization";
@@ -82,7 +82,7 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 			
 			try {		    
 				LOG.debugf( "Verifying the user: %s", username );
-				if ( configuration.users().stream().noneMatch( ( t -> t.username().equals( username ) && BCrypt.checkPw( password, t.password() ) ) ) ) {
+				if ( confController.getUsers().stream().noneMatch( ( t -> t.username().equals( username ) && BCrypt.checkPw( password, t.password() ) ) ) ) {
 					context.abortWith( responseUnauthorized );
 				}
 			} 
