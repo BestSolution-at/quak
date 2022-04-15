@@ -1,8 +1,8 @@
 /*
  * ----------------------------------------------------------------
- * Original File Name: QuakConfiguration.java
- * Creation Date:      28.01.2022
- * Description: Class file of quak configuration.       
+ * Original File Name: QuakTestProfilePublicRepository.java
+ * Creation Date:      14.04.2022
+ * Description: Test profile with a public repository.       
  * ----------------------------------------------------------------
 
  * ----------------------------------------------------------------
@@ -25,44 +25,22 @@
 
 package at.bestsolution.quak;
 
-import java.nio.file.Path;
-import java.util.List;
-
-import io.quarkus.runtime.annotations.StaticInitSafe;
-import io.smallrye.config.ConfigMapping;
-import io.smallrye.config.WithDefault;
+import java.util.Map;
 
 /**
- * Represents a quak configuration. Contains a list of repository configurations.
+ * Test profile with a public repository.
+ * 
+ * @author: kerim.yeniduenya@bestsolution.at
  */
-@StaticInitSafe
-@ConfigMapping( prefix = "quak" )
-public interface QuakConfiguration {
+public class QuakTestProfilePublicRepository extends QuakTestProfile {
 	
-	public List<Repository> repositories();
-	public List<User> users();
-	
-	/**
-	 * Represents a repository configuration.
-	 */
-	public interface Repository {
-		public String name();
-		public Path storagePath();
-		public String baseUrl();
-		
-		@WithDefault("false")
-		public boolean isPrivate();
-		
-		@WithDefault("true")
-		public boolean allowRedeploy();
-	}
-	
-	/**
-	 * Represents a quak user.
-	 *
-	 */
-	public interface User {
-		public String username();
-		public String password();
-	}
+    /**
+     * @return Returns additional basic quak configuration with a public repository.
+     */
+    @Override
+    public Map<String, String> getConfigOverrides() {
+    	Map<String, String> testConfigurations = super.getConfigOverrides();
+    	testConfigurations.put( "quak.repositories[0].is-private", PUBLIC_REPOSITORY );
+        return testConfigurations;
+    }
 }
