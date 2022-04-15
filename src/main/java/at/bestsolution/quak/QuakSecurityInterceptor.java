@@ -94,7 +94,7 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 				
 				try {		    
 					LOG.debugf( "Verifying the user: %s", username );
-					if ( checkUsernamePassword( username, password ) ) {
+					if ( !isValidUsernamePassword( username, password ) ) {
 						context.abortWith( responseUnauthorized );
 					}
 				} 
@@ -106,7 +106,14 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 		}
 	}
 	
-	private boolean checkUsernamePassword(String username, String password) {
-		 return confController.getUsers().stream().noneMatch( ( t -> t.username().equals( username ) && BCrypt.checkPw( password, t.password() ) ) );
+	/**
+	 * Searches through configuration for a matching username and password. For passwords, BCrypt hash algorithm is used.
+	 * 
+	 * @param username of the user.
+	 * @param password of the user, hashed with BCrypt.
+	 * @return
+	 */
+	private boolean isValidUsernamePassword(String username, String password) {
+		 return confController.getUsers().stream().anyMatch( ( t -> t.username().equals( username ) && BCrypt.checkPw( password, t.password() ) ) );
 	}
 }
