@@ -51,6 +51,7 @@ public class QuakTestProfile implements QuarkusTestProfile {
 	public static final String PUBLIC_REPOSITORY = "false";
 	public static final String WRITE_PERMISSION = "true";
 	public static final String READ_PERMISSION = "false";
+	public static final String PATH_REGEX = "/at/bestsolution*";
 
     /**
      * @return Returns additional basic quak configuration to be applied to the test. 
@@ -68,7 +69,7 @@ public class QuakTestProfile implements QuarkusTestProfile {
     	testConfigurations.put( "quarkus.http.limits.max-body-size", MAX_BODY_SIZE );
     	testConfigurations.put( "quak.permissions[0].username", GOOD_USERNAME );
     	testConfigurations.put( "quak.permissions[0].repository-name", REPOSITORY_NAME );
-    	testConfigurations.put( "quak.permissions[0].paths[0]", BASE_URL );
+    	testConfigurations.put( "quak.permissions[0].paths[0]", PATH_REGEX );
     	testConfigurations.put( "quak.permissions[0].is-write", WRITE_PERMISSION );
         return testConfigurations;
     }

@@ -25,6 +25,8 @@
 
 package at.bestsolution.quak;
 
+import java.util.regex.Pattern;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -36,8 +38,8 @@ import org.apache.directory.api.ldap.model.password.BCrypt;
  * @author kerim.yeniduenya@bestsolution.at
  */
 @ApplicationScoped
-public class QuakSecurityValidator
-{
+public class QuakSecurityValidator {
+	
 	@Inject
 	QuakConfigurationController confController;
 	
@@ -50,8 +52,8 @@ public class QuakSecurityValidator
 	 * @return true if authorized, false if not.
 	 */
 	public boolean isUserAuthorized( String username, String repositoryName, String path, boolean isWriteRequest ) {
-		return confController.getPermissions( username, repositoryName ).stream()
-				.anyMatch( p -> p.paths().stream().anyMatch( pa -> path.contains( pa ) && ( !isWriteRequest || p.isWrite() ) ) );
+		return confController.getPermissions( username, repositoryName ).stream().anyMatch( pe -> pe.paths().stream()
+				.anyMatch( pa -> Pattern.compile( pa, Pattern.CASE_INSENSITIVE ).matcher( path ).find() && ( !isWriteRequest || pe.isWrite() ) ) );
 	}
 	
 	/**
