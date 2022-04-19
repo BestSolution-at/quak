@@ -26,10 +26,12 @@
 package at.bestsolution.quak;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import at.bestsolution.quak.QuakConfiguration.Permission;
 import at.bestsolution.quak.QuakConfiguration.Repository;
 import at.bestsolution.quak.QuakConfiguration.User;
 
@@ -55,9 +57,27 @@ public class QuakConfigurationController {
 	
 	/**
 	 * Get the list of users defined in configuration.
-	 * @return list of users
+	 * @return list of users.
 	 */
 	public List<User> getUsers() {
 		return configuration.users();
+	}
+	
+	/**
+	 * Get the list of permissions in configuration.
+	 * @return list of permissions.
+	 */
+	public List<Permission> getPermissions() {
+		return configuration.permissions();
+	}
+	
+	/**
+	 * Get permissions of a user for a given repository.
+	 * @param username of the user.
+	 * @param repositoryName of the repository.
+	 * @return list of permissions.
+	 */
+	public List<Permission> getPermissions(String username, String repositoryName) {
+		return configuration.permissions().stream().filter( ( p -> p.username().equals( username ) && p.repositoryName().equals( repositoryName ) ) ).collect( Collectors.toList() );
 	}
 }

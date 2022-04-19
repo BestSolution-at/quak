@@ -33,13 +33,13 @@ import java.util.StringTokenizer;
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
-import org.apache.directory.api.ldap.model.password.BCrypt;
 import org.jboss.logging.Logger;
 
 import at.bestsolution.quak.QuakConfiguration.Repository;
@@ -51,10 +51,14 @@ import io.netty.handler.codec.http.HttpMethod;
  * @author: kerim.yeniduenya@bestsolution.at
  */
 @Provider
+@PreMatching
 public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	
 	@Inject
 	QuakConfigurationController confController;
+	
+	@Inject
+	QuakSecurityValidator securityValidator;
 	
 	@Context
 	private UriInfo urlInfo;
@@ -73,9 +77,9 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 		LOG.debugf( "Verifying the credentials for request: %s", context.getUriInfo().getRequestUri().toString() );
 		
 		Repository repository = confController.getRepository( urlInfo.getPath() );
-		boolean isWriteOperation = context.getMethod().equals( HttpMethod.PUT.toString() ) || context.getMethod().equals( HttpMethod.POST.toString() );
+		boolean isWriteMethod = context.getMethod().equals( HttpMethod.PUT.toString() ) || context.getMethod().equals( HttpMethod.POST.toString() );
 		
-		if ( repository != null && ( repository.isPrivate() || isWriteOperation ) ) {
+		if ( repository != null && ( repository.isPrivate() || isWriteMethod ) ) {
 			MultivaluedMap<String, String> headers = context.getHeaders();
 			final List<String> authorization = headers.get( AUTHORIZATION_PROPERTY );
 			Response responseUnauthorized = Response.status( Response.Status.UNAUTHORIZED ).build();
@@ -94,7 +98,7 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 				
 				try {		    
 					LOG.debugf( "Verifying the user: %s", username );
-					if ( !isValidUsernamePassword( username, password ) ) {
+					if ( !securityValidator.isValidUsernamePassword( username, password ) || !securityValidator.isUserAuthorized( username, repository.name(), urlInfo.getPath(), isWriteMethod ) ) {
 						context.abortWith( responseUnauthorized );
 					}
 				} 
@@ -104,16 +108,5 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 				}
 			}
 		}
-	}
-	
-	/**
-	 * Searches through configuration for a matching username and password. For passwords, BCrypt hash algorithm is used.
-	 * 
-	 * @param username of the user.
-	 * @param password of the user, hashed with BCrypt.
-	 * @return
-	 */
-	private boolean isValidUsernamePassword(String username, String password) {
-		 return confController.getUsers().stream().anyMatch( ( t -> t.username().equals( username ) && BCrypt.checkPw( password, t.password() ) ) );
 	}
 }
