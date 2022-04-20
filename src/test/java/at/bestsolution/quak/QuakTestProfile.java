@@ -51,7 +51,7 @@ public class QuakTestProfile implements QuarkusTestProfile {
 	public static final String PUBLIC_REPOSITORY = "false";
 	public static final String WRITE_PERMISSION = "true";
 	public static final String READ_PERMISSION = "false";
-	public static final String PATH_REGEX = "/at/bestsolution*";
+	public static final String PATH_REGEX = "/at/bestsolution.*";
 
     /**
      * @return Returns additional basic quak configuration to be applied to the test. 
