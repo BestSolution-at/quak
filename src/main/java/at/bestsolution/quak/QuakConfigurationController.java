@@ -72,12 +72,12 @@ public class QuakConfigurationController {
 	}
 	
 	/**
-	 * Get permissions of a user for a given repository.
-	 * @param username of the user.
-	 * @param repositoryName of the repository.
+	 * Get permissions a user has on a specific repository.
+	 * @param username of user.
+	 * @param repositoryName of repository.
 	 * @return list of permissions.
 	 */
-	public List<Permission> getPermissions(String username, String repositoryName) {
+	public List<Permission> getPermissionsOfUserForRepository(String username, String repositoryName) {
 		return configuration.permissions().stream().filter( ( p -> p.username().equals( username ) && p.repositoryName().equals( repositoryName ) ) ).collect( Collectors.toList() );
 	}
 }

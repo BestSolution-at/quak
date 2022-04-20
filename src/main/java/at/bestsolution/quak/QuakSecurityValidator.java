@@ -52,7 +52,7 @@ public class QuakSecurityValidator {
 	 * @return true if authorized, false if not.
 	 */
 	public boolean isUserAuthorized( String username, String repositoryName, String path, boolean isWriteRequest ) {
-		return confController.getPermissions( username, repositoryName ).stream().anyMatch( pe -> pe.paths().stream()
+		return confController.getPermissionsOfUserForRepository( username, repositoryName ).stream().anyMatch( pe -> pe.paths().stream()
 				.anyMatch( pa -> Pattern.compile( pa, Pattern.CASE_INSENSITIVE ).matcher( path ).matches() && ( !isWriteRequest || pe.isWrite() ) ) );
 	}
 	
