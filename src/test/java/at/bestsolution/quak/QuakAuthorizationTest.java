@@ -56,7 +56,7 @@ class QuakAuthorizationTest {
 	public static final String DUMMY_FILE_FOO_SUBPATH = QuakTestProfileAuthorization.BASE_URL_SUBPATH.concat( "/dummy_file.foo" );
 	public static final String DUMMY_FILE_FOO_READ_ONLY = QuakTestProfileAuthorization.BASE_URL_READ_ONLY.concat( "/dummy_file.foo" );
 	public static final String DUMMY_FILE_FOO_UNAUTHORIZED_PATH = QuakTestProfileAuthorization.BASE_URL_UNAUTHORIZED_PATH.concat( "/dummy_file.foo" );
-	
+	public static final String DUMMY_FILE_FOO_UNAUTHORIZED__READ_ONLY_PATH = QuakTestProfileAuthorization.BASE_URL_UNAUTHORIZED_READ_ONLY_PATH.concat( "/dummy_file.foo" );
 	
 	/**
 	 * Asserts permissions are written and read correctly.
@@ -176,5 +176,25 @@ class QuakAuthorizationTest {
 	void testWriteToUnauthorizedPath() {
 		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT )
 			.put( DUMMY_FILE_FOO_UNAUTHORIZED_PATH ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
+	}
+	
+	/**
+	 * Asserts user can not write to unauthorized and read-only path.
+	 */
+	@Test
+	@Order( 12 )
+	void testWriteToUnauthorizedReadOnlyPath() {
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT )
+			.put( DUMMY_FILE_FOO_UNAUTHORIZED__READ_ONLY_PATH ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
+	}
+	
+	/**
+	 * Asserts user can not read from unauthorized and read-only path.
+	 */
+	@Test
+	@Order( 13 )
+	void testReadFromUnauthorizedReadOnlyPath() {
+		given().auth().preemptive().basic( QuakTestProfileAuthorization.USERNAME_ADMIN, QuakTestProfile.GOOD_PASSWORD ).get( QuakTestProfileAuthorization.BASE_URL_UNAUTHORIZED_READ_ONLY_PATH.concat( "/" ) )
+			.then().statusCode( Status.UNAUTHORIZED.getStatusCode() ); 
 	}
 }

@@ -42,6 +42,7 @@ public class QuakTestProfileAuthorization extends QuakTestProfile {
 	public static final String BASE_URL_READ_ONLY = "/at/readOnly/bestsolution/";
 	public static final String BASE_URL_SUBPATH = "/at/bestsolution/blueprint/sub/path";
 	public static final String BASE_URL_UNAUTHORIZED_PATH = "/unauthorized/at/bestsolution/blueprint/sub/path";
+	public static final String BASE_URL_UNAUTHORIZED_READ_ONLY_PATH = "/unauthorized/at/readOnly/bestsolution/";
 
     /**
      * @return Returns additional basic quak configuration for authorization tests.
@@ -78,6 +79,10 @@ public class QuakTestProfileAuthorization extends QuakTestProfile {
     	testConfigurations.put( "quak.repositories[4].storage-path", STORAGE_PATH );
     	testConfigurations.put( "quak.repositories[4].base-url", BASE_URL_UNAUTHORIZED_PATH );
     	testConfigurations.put( "quak.repositories[4].is-private", PRIVATE_REPOSITORY );
+    	testConfigurations.put( "quak.repositories[5].name", REPOSITORY_NAME_READ_ONLY );
+    	testConfigurations.put( "quak.repositories[5].storage-path", STORAGE_PATH );
+    	testConfigurations.put( "quak.repositories[5].base-url", BASE_URL_UNAUTHORIZED_READ_ONLY_PATH );
+    	testConfigurations.put( "quak.repositories[5].is-private", PRIVATE_REPOSITORY );
         return testConfigurations;
     }
 }
