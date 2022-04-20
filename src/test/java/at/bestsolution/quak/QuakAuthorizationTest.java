@@ -26,7 +26,9 @@
 package at.bestsolution.quak;
 
 import static io.restassured.RestAssured.given;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import javax.inject.Inject;
 import javax.ws.rs.core.Response.Status;
 
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
@@ -47,15 +49,39 @@ import io.quarkus.test.junit.TestProfile;
 @TestMethodOrder( OrderAnnotation.class )
 class QuakAuthorizationTest {
 	
+	@Inject
+	QuakConfigurationController confController;
+	
 	public static final String DUMMY_FILE_FOO_UNAUTHORIZED = QuakTestProfileAuthorization.BASE_URL_UNAUTHORIZED.concat( "/dummy_file.foo" );
 	public static final String DUMMY_FILE_FOO_SUBPATH = QuakTestProfileAuthorization.BASE_URL_SUBPATH.concat( "/dummy_file.foo" );
 	public static final String DUMMY_FILE_FOO_READ_ONLY = QuakTestProfileAuthorization.BASE_URL_READ_ONLY.concat( "/dummy_file.foo" );
+	
+	
+	/**
+	 * Asserts permissions are written and read correctly.
+	 */
+	@Test
+	@Order( 1 )
+	void testReadPermissions() {
+		assertEquals( QuakTestProfile.GOOD_USERNAME, confController.getPermissions().get( 0 ).username() );
+		assertEquals( QuakTestProfile.REPOSITORY_NAME, confController.getPermissions().get( 0 ).repositoryName() );
+		assertEquals( QuakTestProfile.PATH_REGEX, confController.getPermissions().get( 0 ).paths().get( 0 ) );
+		assertEquals( true, confController.getPermissions().get( 0 ).isWrite() );
+		assertEquals( QuakTestProfile.GOOD_USERNAME, confController.getPermissions().get( 1 ).username() );
+		assertEquals( QuakTestProfileAuthorization.REPOSITORY_NAME_READ_ONLY, confController.getPermissions().get( 1 ).repositoryName() );
+		assertEquals( QuakTestProfileAuthorization.REGEX_MATCH_ALL, confController.getPermissions().get( 1 ).paths().get( 0 ) );
+		assertEquals( false, confController.getPermissions().get( 1 ).isWrite() );
+		assertEquals( QuakTestProfileAuthorization.USERNAME_ADMIN, confController.getPermissions().get( 2 ).username() );
+		assertEquals( QuakTestProfileAuthorization.REPOSITORY_NAME_READ_ONLY, confController.getPermissions().get( 2 ).repositoryName() );
+		assertEquals( QuakTestProfileAuthorization.REGEX_MATCH_ALL, confController.getPermissions().get( 2 ).paths().get( 0 ) );
+		assertEquals( true, confController.getPermissions().get( 2 ).isWrite() );
+	}
 	
 	/**
 	 * Asserts user can not write to unauthorized repository.
 	 */
 	@Test
-	@Order( 1 )
+	@Order( 2 )
 	void testWriteToUnauthorizedRepository() {
 		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT )
 			.put( DUMMY_FILE_FOO_UNAUTHORIZED ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() ); 
@@ -65,7 +91,7 @@ class QuakAuthorizationTest {
 	 * Asserts user can write to path regex matched sub path of permitted repository.
 	 */
 	@Test
-	@Order( 2 )
+	@Order( 3 )
 	void testWriteToSubPathOfPermittedRepository() {
 		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT )
 			.put( DUMMY_FILE_FOO_SUBPATH ).then().statusCode( Status.OK.getStatusCode() ); 
@@ -75,7 +101,7 @@ class QuakAuthorizationTest {
 	 * Asserts user can not write to read permitted repository.
 	 */
 	@Test
-	@Order( 3 )
+	@Order( 4 )
 	void testWriteToReadOnlyPermittedRepository() {
 		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT )
 			.put( DUMMY_FILE_FOO_READ_ONLY ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
@@ -85,7 +111,7 @@ class QuakAuthorizationTest {
 	 * Asserts another user with write permission can write to given repository.
 	 */
 	@Test
-	@Order( 4 )
+	@Order( 5 )
 	void testWriteWithPermittedUser() {
 		given().auth().preemptive().basic( QuakTestProfileAuthorization.USERNAME_ADMIN, QuakTestProfile.GOOD_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT )
 			.put( DUMMY_FILE_FOO_READ_ONLY ).then().statusCode( Status.OK.getStatusCode() ); 
@@ -95,7 +121,7 @@ class QuakAuthorizationTest {
 	 * Asserts user can not read from unauthorized repository.
 	 */
 	@Test
-	@Order( 5 )
+	@Order( 6 )
 	void testReadFromUnauthorizedRepository() {
 		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( QuakTestProfileAuthorization.BASE_URL_UNAUTHORIZED.concat( "/" ) )
 			.then().statusCode( Status.UNAUTHORIZED.getStatusCode() ); 
@@ -105,7 +131,7 @@ class QuakAuthorizationTest {
 	 * Asserts user can read from path regex matched sub path of permitted repository.
 	 */
 	@Test
-	@Order( 6 )
+	@Order( 7 )
 	void testReadFromSubPathOfPermittedRepository() {
 		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( QuakTestProfileAuthorization.BASE_URL_SUBPATH.concat( "/" ) )
 			.then().statusCode( Status.OK.getStatusCode() );
@@ -115,7 +141,7 @@ class QuakAuthorizationTest {
 	 * Asserts user can read from read only permitted repository.
 	 */
 	@Test
-	@Order( 7 )
+	@Order( 8 )
 	void testReadFromReadOnlyPermittedRepository() {
 		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( QuakTestProfileAuthorization.BASE_URL_READ_ONLY.concat( "/" ) )
 			.then().statusCode( Status.OK.getStatusCode() ); 
@@ -125,7 +151,7 @@ class QuakAuthorizationTest {
 	 * Asserts user can read from write permitted repository.
 	 */
 	@Test
-	@Order( 8 )
+	@Order( 9 )
 	void testReadFromWritePermittedRepository() {
 		given().auth().preemptive().basic( QuakTestProfileAuthorization.USERNAME_ADMIN, QuakTestProfile.GOOD_PASSWORD ).get( QuakTestProfileAuthorization.BASE_URL_READ_ONLY.concat( "/" ) )
 			.then().statusCode( Status.OK.getStatusCode() ); 
