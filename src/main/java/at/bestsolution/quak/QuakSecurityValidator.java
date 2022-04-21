@@ -25,8 +25,10 @@
 
 package at.bestsolution.quak;
 
+import java.util.HashMap;
 import java.util.regex.Pattern;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -42,6 +44,20 @@ public class QuakSecurityValidator {
 	
 	@Inject
 	QuakConfigurationController confController;
+	
+	/**
+	 * Credential map containing username, password.
+	 */
+	private HashMap<String, String> mapCredentials;
+	
+	/**
+	 * Initializes QuakSecurityValidator instance.
+	 */
+	@PostConstruct
+	public void initialize() {
+		mapCredentials = new HashMap<>();
+		confController.getUsers().stream().forEach( u -> mapCredentials.put( u.username(), u.password() ) );
+	}
 	
 	/**
 	 * Searches through configuration for a matching repository permission for a given user.
@@ -63,6 +79,6 @@ public class QuakSecurityValidator {
 	 * @return true if a valid username and password is given, false if not.
 	 */
 	public boolean isValidUsernamePassword(String username, String password) {
-		 return confController.getUsers().stream().anyMatch( ( t -> t.username().equals( username ) && BCrypt.checkPw( password, t.password() ) ) );
+		 return ( mapCredentials.containsKey( username ) && BCrypt.checkPw( password, mapCredentials.get( username ) ) );
 	}
 }
