@@ -54,14 +54,14 @@ public class QuakTestProfileAuthorization extends QuakTestProfile {
     	testConfigurations.put( "quak.users[1].username", USERNAME_ADMIN );
     	testConfigurations.put( "quak.users[1].password", GOOD_PASSWORD_HASH );
     	// Insert Permissions
-    	testConfigurations.put( "quak.permissions[1].username", GOOD_USERNAME );
-    	testConfigurations.put( "quak.permissions[1].repository-name", REPOSITORY_NAME_READ_ONLY );
-    	testConfigurations.put( "quak.permissions[1].paths[0]", PATH_REGEX_MATCH_ALL );
-    	testConfigurations.put( "quak.permissions[1].is-write", READ_PERMISSION );
-    	testConfigurations.put( "quak.permissions[2].username", USERNAME_ADMIN );
-    	testConfigurations.put( "quak.permissions[2].repository-name", REPOSITORY_NAME_READ_ONLY );
-    	testConfigurations.put( "quak.permissions[2].paths[0]", PATH_REGEX_MATCH_ALL );
-    	testConfigurations.put( "quak.permissions[2].is-write", WRITE_PERMISSION );
+    	testConfigurations.put( "quak.user-permissions[1].username", GOOD_USERNAME );
+    	testConfigurations.put( "quak.user-permissions[1].repository-name", REPOSITORY_NAME_READ_ONLY );
+    	testConfigurations.put( "quak.user-permissions[1].paths[0]", PATH_REGEX_MATCH_ALL );
+    	testConfigurations.put( "quak.user-permissions[1].is-write", READ_PERMISSION );
+    	testConfigurations.put( "quak.user-permissions[2].username", USERNAME_ADMIN );
+    	testConfigurations.put( "quak.user-permissions[2].repository-name", REPOSITORY_NAME_READ_ONLY );
+    	testConfigurations.put( "quak.user-permissions[2].paths[0]", PATH_REGEX_MATCH_ALL );
+    	testConfigurations.put( "quak.user-permissions[2].is-write", WRITE_PERMISSION );
     	// Insert Repositories
     	testConfigurations.put( "quak.repositories[1].name", REPOSITORY_NAME_UNAUTHORIZED );
     	testConfigurations.put( "quak.repositories[1].storage-path", STORAGE_PATH );

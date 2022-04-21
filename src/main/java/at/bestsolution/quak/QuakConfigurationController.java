@@ -30,7 +30,7 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import at.bestsolution.quak.QuakConfiguration.Permission;
+import at.bestsolution.quak.QuakConfiguration.UserPermission;
 import at.bestsolution.quak.QuakConfiguration.Repository;
 import at.bestsolution.quak.QuakConfiguration.User;
 
@@ -63,10 +63,10 @@ public class QuakConfigurationController {
 	}
 	
 	/**
-	 * Get the list of permissions in configuration.
-	 * @return list of permissions.
+	 * Get the list of user permissions in configuration.
+	 * @return list of user permissions.
 	 */
-	public List<Permission> getPermissions() {
-		return configuration.permissions();
+	public List<UserPermission> getUserPermissions() {
+		return configuration.userPermissions();
 	}
 }

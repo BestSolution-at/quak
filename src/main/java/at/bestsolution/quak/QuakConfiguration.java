@@ -41,7 +41,7 @@ public interface QuakConfiguration {
 	
 	public List<Repository> repositories();
 	public List<User> users();
-	public List<Permission> permissions();
+	public List<UserPermission> userPermissions();
 	
 	/**
 	 * Represents a repository configuration.
@@ -71,7 +71,7 @@ public interface QuakConfiguration {
 	 * Represents a quak user permission.
 	 *
 	 */
-	public interface Permission {
+	public interface UserPermission {
 		public String username();
 		public String repositoryName();
 		public List<String> paths();
