@@ -40,6 +40,13 @@ public class QuakUserAuthorization {
 	private boolean isWrite;
 	private Pattern pathPattern;
 	
+	/**
+	 * Constructs a user authorization definition instance.
+	 * @param username of user.
+	 * @param repositoryName of repository.
+	 * @param isWrite true if write permission false if read permission.
+	 * @param pathPattern pattern for paths which allow this authorization.
+	 */
 	public QuakUserAuthorization(String username, String repositoryName, boolean isWrite, Pattern pathPattern) {
 		setUsername( username );
 		setRepositoryName( repositoryName );
