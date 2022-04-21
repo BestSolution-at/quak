@@ -26,7 +26,6 @@
 package at.bestsolution.quak;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -69,15 +68,5 @@ public class QuakConfigurationController {
 	 */
 	public List<Permission> getPermissions() {
 		return configuration.permissions();
-	}
-	
-	/**
-	 * Get permissions a user has on a specific repository.
-	 * @param username of user.
-	 * @param repositoryName of repository.
-	 * @return list of permissions.
-	 */
-	public List<Permission> getPermissionsOfUserForRepository(String username, String repositoryName) {
-		return configuration.permissions().stream().filter( ( p -> p.username().equals( username ) && p.repositoryName().equals( repositoryName ) ) ).collect( Collectors.toList() );
 	}
 }

@@ -25,7 +25,9 @@
 
 package at.bestsolution.quak;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
@@ -33,6 +35,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.apache.directory.api.ldap.model.password.BCrypt;
+import org.jboss.logging.Logger;
 
 /**
  * Validator class for credentials and permissions of quak users.
@@ -45,18 +48,30 @@ public class QuakSecurityValidator {
 	@Inject
 	QuakConfigurationController confController;
 	
+	private static final Logger LOG = Logger.getLogger( QuakSecurityValidator.class );
+	
 	/**
 	 * Credential map containing username, password.
 	 */
-	private HashMap<String, String> mapCredentials;
+	private HashMap<String, String> credentialsMap;
+	
+	/**
+	 * List of user authorizations given for repositories and paths
+	 */
+	private List<QuakUserAuthorization> userAuthorizationList;
 	
 	/**
 	 * Initializes QuakSecurityValidator instance.
 	 */
 	@PostConstruct
 	public void initialize() {
-		mapCredentials = new HashMap<>();
-		confController.getUsers().stream().forEach( u -> mapCredentials.put( u.username(), u.password() ) );
+		credentialsMap = new HashMap<>();
+		confController.getUsers().stream().forEach( u -> credentialsMap.put( u.username(), u.password() ) );
+
+		userAuthorizationList = new ArrayList<>();
+		confController.getPermissions().forEach( pe -> pe.paths().
+				forEach( pa -> userAuthorizationList.add( new QuakUserAuthorization( pe.username(), pe.repositoryName(), pe.isWrite(), Pattern.compile( pa, Pattern.CASE_INSENSITIVE ) ) ) ) );
+		LOG.info( "QuakSecurityValidator is initialized." );
 	}
 	
 	/**
@@ -68,8 +83,8 @@ public class QuakSecurityValidator {
 	 * @return true if authorized, false if not.
 	 */
 	public boolean isUserAuthorized( String username, String repositoryName, String path, boolean isWriteRequest ) {
-		return confController.getPermissionsOfUserForRepository( username, repositoryName ).stream().anyMatch( pe -> pe.paths().stream()
-				.anyMatch( pa -> Pattern.compile( pa, Pattern.CASE_INSENSITIVE ).matcher( path ).matches() && ( !isWriteRequest || pe.isWrite() ) ) );
+		return userAuthorizationList.stream().anyMatch( u -> u.getUsername().equals( username ) && u.getRepositoryName().equals( repositoryName ) 
+				&& ( !isWriteRequest || u.isWrite() ) && u.getPathPattern().matcher( path ).matches() );
 	}
 	
 	/**
@@ -79,6 +94,6 @@ public class QuakSecurityValidator {
 	 * @return true if a valid username and password is given, false if not.
 	 */
 	public boolean isValidUsernamePassword(String username, String password) {
-		 return ( mapCredentials.containsKey( username ) && BCrypt.checkPw( password, mapCredentials.get( username ) ) );
+		 return ( credentialsMap.containsKey( username ) && BCrypt.checkPw( password, credentialsMap.get( username ) ) );
 	}
 }
