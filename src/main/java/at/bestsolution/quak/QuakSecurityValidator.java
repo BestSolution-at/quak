@@ -28,7 +28,6 @@ package at.bestsolution.quak;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -56,9 +55,9 @@ public class QuakSecurityValidator {
 	private HashMap<String, String> credentials;
 	
 	/**
-	 * List of user authorizations given for repositories and paths
+	 * List of quak repositories
 	 */
-	private List<QuakUserAuthorization> userAuthorizations;
+	private List<QuakRepository> repositories;
 	
 	/**
 	 * Initializes QuakSecurityValidator instance.
@@ -66,35 +65,42 @@ public class QuakSecurityValidator {
 	@PostConstruct
 	public void initialize() {
 		credentials = new HashMap<>();
-		userAuthorizations = new ArrayList<>();
+		repositories = new ArrayList<>();
 		
 		confController.getUsers().stream().forEach( u -> credentials.put( u.username(), u.password() ) );
-		confController.getUserPermissions().forEach( pe -> pe.paths().
-				forEach( pa -> userAuthorizations.add( new QuakUserAuthorization( pe.username(), pe.repositoryName(), pe.isWrite(), Pattern.compile( pa, Pattern.CASE_INSENSITIVE ) ) ) ) );
+		confController.getRepositories().forEach( re -> repositories.add( new QuakRepository( re.name(), re.baseUrl(), re.isPrivate(), re.allowRedeploy(), re.storagePath() ) ) );
+		confController.getUserPermissions().forEach( pe ->  repositories.stream().filter( re -> pe.repositoryName().equals( re.getName() ) ).findFirst().get().
+				getUserPermissions().add( new QuakUserPermission( pe.username(), pe.isWrite(), pe.paths() ) ) );
 		
 		LOG.info( "QuakSecurityValidator is initialized." );
 	}
 	
 	/**
-	 * Searches through configuration for a matching repository permission for a given user.
-	 * @param username of the authorization request.
-	 * @param repositoryName of the repository which authorization requested for.
-	 * @param path of the request which authorization requested for.
-	 * @param isWriteRequest true if a write request, false if not. 
+	 * Searches through configuration for a matching repository permission for the user in given request.
+	 * @param request to be validated if it's user is authorized to given path. 
 	 * @return true if authorized, false if not.
 	 */
-	public boolean isUserAuthorized( String username, String repositoryName, String path, boolean isWriteRequest ) {
-		return userAuthorizations.stream().anyMatch( u -> u.getUsername().equals( username ) && u.getRepositoryName().equals( repositoryName ) 
-				&& ( !isWriteRequest || u.isWrite() ) && u.getPathPattern().matcher( path ).matches() );
+	public boolean isUserAuthorized( QuakRequest request ) {
+		return getQuakRepository( request.getPath() ).getUserPermissions().stream().anyMatch( p -> p.getUsername().equals( request.getUsername() ) 
+				&& ( !request.isWrite() || p.isWrite() ) && p.getPatterns().stream().anyMatch( pa -> pa.matcher( request.getPath() ).matches() ) );
 	}
 	
 	/**
-	 * Searches through configuration for a matching username and password. For passwords, BCrypt hash algorithm is used.
-	 * @param username of the user.
-	 * @param password of the user, hashed with BCrypt.
-	 * @return true if a valid username and password is given, false if not.
+	 * Searches through configuration for a matching username and password for a given request. For passwords, BCrypt hash algorithm is used.
+	 * @param request to be checked if valid user credentials are given.
+	 * @return true if username and password is valid, false if not.
 	 */
-	public boolean isValidUsernamePassword(String username, String password) {
-		 return ( credentials.containsKey( username ) && BCrypt.checkPw( password, credentials.get( username ) ) );
+	public boolean isUserAuthenticated( QuakRequest request ) {
+		 return ( credentials.containsKey( request.getUsername() ) && BCrypt.checkPw( request.getPassword(), credentials.get( request.getUsername() ) ) );
+	}
+
+	
+	/**
+	 * Searches for a quak repository which has a base URL matching with beginning of the path.
+	 * @param path URL path of the upload request.
+	 * @return Repository a quak repository or null in case of no match.
+	 */
+	public QuakRepository getQuakRepository( String path ) {
+		return repositories.stream().filter( r -> path.startsWith( r.getBaseUrl() ) ).findFirst().orElse( null );
 	}
 }

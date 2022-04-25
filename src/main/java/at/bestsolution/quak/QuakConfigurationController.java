@@ -55,6 +55,14 @@ public class QuakConfigurationController {
 	}
 	
 	/**
+	 * Get the list of repositories defined in configuration.
+	 * @return list of repositories.
+	 */
+	public List<Repository> getRepositories() {
+		return configuration.repositories();
+	}
+	
+	/**
 	 * Get the list of users defined in configuration.
 	 * @return list of users.
 	 */

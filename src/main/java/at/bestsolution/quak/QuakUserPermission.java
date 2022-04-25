@@ -1,9 +1,9 @@
 /*
  * ----------------------------------------------------------------
- * Original File Name: QuakUserAuthorization.java
+ * Original File Name: QuakUserPermission.java
  * Creation Date:      21.04.2022
- * Description: Represents a read or write authorization given to a user 
- * on a repository.     
+ * Description:  Represents a read or write permissions given to a quak user 
+ * for given paths in regular expressions.
  * ----------------------------------------------------------------
 
  * ----------------------------------------------------------------
@@ -26,32 +26,34 @@
 
 package at.bestsolution.quak;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * Represents a read or write authorization given to a user on a repository. Paths are to be restricted by set pattern.
+ * Represents a read or write permissions given to a quak user for given paths in regular expressions.
  * 
  * @author kerim.yeniduenya@bestsolution.com
  */
-public class QuakUserAuthorization {
+public class QuakUserPermission {
 	
 	private String username;
-	private String repositoryName;
 	private boolean isWrite;
-	private Pattern pathPattern;
+	private List<String> paths;
+	private List<Pattern> patterns;
 	
 	/**
-	 * Constructs a user authorization definition instance.
+	 * Constructs a user permission definition instance.
 	 * @param username of user.
-	 * @param repositoryName of repository.
 	 * @param isWrite true if write permission false if read permission.
-	 * @param pathPattern pattern for paths which allow this authorization.
+	 * @param paths in regular expressions which defines authorized paths.
 	 */
-	public QuakUserAuthorization(String username, String repositoryName, boolean isWrite, Pattern pathPattern) {
+	public QuakUserPermission(String username, boolean isWrite, List<String> paths ) {
 		setUsername( username );
-		setRepositoryName( repositoryName );
 		setWrite( isWrite );
-		setPathPattern( pathPattern );
+		setPaths( paths );
+		patterns = new ArrayList<>();
+		paths.stream().forEach( pa -> patterns.add( Pattern.compile( pa, Pattern.CASE_INSENSITIVE ) ) );
 	}
 
 	public String getUsername() {
@@ -62,14 +64,6 @@ public class QuakUserAuthorization {
 		this.username = username;
 	}
 
-	public String getRepositoryName() {
-		return repositoryName;
-	}
-
-	public void setRepositoryName( String repositoryName ) {
-		this.repositoryName = repositoryName;
-	}
-
 	public boolean isWrite() {
 		return isWrite;
 	}
@@ -78,11 +72,19 @@ public class QuakUserAuthorization {
 		this.isWrite = isWrite;
 	}
 
-	public Pattern getPathPattern() {
-		return pathPattern;
+	public List<String> getPaths() {
+		return paths;
 	}
 
-	public void setPathPattern( Pattern pathPattern ) {
-		this.pathPattern = pathPattern;
+	public void setPaths( List<String> paths ) {
+		this.paths = paths;
+	}
+
+	public List<Pattern> getPatterns() {
+		return patterns;
+	}
+
+	public void setPatterns( List<Pattern> patterns ) {
+		this.patterns = patterns;
 	}
 }

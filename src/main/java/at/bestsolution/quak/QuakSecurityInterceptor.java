@@ -35,14 +35,12 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
 import org.jboss.logging.Logger;
 
-import at.bestsolution.quak.QuakConfiguration.Repository;
 import io.netty.handler.codec.http.HttpMethod;
 
 /**
@@ -53,9 +51,6 @@ import io.netty.handler.codec.http.HttpMethod;
 @Provider
 @PreMatching
 public class QuakSecurityInterceptor implements ContainerRequestFilter {
-	
-	@Inject
-	QuakConfigurationController confController;
 	
 	@Inject
 	QuakSecurityValidator securityValidator;
@@ -74,31 +69,28 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	 */
 	@Override
 	public void filter( ContainerRequestContext context ) {
-		LOG.debugf( "Verifying the credentials for request: %s", context.getUriInfo().getRequestUri().toString() );
+		LOG.debugf( "Request received at: %s", context.getUriInfo().getRequestUri().toString() );
+		final List<String> authorization = context.getHeaders().get( AUTHORIZATION_PROPERTY );
+		final boolean isWrite = context.getMethod().equals( HttpMethod.PUT.toString() ) || context.getMethod().equals( HttpMethod.POST.toString() );
+		final QuakRepository repository = securityValidator.getQuakRepository( urlInfo.getPath() );
+		final Response responseUnauthorized = Response.status( Response.Status.UNAUTHORIZED ).build();
 		
-		Repository repository = confController.getRepository( urlInfo.getPath() );
-		boolean isWriteMethod = context.getMethod().equals( HttpMethod.PUT.toString() ) || context.getMethod().equals( HttpMethod.POST.toString() );
-		
-		if ( repository != null && ( repository.isPrivate() || isWriteMethod ) ) {
-			MultivaluedMap<String, String> headers = context.getHeaders();
-			final List<String> authorization = headers.get( AUTHORIZATION_PROPERTY );
-			Response responseUnauthorized = Response.status( Response.Status.UNAUTHORIZED ).build();
-			
+		if ( repository != null && ( repository.isPrivate() || isWrite ) ) {
 			if ( authorization == null || authorization.isEmpty() ) {
 				LOG.debugf( "No credentials given for authentication." );
 				responseUnauthorized.getHeaders().add( AUTHENTICATION_RESPONSE_HEADER, AUTHENTICATION_SCHEME );
 				context.abortWith( responseUnauthorized );
-			} 
+			}
 			else {
 				final String encodedUserPassword = authorization.get( 0 ).replaceFirst( AUTHENTICATION_SCHEME + " ", "" );
-				String usernameAndPassword = new String( Base64.getDecoder().decode( encodedUserPassword ) );
+				final String usernameAndPassword = new String( Base64.getDecoder().decode( encodedUserPassword ) );
 				final StringTokenizer tokenizer = new StringTokenizer( usernameAndPassword, ":" );
 				final String username = tokenizer.nextToken();
 				final String password = tokenizer.nextToken();
-				
-				try {		    
-					LOG.debugf( "Verifying the user: %s", username );
-					if ( !securityValidator.isValidUsernamePassword( username, password ) || !securityValidator.isUserAuthorized( username, repository.name(), urlInfo.getPath(), isWriteMethod ) ) {
+				final QuakRequest request = new QuakRequest( urlInfo.getPath(), username, password, isWrite );
+				try {
+					LOG.debugf( "Validating request for user: %s", username );
+					if ( !securityValidator.isUserAuthenticated( request ) || !securityValidator.isUserAuthorized( request ) ) {
 						context.abortWith( responseUnauthorized );
 					}
 				} 
