@@ -44,7 +44,7 @@ import org.jboss.logging.Logger;
 import io.netty.handler.codec.http.HttpMethod;
 
 /**
- * Security Interceptor to verify the access permissions for a user.
+ * Security Interceptor to verify the repository access for a user.
  * 
  * @author: kerim.yeniduenya@bestsolution.at
  */
@@ -64,8 +64,9 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	private static final String AUTHENTICATION_RESPONSE_HEADER = "WWW-Authenticate";
 
 	/**
-	 * Filters out the unauthorized access to quak service or path.
-	 * @param context is current context of the request.
+	 * Filters out the unauthorized access to quak service. Valid authentication must be provided if repository of requested URL is a private one or request is a
+	 * write request sent by a PUT or POST. If requirements are not met than request is filtered out by this method.
+	 * @param context is context of request. It must include authorization headers if required.
 	 */
 	@Override
 	public void filter( ContainerRequestContext context ) {
