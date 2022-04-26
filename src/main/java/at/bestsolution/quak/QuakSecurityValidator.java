@@ -80,7 +80,7 @@ public class QuakSecurityValidator {
 	 * @param request to be validated if it's user is authorized to given path. 
 	 * @return true if authorized, false if not.
 	 */
-	public boolean isUserAuthorized( QuakRequest request ) {
+	public boolean isUserAuthorized( QuakAuthorizationRequest request ) {
 		return getQuakRepository( request.getUrlPath() ).getUserPermissions().stream().anyMatch( p -> p.getUsername().equals( request.getUsername() ) 
 				&& ( !request.isWrite() || p.isWrite() ) && p.getUrlPathPatterns().stream().anyMatch( pa -> pa.matcher( request.getUrlPath() ).matches() ) );
 	}
@@ -90,7 +90,7 @@ public class QuakSecurityValidator {
 	 * @param request to be checked if valid user credentials are given.
 	 * @return true if username and password is valid, false if not.
 	 */
-	public boolean isUserAuthenticated( QuakRequest request ) {
+	public boolean isUserAuthenticated( QuakAuthorizationRequest request ) {
 		 return ( credentials.containsKey( request.getUsername() ) && BCrypt.checkPw( request.getPassword(), credentials.get( request.getUsername() ) ) );
 	}
 

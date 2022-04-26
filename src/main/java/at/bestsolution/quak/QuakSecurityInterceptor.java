@@ -87,7 +87,7 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 				final StringTokenizer tokenizer = new StringTokenizer( usernameAndPassword, ":" );
 				final String username = tokenizer.nextToken();
 				final String password = tokenizer.nextToken();
-				final QuakRequest request = new QuakRequest( urlInfo.getPath(), username, password, isWrite );
+				final QuakAuthorizationRequest request = new QuakAuthorizationRequest( urlInfo.getPath(), username, password, isWrite );
 				try {
 					LOG.debugf( "Validating request for user: %s", username );
 					if ( !securityValidator.isUserAuthenticated( request ) || !securityValidator.isUserAuthorized( request ) ) {

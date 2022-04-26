@@ -30,7 +30,7 @@ package at.bestsolution.quak;
  * 
  * @author kerim.yeniduenya@bestsolution.com
  */
-public class QuakRequest {
+public class QuakAuthorizationRequest {
 	
 	private String urlPath;
 	private String username;
@@ -44,7 +44,7 @@ public class QuakRequest {
 	 * @param password of requester.
 	 * @param isWrite true if is a write operation, false if read.
 	 */
-	public QuakRequest(String urlPath, String username, String password, boolean isWrite) {
+	public QuakAuthorizationRequest(String urlPath, String username, String password, boolean isWrite) {
 		setUrlPath( urlPath );
 		setUsername( username );
 		setPassword( password );
