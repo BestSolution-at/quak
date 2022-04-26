@@ -33,28 +33,27 @@ import java.util.StringTokenizer;
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
-import org.apache.directory.api.ldap.model.password.BCrypt;
 import org.jboss.logging.Logger;
 
-import at.bestsolution.quak.QuakConfiguration.Repository;
 import io.netty.handler.codec.http.HttpMethod;
 
 /**
- * Security Interceptor to verify the access permissions for a user.
+ * Security Interceptor to verify the repository access for a user.
  * 
  * @author: kerim.yeniduenya@bestsolution.at
  */
 @Provider
+@PreMatching
 public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	
 	@Inject
-	QuakConfigurationController confController;
+	QuakSecurityValidator securityValidator;
 	
 	@Context
 	private UriInfo urlInfo;
@@ -65,36 +64,34 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	private static final String AUTHENTICATION_RESPONSE_HEADER = "WWW-Authenticate";
 
 	/**
-	 * Filters out the unauthorized access to quak service or path.
-	 * @param context is current context of the request.
+	 * Filters out the unauthorized access to quak service. Valid authentication must be provided if repository of requested URL is a private one or request is a
+	 * write request sent by a PUT or POST. If requirements are not met than request is filtered out by this method.
+	 * @param context is context of request. It must include authorization headers if required.
 	 */
 	@Override
 	public void filter( ContainerRequestContext context ) {
-		LOG.debugf( "Verifying the credentials for request: %s", context.getUriInfo().getRequestUri().toString() );
+		LOG.debugf( "Request received at: %s", context.getUriInfo().getRequestUri().toString() );
+		final List<String> authorization = context.getHeaders().get( AUTHORIZATION_PROPERTY );
+		final boolean isWrite = context.getMethod().equals( HttpMethod.PUT.toString() ) || context.getMethod().equals( HttpMethod.POST.toString() );
+		final QuakRepository repository = securityValidator.getQuakRepository( urlInfo.getPath() );
+		final Response responseUnauthorized = Response.status( Response.Status.UNAUTHORIZED ).build();
 		
-		Repository repository = confController.getRepository( urlInfo.getPath() );
-		boolean isWriteOperation = context.getMethod().equals( HttpMethod.PUT.toString() ) || context.getMethod().equals( HttpMethod.POST.toString() );
-		
-		if ( repository != null && ( repository.isPrivate() || isWriteOperation ) ) {
-			MultivaluedMap<String, String> headers = context.getHeaders();
-			final List<String> authorization = headers.get( AUTHORIZATION_PROPERTY );
-			Response responseUnauthorized = Response.status( Response.Status.UNAUTHORIZED ).build();
-			
+		if ( repository != null && ( repository.isPrivate() || isWrite ) ) {
 			if ( authorization == null || authorization.isEmpty() ) {
 				LOG.debugf( "No credentials given for authentication." );
 				responseUnauthorized.getHeaders().add( AUTHENTICATION_RESPONSE_HEADER, AUTHENTICATION_SCHEME );
 				context.abortWith( responseUnauthorized );
-			} 
+			}
 			else {
 				final String encodedUserPassword = authorization.get( 0 ).replaceFirst( AUTHENTICATION_SCHEME + " ", "" );
-				String usernameAndPassword = new String( Base64.getDecoder().decode( encodedUserPassword ) );
+				final String usernameAndPassword = new String( Base64.getDecoder().decode( encodedUserPassword ) );
 				final StringTokenizer tokenizer = new StringTokenizer( usernameAndPassword, ":" );
 				final String username = tokenizer.nextToken();
 				final String password = tokenizer.nextToken();
-				
-				try {		    
-					LOG.debugf( "Verifying the user: %s", username );
-					if ( !isValidUsernamePassword( username, password ) ) {
+				final QuakAuthorizationRequest request = new QuakAuthorizationRequest( urlInfo.getPath(), username, password, isWrite );
+				try {
+					LOG.debugf( "Validating request for user: %s", username );
+					if ( !securityValidator.isUserAuthenticated( request ) || !securityValidator.isUserAuthorized( request ) ) {
 						context.abortWith( responseUnauthorized );
 					}
 				} 
@@ -104,16 +101,5 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 				}
 			}
 		}
-	}
-	
-	/**
-	 * Searches through configuration for a matching username and password. For passwords, BCrypt hash algorithm is used.
-	 * 
-	 * @param username of the user.
-	 * @param password of the user, hashed with BCrypt.
-	 * @return
-	 */
-	private boolean isValidUsernamePassword(String username, String password) {
-		 return confController.getUsers().stream().anyMatch( ( t -> t.username().equals( username ) && BCrypt.checkPw( password, t.password() ) ) );
 	}
 }

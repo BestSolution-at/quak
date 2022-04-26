@@ -30,6 +30,7 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import at.bestsolution.quak.QuakConfiguration.UserPermission;
 import at.bestsolution.quak.QuakConfiguration.Repository;
 import at.bestsolution.quak.QuakConfiguration.User;
 
@@ -49,15 +50,31 @@ public class QuakConfigurationController {
 	 * @param path URL path of the upload request.
 	 * @return Repository a repository configuration or null in case of no match.
 	 */
-	public Repository getRepository(String path) {
-		return configuration.repositories().stream().filter( r -> path.startsWith( r.baseUrl() ) ).findFirst().orElse( null );
+	public Repository getRepository(String urlPath) {
+		return configuration.repositories().stream().filter( r -> urlPath.startsWith( r.baseUrl() ) ).findFirst().orElse( null );
+	}
+	
+	/**
+	 * Get the list of repositories defined in configuration.
+	 * @return list of repositories.
+	 */
+	public List<Repository> getRepositories() {
+		return configuration.repositories();
 	}
 	
 	/**
 	 * Get the list of users defined in configuration.
-	 * @return list of users
+	 * @return list of users.
 	 */
 	public List<User> getUsers() {
 		return configuration.users();
+	}
+	
+	/**
+	 * Get the list of user permissions in configuration.
+	 * @return list of user permissions.
+	 */
+	public List<UserPermission> getUserPermissions() {
+		return configuration.userPermissions();
 	}
 }

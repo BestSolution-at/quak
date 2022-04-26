@@ -55,7 +55,6 @@ import javax.ws.rs.core.UriInfo;
 
 import org.jboss.logging.Logger;
 
-import at.bestsolution.quak.QuakConfiguration.Repository;
 import io.quarkus.qute.Template;
 
 /**
@@ -65,7 +64,7 @@ import io.quarkus.qute.Template;
 public class QuakResource {
 	
 	@Inject
-	QuakConfigurationController confController;
+	QuakSecurityValidator securityValidator;
 	
 	@Context
 	private UriInfo urlInfo;
@@ -97,8 +96,8 @@ public class QuakResource {
 	 * @param url current URL path.
 	 * @return path for file or null if no match.
 	 */
-	private java.nio.file.Path resolveFileSystemPath(Repository repository, String url) {
-		int length = repository.baseUrl().length();
+	private java.nio.file.Path resolveFileSystemPath(QuakRepository repository, String url) {
+		int length = repository.getBaseUrl().length();
 		String relative = url.substring( length );
 		
 		if ( relative.length() > 0 && relative.charAt( 0 ) == '/' ) {
@@ -106,10 +105,10 @@ public class QuakResource {
 		}
 		
 		if ( relative.isEmpty() ) {
-			return repository.storagePath();
+			return repository.getStoragePath();
 		}
 		
-		return repository.storagePath().resolve( relative ).normalize();
+		return repository.getStoragePath().resolve( relative ).normalize();
 	}
 	
 	private String getFormattedFileSize(long size) {
@@ -164,7 +163,7 @@ public class QuakResource {
 		LOG.debugf( "Get request received with: %s", urlInfo.getRequestUri() );
 		String path = urlInfo.getPath();
 		
-		Repository repository = confController.getRepository( path );
+		QuakRepository repository = securityValidator.getQuakRepository( path );
 		if ( repository == null ) {
 			LOG.errorf( "No repository found for path: %s", path );
 			return Response.status( Status.NOT_FOUND ).build();
@@ -179,7 +178,7 @@ public class QuakResource {
 		
 		if ( Files.isDirectory( file ) ) {
 			List<DirectoryItem> items = new ArrayList<>();
-			if ( !repository.storagePath().equals( file ) ) {
+			if ( !repository.getStoragePath().equals( file ) ) {
 				items.add( new DirectoryItem( "drive_folder_upload", "..", "..", "-", getLastModified( file ) ) );		
 			}
 			try {
@@ -226,7 +225,7 @@ public class QuakResource {
 		LOG.infof( "Upload request received with: %s", urlInfo.getRequestUri() );
 		String path = urlInfo.getPath();
 		
-		Repository repository = confController.getRepository( path );
+		QuakRepository repository = securityValidator.getQuakRepository( path );
 		if ( repository == null ) {
 			LOG.errorf( "No repository found for path: %s", path );
 			return Response.status( Status.NOT_FOUND ).build();
@@ -245,8 +244,8 @@ public class QuakResource {
 		try {
 			Files.createDirectories( file.getParent() );
 			if ( Files.exists( file ) ) {
-				if ( !repository.allowRedeploy() && !file.getFileName().toString().startsWith( "maven-metadata.xml" ) ) {
-					LOG.infof( "Redeploy for %s is not allowed. Artifact (%s) is NOT uploaded.", repository.name(), file.getFileName() );
+				if ( !repository.isAllowRedeploy() && !file.getFileName().toString().startsWith( "maven-metadata.xml" ) ) {
+					LOG.infof( "Redeploy for %s is not allowed. Artifact (%s) is NOT uploaded.", repository.getName(), file.getFileName() );
 					return Response.status( Status.METHOD_NOT_ALLOWED ).entity( "Redeployment not allowed" ).build();
 				}
 				Files.copy( messageBody, file, StandardCopyOption.REPLACE_EXISTING );	
@@ -261,7 +260,7 @@ public class QuakResource {
 			return Response.serverError().build();
 		}
 		
-		LOG.infof( "Artifact (%s) is successfully uploaded for repository: %s", file.getFileName(), repository.name() );
+		LOG.infof( "Artifact (%s) is successfully uploaded for repository: %s", file.getFileName(), repository.getName() );
 		return Response.ok().build();
 	}
 	
