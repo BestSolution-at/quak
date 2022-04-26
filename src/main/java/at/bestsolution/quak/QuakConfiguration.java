@@ -74,7 +74,7 @@ public interface QuakConfiguration {
 	public interface UserPermission {
 		public String username();
 		public String repositoryName();
-		public List<String> paths();
+		public List<String> urlPaths();
 		
 		@WithDefault("false")
 		public boolean isWrite();

@@ -50,8 +50,8 @@ public class QuakConfigurationController {
 	 * @param path URL path of the upload request.
 	 * @return Repository a repository configuration or null in case of no match.
 	 */
-	public Repository getRepository(String path) {
-		return configuration.repositories().stream().filter( r -> path.startsWith( r.baseUrl() ) ).findFirst().orElse( null );
+	public Repository getRepository(String urlPath) {
+		return configuration.repositories().stream().filter( r -> urlPath.startsWith( r.baseUrl() ) ).findFirst().orElse( null );
 	}
 	
 	/**

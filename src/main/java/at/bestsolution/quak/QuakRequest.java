@@ -32,31 +32,31 @@ package at.bestsolution.quak;
  */
 public class QuakRequest {
 	
-	private String path;
+	private String urlPath;
 	private String username;
 	private String password;
 	private boolean isWrite;
 	
 	/**
 	 * Constructs a quak request instance.
-	 * @param path of request.
+	 * @param urlPath of request.
 	 * @param username of requester.
 	 * @param password of requester.
 	 * @param isWrite true if is a write operation, false if read.
 	 */
-	public QuakRequest(String path, String username, String password, boolean isWrite) {
-		setPath( path );
+	public QuakRequest(String urlPath, String username, String password, boolean isWrite) {
+		setUrlPath( urlPath );
 		setUsername( username );
 		setPassword( password );
 		setWrite( isWrite );
 	}
 	
-	public String getPath() {
-		return path;
+	public String getUrlPath() {
+		return urlPath;
 	}
 	
-	public void setPath( String path ) {
-		this.path = path;
+	public void setUrlPath( String urlPath ) {
+		this.urlPath = urlPath;
 	}
 	
 	public String getUsername() {

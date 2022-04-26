@@ -69,7 +69,7 @@ public class QuakTestProfile implements QuarkusTestProfile {
     	testConfigurations.put( "quarkus.http.limits.max-body-size", MAX_BODY_SIZE );
     	testConfigurations.put( "quak.user-permissions[0].username", GOOD_USERNAME );
     	testConfigurations.put( "quak.user-permissions[0].repository-name", REPOSITORY_NAME );
-    	testConfigurations.put( "quak.user-permissions[0].paths[0]", PATH_REGEX );
+    	testConfigurations.put( "quak.user-permissions[0].url-paths[0]", PATH_REGEX );
     	testConfigurations.put( "quak.user-permissions[0].is-write", WRITE_PERMISSION );
         return testConfigurations;
     }

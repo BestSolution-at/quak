@@ -39,21 +39,19 @@ public class QuakUserPermission {
 	
 	private String username;
 	private boolean isWrite;
-	private List<String> paths;
-	private List<Pattern> patterns;
+	private List<Pattern> urlPathPatterns;
 	
 	/**
 	 * Constructs a user permission definition instance.
 	 * @param username of user.
 	 * @param isWrite true if write permission false if read permission.
-	 * @param paths in regular expressions which defines authorized paths.
+	 * @param urlPathsInRegex is paths in regular expressions which defines authorized paths.
 	 */
-	public QuakUserPermission(String username, boolean isWrite, List<String> paths ) {
+	public QuakUserPermission(String username, boolean isWrite, List<String> urlPathsInRegex ) {
 		setUsername( username );
 		setWrite( isWrite );
-		setPaths( paths );
-		patterns = new ArrayList<>();
-		paths.stream().forEach( pa -> patterns.add( Pattern.compile( pa, Pattern.CASE_INSENSITIVE ) ) );
+		urlPathPatterns = new ArrayList<>();
+		urlPathsInRegex.stream().forEach( pa -> urlPathPatterns.add( Pattern.compile( pa, Pattern.CASE_INSENSITIVE ) ) );
 	}
 
 	public String getUsername() {
@@ -72,19 +70,11 @@ public class QuakUserPermission {
 		this.isWrite = isWrite;
 	}
 
-	public List<String> getPaths() {
-		return paths;
+	public List<Pattern> getUrlPathPatterns() {
+		return urlPathPatterns;
 	}
 
-	public void setPaths( List<String> paths ) {
-		this.paths = paths;
-	}
-
-	public List<Pattern> getPatterns() {
-		return patterns;
-	}
-
-	public void setPatterns( List<Pattern> patterns ) {
-		this.patterns = patterns;
+	public void setUrlPathPatterns( List<Pattern> urlPathPatterns ) {
+		this.urlPathPatterns = urlPathPatterns;
 	}
 }
