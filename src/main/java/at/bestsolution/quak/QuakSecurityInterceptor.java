@@ -93,10 +93,10 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 				final Response responseUnauthorized = Response.status( Response.Status.UNAUTHORIZED ).build();
 				responseUnauthorized.getHeaders().add( AUTHENTICATION_RESPONSE_HEADER, AUTHENTICATION_SCHEME_BASIC );
 				context.abortWith( responseUnauthorized );
-			}
+			} 
 			else if ( securityContext.getAuthenticationScheme().equals( AUTHENTICATION_SCHEME_BEARER ) ) {
 				request.setUsername( securityContext.getUserPrincipal().getName() );
-				if ( !isOpenAuthValid( securityContext ) ) {
+				if ( !isOpenAuthValid( securityContext ) || !securityValidator.isUserAuthorized( request ) ) {
 					context.abortWith( Response.status( Response.Status.UNAUTHORIZED ).build() );
 				}
 			}
@@ -106,13 +106,9 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 				final StringTokenizer tokenizer = new StringTokenizer( usernameAndPassword, ":" );
 				request.setUsername( tokenizer.nextToken() );
 				request.setPassword( tokenizer.nextToken() );
-				if ( !isBasicAuthValid( request ) ) {
+				if ( !isBasicAuthValid( request ) || !securityValidator.isUserAuthorized( request ) ) {
 					context.abortWith( Response.status( Response.Status.UNAUTHORIZED ).build() );
 				}
-			}
-			LOG.debugf( "Validating authorization for user: %s", request.getUsername() );
-			if ( !securityValidator.isUserAuthorized( request ) ) {
-				context.abortWith( Response.status( Response.Status.UNAUTHORIZED ).build() );
 			}
 		}
 	}
