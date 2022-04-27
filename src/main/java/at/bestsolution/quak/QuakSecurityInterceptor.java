@@ -128,7 +128,7 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	
 	/**
 	 * Validates Basic authentication by checking if given username and password is valid.
-	 * @param request authorization request with credentials.
+	 * @param request quak authorization request with credentials.
 	 * @return true if authorized, false if not.
 	 */
 	private boolean isBasicAuthValid( QuakAuthorizationRequest request ) {
@@ -154,7 +154,8 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	}
 		
 	/**
-	 * Checks if authorization is required or not.
+	 * Checks if authorization is required or not. Authorization is required if request is a write or repository is
+	 * a private one.
 	 * @param request quak authorization request.
 	 * @param repository quak repository to be accessed.
 	 * @return true if authorization must be provided, false if no need for authorization.
