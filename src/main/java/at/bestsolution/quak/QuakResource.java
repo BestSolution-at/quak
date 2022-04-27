@@ -163,12 +163,7 @@ public class QuakResource {
 		LOG.debugf( "Get request received with: %s", urlInfo.getRequestUri() );
 		String path = urlInfo.getPath();
 		
-		QuakRepository repository = securityValidator.getQuakRepository( path );
-		if ( repository == null ) {
-			LOG.errorf( "No repository found for path: %s", path );
-			return Response.status( Status.NOT_FOUND ).build();
-		}
-		
+		QuakRepository repository = securityValidator.getQuakRepository( path );	
 		java.nio.file.Path file = resolveFileSystemPath( repository, path );
 		
 		if ( file == null ) {
@@ -226,11 +221,6 @@ public class QuakResource {
 		String path = urlInfo.getPath();
 		
 		QuakRepository repository = securityValidator.getQuakRepository( path );
-		if ( repository == null ) {
-			LOG.errorf( "No repository found for path: %s", path );
-			return Response.status( Status.NOT_FOUND ).build();
-		}
-		
 		java.nio.file.Path file = resolveFileSystemPath( repository, path );
 		
 		if ( file == null ) {
