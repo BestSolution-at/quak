@@ -37,6 +37,7 @@ import io.quarkus.test.junit.QuarkusTestProfile;
  */
 public class QuakTestProfile implements QuarkusTestProfile {
 	
+	public static final String PUBLIC_KEY_FILE_LOCATION = "/main/resources/publicKey.pem";
 	public static final String PUBLIC_KEY_FILE = "publicKey.pem";
 	public static final String JWT_ISSUER = "https://www.bestsolution.at/quak/test";
 	public static final String GOOD_USERNAME = "user1";
