@@ -96,40 +96,45 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 			} 
 			else if ( securityContext.getAuthenticationScheme().equals( AUTHENTICATION_SCHEME_BEARER ) ) {
 				request.setUsername( securityContext.getUserPrincipal().getName() );
-				if ( !isOpenAuthValid( securityContext ) || !securityValidator.isUserAuthorized( request ) ) {
+				if ( !isUserAuthorizedByBearerAuth( securityContext, request ) ) {
 					context.abortWith( Response.status( Response.Status.UNAUTHORIZED ).build() );
 				}
 			}
-			else { 
+			else if ( securityContext.getAuthenticationScheme().equals( AUTHENTICATION_SCHEME_BASIC ) ) { 
 				final String encodedUserPassword = authorizationHeader.get( 0 ).replaceFirst( AUTHENTICATION_SCHEME_BASIC + " ", "" );
 				final String usernameAndPassword = new String( Base64.getDecoder().decode( encodedUserPassword ) );
 				final StringTokenizer tokenizer = new StringTokenizer( usernameAndPassword, ":" );
 				request.setUsername( tokenizer.nextToken() );
 				request.setPassword( tokenizer.nextToken() );
-				if ( !isBasicAuthValid( request ) || !securityValidator.isUserAuthorized( request ) ) {
+				if ( !isUserAuthorizedByBasicAuth( request ) ) {
 					context.abortWith( Response.status( Response.Status.UNAUTHORIZED ).build() );
 				}
+			} 
+			else {
+				context.abortWith( Response.status( Response.Status.UNAUTHORIZED ).build() );
 			}
 		}
 	}
 	
 	/**
-	 * Validates Bearer authentication by checking if user principal has matching name with name from JWT.
+	 * Checks if user is authorized by bearer token authentication.
 	 * @param securityContext security context of request. 
+	 * @param request quak authorization request.
 	 * @return true if authenticated, false if not.
 	 */
-	private boolean isOpenAuthValid( SecurityContext securityContext ) {
-		return securityContext.getUserPrincipal() != null && securityContext.getUserPrincipal().getName().equals( jwt.getName() );
+	private boolean isUserAuthorizedByBearerAuth( SecurityContext securityContext, QuakAuthorizationRequest request ) {
+		return securityContext.getUserPrincipal() != null && securityContext.getUserPrincipal().getName().equals( jwt.getName() )
+				&& securityValidator.isUserAuthorized( request );
 	}
 	
 	/**
-	 * Validates Basic authentication by checking if given username and password is valid.
+	 * Checks if user is authorized by basic username and password authentication.
 	 * @param request quak authorization request with credentials.
-	 * @return true if authorized, false if not.
+	 * @return true if authorized, false if not. 
 	 */
-	private boolean isBasicAuthValid( QuakAuthorizationRequest request ) {
+	private boolean isUserAuthorizedByBasicAuth( QuakAuthorizationRequest request ) {
 		try {
-			if ( !securityValidator.isUserAuthenticated( request ) ) {
+			if ( !securityValidator.isUserAuthenticated( request ) || !securityValidator.isUserAuthorized( request ) ) {
 				return false;
 			}
 		} 
