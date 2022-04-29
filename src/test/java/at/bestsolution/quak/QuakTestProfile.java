@@ -37,7 +37,7 @@ import io.quarkus.test.junit.QuarkusTestProfile;
  */
 public class QuakTestProfile implements QuarkusTestProfile {
 	
-	public static final String PUBLIC_KEY_FILE_LOCATION = "/main/resources/publicKey.pem";
+	public static final String PUBLIC_KEY_FILE_LOCATION = "/tests/publicKey.pem";
 	public static final String PUBLIC_KEY_FILE = "publicKey.pem";
 	public static final String JWT_ISSUER = "https://www.bestsolution.at/quak/test";
 	public static final String GOOD_USERNAME = "user1";
@@ -62,7 +62,7 @@ public class QuakTestProfile implements QuarkusTestProfile {
     @Override
     public Map<String, String> getConfigOverrides() {
     	Map<String, String> testConfigurations = new HashMap<String, String>();
-    	testConfigurations.put( "mp.jwt.verify.publickey.location", PUBLIC_KEY_FILE );
+    	testConfigurations.put( "mp.jwt.verify.publickey.location", PUBLIC_KEY_FILE_LOCATION );
     	testConfigurations.put( "mp.jwt.verify.issuer", JWT_ISSUER );
     	testConfigurations.put( "quarkus.native.resources.includes", PUBLIC_KEY_FILE );
     	testConfigurations.put( "quak.repositories[0].name", REPOSITORY_NAME );
