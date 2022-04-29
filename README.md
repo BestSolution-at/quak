@@ -92,3 +92,11 @@ Please note that `quak.repositories` configuration is an **array** and one insta
 Given "blueprint" name is and example repository to explain how to define a repository.
 
 For information about Quarkus configuration please see: https://quarkus.io/guides/config-reference .
+
+
+## Authorization
+
+Authorization can be satisfied in Quak with a simple configuration. Users can be defined with read/write permissions on different paths and repositories.
+
+Please see ['Authorization in quak'](docs/AUTHORIZATION.md) for more details.
+
