@@ -88,6 +88,7 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 		}
 		else if ( isAuthorizationRequired( request, repository ) ) {
 			LOG.debugf( "Validating authentication for user: %s", request.getUsername() );
+			// Check if any authentication is provided.
 			if ( !isAuthenticationProvided( authorizationHeader ) ) {
 				LOG.debugf( "No credentials given for authentication." );
 				final Response responseUnauthorized = Response.status( Response.Status.UNAUTHORIZED ).build();
@@ -95,12 +96,14 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 				context.abortWith( responseUnauthorized );
 			} 
 			else if ( securityContext.getAuthenticationScheme().equals( AUTHENTICATION_SCHEME_BEARER ) ) {
+				// Check if Bearer/Token Authentication is provided and authorization is valid.
 				request.setUsername( securityContext.getUserPrincipal().getName() );
 				if ( !isUserAuthorizedByBearerAuth( securityContext, request ) ) {
 					context.abortWith( Response.status( Response.Status.UNAUTHORIZED ).build() );
 				}
-			}
+			} 
 			else if ( securityContext.getAuthenticationScheme().equals( AUTHENTICATION_SCHEME_BASIC ) ) { 
+				// Check if Basic Authentication with username and password is provided and authorization is valid.
 				final String encodedUserPassword = authorizationHeader.get( 0 ).replaceFirst( AUTHENTICATION_SCHEME_BASIC + " ", "" );
 				final String usernameAndPassword = new String( Base64.getDecoder().decode( encodedUserPassword ) );
 				final StringTokenizer tokenizer = new StringTokenizer( usernameAndPassword, ":" );
@@ -111,6 +114,7 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 				}
 			} 
 			else {
+				// If what is provided does not match anything, abort with unauthorized.
 				context.abortWith( Response.status( Response.Status.UNAUTHORIZED ).build() );
 			}
 		}
