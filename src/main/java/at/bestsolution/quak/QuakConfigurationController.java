@@ -47,7 +47,7 @@ public class QuakConfigurationController {
 		
 	/**
 	 * Searches for a repository configuration which has a base URL matching with beginning of the path.
-	 * @param path URL path of the upload request.
+	 * @param urlPath URL path of the upload request.
 	 * @return Repository a repository configuration or null in case of no match.
 	 */
 	public Repository getRepository(String urlPath) {

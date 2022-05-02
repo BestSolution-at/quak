@@ -67,15 +67,15 @@ class QuakAuthorizationTest {
 		assertEquals( QuakTestProfile.GOOD_USERNAME, confController.getUserPermissions().get( 0 ).username() );
 		assertEquals( QuakTestProfile.REPOSITORY_NAME, confController.getUserPermissions().get( 0 ).repositoryName() );
 		assertEquals( QuakTestProfile.PATH_REGEX, confController.getUserPermissions().get( 0 ).urlPaths().get( 0 ) );
-		assertEquals( true, confController.getUserPermissions().get( 0 ).isWrite() );
+		assertEquals( true, confController.getUserPermissions().get( 0 ).mayPublish() );
 		assertEquals( QuakTestProfile.GOOD_USERNAME, confController.getUserPermissions().get( 1 ).username() );
 		assertEquals( QuakTestProfileAuthorization.REPOSITORY_NAME_READ_ONLY, confController.getUserPermissions().get( 1 ).repositoryName() );
 		assertEquals( QuakTestProfileAuthorization.PATH_REGEX_MATCH_ALL, confController.getUserPermissions().get( 1 ).urlPaths().get( 0 ) );
-		assertEquals( false, confController.getUserPermissions().get( 1 ).isWrite() );
+		assertEquals( false, confController.getUserPermissions().get( 1 ).mayPublish() );
 		assertEquals( QuakTestProfileAuthorization.USERNAME_ADMIN, confController.getUserPermissions().get( 2 ).username() );
 		assertEquals( QuakTestProfileAuthorization.REPOSITORY_NAME_READ_ONLY, confController.getUserPermissions().get( 2 ).repositoryName() );
 		assertEquals( QuakTestProfileAuthorization.PATH_REGEX_MATCH_ALL, confController.getUserPermissions().get( 2 ).urlPaths().get( 0 ) );
-		assertEquals( true, confController.getUserPermissions().get( 2 ).isWrite() );
+		assertEquals( true, confController.getUserPermissions().get( 2 ).mayPublish() );
 	}
 	
 	/**

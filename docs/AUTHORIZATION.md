@@ -44,7 +44,7 @@ In order to have authorized access to repositories, user permissions must be def
 quak.user-permissions[0].username = user1
 quak.user-permissions[0].repository-name = blueprint
 quak.user-permissions[0].url-paths[0] = /.*
-quak.user-permissions[0].is-write = true
+quak.user-permissions[0].may-publish = true
 ```
 
 `username` : unique username which has access.
@@ -53,7 +53,7 @@ quak.user-permissions[0].is-write = true
 
 `url-paths[]` : a list of permitted paths, written with regular expressions.
 
-`is-write` : true if it is a write permission, false if it is only a read permission.
+`may-publish` : true if user has right to publish, false if has only read right.
 
 
 
