@@ -14,7 +14,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
 		<quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-		<quarkus.platform.version>2.6.3.Final</quarkus.platform.version>
+		<quarkus.platform.version>2.8.1.Final</quarkus.platform.version>
 		<surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
 		<jacoco-maven-plugin-version>0.8.5</jacoco-maven-plugin-version>
 		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
@@ -57,6 +57,14 @@
 		    <groupId>org.apache.directory.api</groupId>
 		    <artifactId>api-ldap-model</artifactId>
 		    <version>2.1.0</version>
+		</dependency>
+		<dependency>
+		    <groupId>io.quarkus</groupId>
+		    <artifactId>quarkus-smallrye-jwt</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>io.quarkus</groupId>
+		    <artifactId>quarkus-smallrye-jwt-build</artifactId>
 		</dependency>
 	</dependencies>
 	<build>

@@ -37,6 +37,9 @@ import io.quarkus.test.junit.QuarkusTestProfile;
  */
 public class QuakTestProfile implements QuarkusTestProfile {
 	
+	public static final String PUBLIC_KEY_FILE_LOCATION = "/tests/publicKey.pem";
+	public static final String PUBLIC_KEY_FILE = "publicKey.pem";
+	public static final String JWT_ISSUER = "https://www.bestsolution.at/quak/test";
 	public static final String GOOD_USERNAME = "user1";
 	public static final String GOOD_PASSWORD = "pass123";
 	public static final String GOOD_PASSWORD_HASH = "$2a$10$Nfw5dwvR8ly0HPzhVE92TuqqUORzw1WBs9f4hmPBdkaqctmJQVtNu";
@@ -59,6 +62,9 @@ public class QuakTestProfile implements QuarkusTestProfile {
     @Override
     public Map<String, String> getConfigOverrides() {
     	Map<String, String> testConfigurations = new HashMap<String, String>();
+    	testConfigurations.put( "mp.jwt.verify.publickey.location", PUBLIC_KEY_FILE_LOCATION );
+    	testConfigurations.put( "mp.jwt.verify.issuer", JWT_ISSUER );
+    	testConfigurations.put( "quarkus.native.resources.includes", PUBLIC_KEY_FILE );
     	testConfigurations.put( "quak.repositories[0].name", REPOSITORY_NAME );
     	testConfigurations.put( "quak.repositories[0].storage-path", STORAGE_PATH );
     	testConfigurations.put( "quak.repositories[0].base-url", BASE_URL );
@@ -70,7 +76,7 @@ public class QuakTestProfile implements QuarkusTestProfile {
     	testConfigurations.put( "quak.user-permissions[0].username", GOOD_USERNAME );
     	testConfigurations.put( "quak.user-permissions[0].repository-name", REPOSITORY_NAME );
     	testConfigurations.put( "quak.user-permissions[0].url-paths[0]", PATH_REGEX );
-    	testConfigurations.put( "quak.user-permissions[0].is-write", WRITE_PERMISSION );
+    	testConfigurations.put( "quak.user-permissions[0].may-publish", WRITE_PERMISSION );
         return testConfigurations;
     }
 }

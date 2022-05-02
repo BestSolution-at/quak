@@ -123,9 +123,9 @@ public interface QuakConfiguration {
 		public List<String> urlPaths();
 		
 		/**
-		 * @return true if it is a write permission, false if not. Default is false.
+		 * @return true if user has right to publish, false if has only read right.
 		 */
 		@WithDefault("false")
-		public boolean isWrite();
+		public boolean mayPublish();
 	}
 }

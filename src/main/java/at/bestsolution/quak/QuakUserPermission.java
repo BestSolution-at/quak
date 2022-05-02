@@ -38,19 +38,19 @@ import java.util.regex.Pattern;
 public class QuakUserPermission {
 	
 	private String username;
-	private boolean isWrite;
+	private boolean mayPublish;
 	private List<Pattern> urlPathPatterns;
 	
 	/**
 	 * Constructs a user permission definition instance. Strings in parameter list urlPathsInRegex are used in pattern compilation and
 	 * added to urlPathPatterns list. 
 	 * @param username username of user.
-	 * @param isWrite true if write permission, false if read permission.
+	 * @param mayPublish true if user has right to publish, false if has only read right.
 	 * @param urlPathsInRegex list of strings in regular expressions each of them defining authorized URL paths for given username.
 	 */
-	public QuakUserPermission(String username, boolean isWrite, List<String> urlPathsInRegex ) {
+	public QuakUserPermission(String username, boolean mayPublish, List<String> urlPathsInRegex ) {
 		setUsername( username );
-		setWrite( isWrite );
+		setMayPublish( mayPublish );
 		urlPathPatterns = new ArrayList<>();
 		urlPathsInRegex.stream().forEach( pa -> urlPathPatterns.add( Pattern.compile( pa, Pattern.CASE_INSENSITIVE ) ) );
 	}
@@ -70,17 +70,17 @@ public class QuakUserPermission {
 	}
 
 	/**
-	 * @return true if it is a write permission, false if not.
+	 * @return true if user has right to publish, false if has only read right.
 	 */
-	public boolean isWrite() {
-		return isWrite;
+	public boolean isMayPublish() {
+		return mayPublish;
 	}
 
 	/**
-	 * @param isWrite true if it is a write permission, false if not.
+	 * @param mayPublish true if user has right to publish, false if has only read right.
 	 */
-	public void setWrite( boolean isWrite ) {
-		this.isWrite = isWrite;
+	public void setMayPublish( boolean mayPublish ) {
+		this.mayPublish = mayPublish;
 	}
 
 	/**

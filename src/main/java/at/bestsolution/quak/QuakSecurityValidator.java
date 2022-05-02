@@ -70,7 +70,7 @@ public class QuakSecurityValidator {
 		confController.getUsers().stream().forEach( u -> credentials.put( u.username(), u.password() ) );
 		confController.getRepositories().forEach( re -> repositories.add( new QuakRepository( re.name(), re.baseUrl(), re.isPrivate(), re.allowRedeploy(), re.storagePath() ) ) );
 		confController.getUserPermissions().forEach( pe ->  repositories.stream().filter( re -> pe.repositoryName().equals( re.getName() ) ).findFirst().get().
-				getUserPermissions().add( new QuakUserPermission( pe.username(), pe.isWrite(), pe.urlPaths() ) ) );
+				getUserPermissions().add( new QuakUserPermission( pe.username(), pe.mayPublish(), pe.urlPaths() ) ) );
 		
 		LOG.info( "QuakSecurityValidator is initialized." );
 	}
@@ -82,7 +82,7 @@ public class QuakSecurityValidator {
 	 */
 	public boolean isUserAuthorized( QuakAuthorizationRequest request ) {
 		return getQuakRepository( request.getUrlPath() ).getUserPermissions().stream().anyMatch( p -> p.getUsername().equals( request.getUsername() ) 
-				&& ( !request.isWrite() || p.isWrite() ) && p.getUrlPathPatterns().stream().anyMatch( pa -> pa.matcher( request.getUrlPath() ).matches() ) );
+				&& ( !request.isWrite() || p.isMayPublish() ) && p.getUrlPathPatterns().stream().anyMatch( pa -> pa.matcher( request.getUrlPath() ).matches() ) );
 	}
 	
 	/**
