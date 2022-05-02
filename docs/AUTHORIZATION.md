@@ -49,9 +49,9 @@ quak.user-permissions[0].is-write = true
 
 `username` : unique username which has access.
 
-`password` : unique repository name which is accessed.
+`repository-name` : unique repository name which is accessed.
 
-`urlpaths[]` : a list of permitted paths, written with regular expressions.
+`url-paths[]` : a list of permitted paths, written with regular expressions.
 
 `is-write` : true if it is a write permission, false if it is only a read permission.
 
@@ -77,4 +77,4 @@ openssl rsa -pubout -in rsaPrivateKey.pem -out publicKey.pem
 openssl pkcs8 -topk8 -nocrypt -inform pem -in rsaPrivateKey.pem -outform pem -out privateKey.pem
 ```
 
-Once this configuration is done correctly, usernames defined in user-permissions list, will be able access permitted repositories provided that tokens are available in Maven requests.
+Once this configuration is done correctly, usernames defined in user-permissions list, will be able to access permitted repositories provided that tokens are available in Maven requests.
