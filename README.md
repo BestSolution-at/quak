@@ -94,9 +94,9 @@ Given "blueprint" name is and example repository to explain how to define a repo
 For information about Quarkus configuration please see: https://quarkus.io/guides/config-reference .
 
 
-## Authorization
+## Authentication and authorization
 
-Authorization can be satisfied in Quak with a simple configuration. Users can be defined with read/write permissions on different paths and repositories.
+Both authentication and authorization can be satisfied in quak with a simple configuration. Users can be defined with read/write permissions on different paths and repositories.
 
-Please see ['Authorization in quak'](docs/AUTHORIZATION.md) for more details.
+Please see ['Authentication and authorization in quak'](docs/AUTHORIZATION.md) for more details.
 
