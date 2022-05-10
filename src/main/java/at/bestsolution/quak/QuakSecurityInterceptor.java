@@ -61,9 +61,6 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	@Context
 	private UriInfo urlInfo;
 	
-	@Inject
-    JsonWebToken jwt;
-
 	private static final Logger LOG = Logger.getLogger( QuakSecurityInterceptor.class );
 	private static final String AUTHORIZATION_PROPERTY = "Authorization";
 	private static final String AUTHENTICATION_SCHEME_BASIC = "Basic";
@@ -126,18 +123,14 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	 * @return true if authenticated, false if not.
 	 */
 	private boolean isUserAuthorizedByBearerAuth( SecurityContext securityContext, QuakAuthorizationRequest request ) {	
-		try {
-			if ( securityContext.getUserPrincipal() == null || securityContext.getUserPrincipal().getName() == null || !securityContext.getUserPrincipal().getName().equals( jwt.getName() ) ) {
-				LOG.errorf( "User principal name does not match with name in JWT for user: %s", securityContext.getUserPrincipal().getName() );
-				return false;
-			}
+		if ( securityContext.getUserPrincipal() == null || securityContext.getUserPrincipal().getName() == null ) {
+			LOG.errorf( "Bearer authentication failed for user: %s", securityContext.getUserPrincipal().getName() );
+			return false;
 		} 
-		catch ( Exception e ) {
-			// When JWT is not available, it means oauth2 token authentication is to be handled all by Quarkus.
-			LOG.debugf( "JWT is not available for user: %s", securityContext.getUserPrincipal().getName() );
+		else {
+			request.setUsername( securityContext.getUserPrincipal().getName() );
+			return securityValidator.isUserAuthorized( request );
 		}
-		request.setUsername( securityContext.getUserPrincipal().getName() );
-		return securityValidator.isUserAuthorized( request );
 	}
 	
 	/**
