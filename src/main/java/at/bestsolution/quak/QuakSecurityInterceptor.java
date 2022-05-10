@@ -99,12 +99,7 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 			} 
 			else if ( securityContext.getAuthenticationScheme().equals( AUTHENTICATION_SCHEME_BASIC ) ) { 
 				// Check if Basic Authentication with username and password is provided and authorization is valid.
-				final String encodedUserPassword = authorizationHeader.get( 0 ).replaceFirst( AUTHENTICATION_SCHEME_BASIC + " ", "" );
-				final String usernameAndPassword = new String( Base64.getDecoder().decode( encodedUserPassword ) );
-				final StringTokenizer tokenizer = new StringTokenizer( usernameAndPassword, ":" );
-				request.setUsername( tokenizer.nextToken() );
-				request.setPassword( tokenizer.nextToken() );
-				if ( !isUserAuthorizedByBasicAuth( request ) ) {
+				if ( !isUserAuthorizedByBasicAuth( authorizationHeader, request ) ) {
 					context.abortWith( Response.status( Response.Status.UNAUTHORIZED ).build() );
 				}
 			} 
@@ -134,10 +129,16 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	
 	/**
 	 * Checks if user is authorized by basic username and password authentication.
+	 * @param authorizationHeader String list including authorization header values.
 	 * @param request quak authorization request with credentials.
 	 * @return true if authorized, false if not. 
 	 */
-	private boolean isUserAuthorizedByBasicAuth( QuakAuthorizationRequest request ) {
+	private boolean isUserAuthorizedByBasicAuth( List<String> authorizationHeader, QuakAuthorizationRequest request ) {
+		final String encodedUserPassword = authorizationHeader.get( 0 ).replaceFirst( AUTHENTICATION_SCHEME_BASIC + " ", "" );
+		final String usernameAndPassword = new String( Base64.getDecoder().decode( encodedUserPassword ) );
+		final StringTokenizer tokenizer = new StringTokenizer( usernameAndPassword, ":" );
+		request.setUsername( tokenizer.nextToken() );
+		request.setPassword( tokenizer.nextToken() );
 		try {
 			if ( !securityValidator.isUserAuthenticated( request ) || !securityValidator.isUserAuthorized( request ) ) {
 				return false;
