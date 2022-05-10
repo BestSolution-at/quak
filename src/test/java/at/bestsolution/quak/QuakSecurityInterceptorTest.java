@@ -27,12 +27,16 @@ package at.bestsolution.quak;
 
 import static io.restassured.RestAssured.given;
 
+import java.util.Arrays;
+
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response.Status;
 
-import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
@@ -70,6 +74,8 @@ class QuakSecurityInterceptorTest {
 											+ "4IiKUpvpOOe0140Z7qJOvh-s_r1Kwk9dhSiTE3M61nbNuqFQrv1qFoeovGkLTcF"
 											+ "MOXmexy0rebvRtd8Z66R_fJTQObRXtyiG5f6F5yNF6SwLry6to2wcBsEFDEZjoi"
 											+ "pkNnXmB9EwlfnWBfTjz7dJFPo6l9APipUl8tYHYw";
+	private static final String AUTHORIZATION_PROPERTY = "Authorization";
+	private static final String UNDEFINED_AUTHORIZATION_SCHEME = "UndefinedScheme";
 	
 	/**
 	 * Asserts authentication is done correctly.
@@ -108,5 +114,38 @@ class QuakSecurityInterceptorTest {
 		given().auth().oauth2( VALID_TOKEN ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.OK.getStatusCode() );
 		given().auth().oauth2( INVALID_TOKEN ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
 		given().auth().oauth2( VALID_TOKEN_WITH_WRONGUSERNAME ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
+	}
+	
+	/**
+	 * Asserts a request with null authorization header has unauthorized response.
+	 */
+	@Test
+	@Order( 3 )
+	void testNullAuthorizationHeader() {
+		MultivaluedMap<String, String> headers = new MultivaluedHashMap<String, String>();
+		headers.put( AUTHORIZATION_PROPERTY, null );
+		given().headers( headers ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );		
+	}
+	
+	/**
+	 * Asserts a request with empty authorization header has unauthorized response.
+	 */
+	@Test
+	@Order( 4 )
+	void testEmptyAuthorizationHeader() {
+		MultivaluedMap<String, String> headers = new MultivaluedHashMap<String, String>();
+		headers.put( AUTHORIZATION_PROPERTY, Arrays.asList( ) );
+		given().headers( headers ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );		
+	}
+	
+	/**
+	 * Asserts a request with undefined authorization scheme has unauthorized response.
+	 */
+	@Test
+	@Order( 5 )
+	void testUndefinedAuthentication() {
+		MultivaluedMap<String, String> headers = new MultivaluedHashMap<String, String>();
+		headers.put( AUTHORIZATION_PROPERTY, Arrays.asList( UNDEFINED_AUTHORIZATION_SCHEME, QuakTestProfile.GOOD_USERNAME ) );
+		given().headers( headers ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );		
 	}
 }
