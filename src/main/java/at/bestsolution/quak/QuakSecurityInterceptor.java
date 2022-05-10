@@ -123,7 +123,7 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	 */
 	private boolean isUserAuthorizedByBearerAuth( SecurityContext securityContext, QuakAuthorizationRequest request ) {	
 		if ( securityContext.getUserPrincipal() == null || securityContext.getUserPrincipal().getName() == null ) {
-			LOG.errorf( "Bearer authentication failed for user: %s", securityContext.getUserPrincipal().getName() );
+			LOG.errorf( "Bearer authentication failed for request at: %s", request.getUrlPath() );
 			return false;
 		} 
 		else {
