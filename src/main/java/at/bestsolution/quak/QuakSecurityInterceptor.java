@@ -87,17 +87,16 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 			context.abortWith( Response.status( Status.NOT_FOUND ).build() );
 		}
 		else if ( isAuthorizationRequired( request, repository ) ) {
-			LOG.debugf( "Validating authentication for user: %s", request.getUsername() );
+			LOG.debugf( "Validating user authentication for repository: %s", repository.getName() );
 			// Check if any authentication is provided.
 			if ( !isAuthenticationProvided( authorizationHeader ) ) {
-				LOG.debugf( "No credentials given for authentication." );
+				LOG.debug( "No credentials given for authentication." );
 				final Response responseUnauthorized = Response.status( Response.Status.UNAUTHORIZED ).build();
 				responseUnauthorized.getHeaders().add( AUTHENTICATION_RESPONSE_HEADER, AUTHENTICATION_SCHEME_BASIC );
 				context.abortWith( responseUnauthorized );
 			} 
 			else if ( securityContext.getAuthenticationScheme().equals( AUTHENTICATION_SCHEME_BEARER ) ) {
 				// Check if Bearer/Token Authentication is provided and authorization is valid.
-				request.setUsername( securityContext.getUserPrincipal().getName() );
 				if ( !isUserAuthorizedByBearerAuth( securityContext, request ) ) {
 					context.abortWith( Response.status( Response.Status.UNAUTHORIZED ).build() );
 				}
@@ -126,9 +125,19 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	 * @param request quak authorization request.
 	 * @return true if authenticated, false if not.
 	 */
-	private boolean isUserAuthorizedByBearerAuth( SecurityContext securityContext, QuakAuthorizationRequest request ) {
-		return securityContext.getUserPrincipal() != null && securityContext.getUserPrincipal().getName().equals( jwt.getName() )
-				&& securityValidator.isUserAuthorized( request );
+	private boolean isUserAuthorizedByBearerAuth( SecurityContext securityContext, QuakAuthorizationRequest request ) {	
+		try {
+			if ( securityContext.getUserPrincipal() == null || securityContext.getUserPrincipal().getName() == null || !securityContext.getUserPrincipal().getName().equals( jwt.getName() ) ) {
+				LOG.errorf( "User principal name does not match with name in JWT for user: %s", securityContext.getUserPrincipal().getName() );
+				return false;
+			}
+		} 
+		catch ( Exception e ) {
+			// When JWT is not available, it means oauth2 token authentication is to be handled all by Quarkus.
+			LOG.debugf( "JWT is not available for user: %s", securityContext.getUserPrincipal().getName() );
+		}
+		request.setUsername( securityContext.getUserPrincipal().getName() );
+		return securityValidator.isUserAuthorized( request );
 	}
 	
 	/**
