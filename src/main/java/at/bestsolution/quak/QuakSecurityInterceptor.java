@@ -34,11 +34,9 @@ import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.PreMatching;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
 import org.jboss.logging.Logger;
@@ -57,9 +55,6 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	@Inject
 	QuakSecurityValidator securityValidator;
 	
-	@Context
-	private UriInfo urlInfo;
-	
 	private static final Logger LOG = Logger.getLogger( QuakSecurityInterceptor.class );
 	private static final String AUTHORIZATION_PROPERTY = "Authorization";
 	private static final String AUTHENTICATION_SCHEME_BASIC = "Basic";
@@ -76,10 +71,12 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 		LOG.debugf( "Request received at: %s", context.getUriInfo().getRequestUri().toString() );
 		final SecurityContext securityContext = context.getSecurityContext();
 		final List<String> authorizationHeader = context.getHeaders().get( AUTHORIZATION_PROPERTY );
-		final QuakRepository repository = securityValidator.getQuakRepository( urlInfo.getPath() );
-		QuakAuthorizationRequest request = new QuakAuthorizationRequest( urlInfo.getPath(), null, null, context.getMethod().equals( HttpMethod.PUT.toString() ) || context.getMethod().equals( HttpMethod.POST.toString() ) );
+		final QuakRepository repository = securityValidator.getQuakRepository( context.getUriInfo().getPath() );
+		QuakAuthorizationRequest request = new QuakAuthorizationRequest( context.getUriInfo().getPath(), null, null, 
+				context.getMethod().equals( HttpMethod.PUT.toString() ) || context.getMethod().equals( HttpMethod.POST.toString() ) );
+		
 		if ( repository == null ) {
-			LOG.errorf( "No repository found for path: %s", urlInfo.getPath() );
+			LOG.errorf( "No repository found for path: %s", request.getUrlPath() );
 			context.abortWith( Response.status( Status.NOT_FOUND ).build() );
 		}
 		else if ( isAuthorizationRequired( request, repository ) ) {
