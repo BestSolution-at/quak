@@ -205,4 +205,21 @@ class QuakSecurityInterceptorTest {
 		securityInterceptor.filter( contextMock );
 		verify( contextMock, times( 1 ) ).abortWith( any( Response.class ) );
 	}
+	
+	/**
+	 * Asserts QuakSecurityInterceptor aborts a request with null security context.
+	 */
+	@Test
+	@Order( 8 )
+	void testNullSecurityContext() {
+		final ContainerRequestContext contextMock = mock( ContainerRequestContext.class );
+		MultivaluedMap<String, String> headers = new MultivaluedHashMap<String, String>();
+		headers.put( AUTHORIZATION_PROPERTY, Arrays.asList( AUTHENTICATION_SCHEME_BEARER, QuakTestProfile.GOOD_USERNAME ) );
+		when( contextMock.getUriInfo() ).thenReturn( new ResteasyUriInfo( QuakTestProfile.BASE_URL.concat( "/" ),  "/" ) );
+		when( contextMock.getMethod() ).thenReturn( HttpMethod.PUT.toString() );
+		when( contextMock.getHeaders() ).thenReturn( headers );
+		when( contextMock.getSecurityContext() ).thenReturn( null );
+		securityInterceptor.filter( contextMock );
+		verify( contextMock, times( 1 ) ).abortWith( any( Response.class ) );
+	}
 }

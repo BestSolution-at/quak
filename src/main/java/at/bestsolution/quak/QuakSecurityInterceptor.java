@@ -82,7 +82,7 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 		else if ( isAuthorizationRequired( request, repository ) ) {
 			LOG.debugf( "Validating user authentication for repository: %s", repository.getName() );
 			// Check if any authentication is provided.
-			if ( !isAuthenticationProvided( authorizationHeader ) ) {
+			if ( !isAuthenticationProvided( authorizationHeader ) || securityContext == null ) {
 				LOG.debug( "No credentials given for authentication." );
 				final Response responseUnauthorized = Response.status( Response.Status.UNAUTHORIZED ).build();
 				responseUnauthorized.getHeaders().add( AUTHENTICATION_RESPONSE_HEADER, AUTHENTICATION_SCHEME_BASIC );
