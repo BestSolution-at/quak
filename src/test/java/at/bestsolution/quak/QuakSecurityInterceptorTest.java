@@ -166,10 +166,10 @@ class QuakSecurityInterceptorTest {
 	}
 	
 	/**
-	 * Asserts a request with null user principal has unauthorized response.
+	 * Asserts QuakSecurityInterceptor aborts a request with null user principal.
 	 */
 	@Test
-	@Order( 5 )
+	@Order( 6 )
 	void testNullUserPrincipal() {
 		final ContainerRequestContext contextMock = mock( ContainerRequestContext.class );
 		final SecurityContext securityContextMock = mock( SecurityContext.class );
@@ -185,10 +185,10 @@ class QuakSecurityInterceptorTest {
 	}
 	
 	/**
-	 * Asserts a request with null user principal name has unauthorized response.
+	 * Asserts QuakSecurityInterceptor aborts a request with null user principal name.
 	 */
 	@Test
-	@Order( 6 )
+	@Order( 7 )
 	void testNullUserPrincipalName() {
 		final ContainerRequestContext contextMock = mock( ContainerRequestContext.class );
 		final SecurityContext securityContextMock = mock( SecurityContext.class );
