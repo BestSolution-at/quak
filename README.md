@@ -71,6 +71,7 @@ Following is a sample configuration file placed under the path `target/config/ap
 ```
 quarkus.http.port = 8089
 quarkus.http.limits.max-body-size = 1000M
+quarkus.oauth2.enabled = false
 
 quak.repositories[0].name = blueprint
 quak.repositories[0].storage-path = repos/blueprint
@@ -82,6 +83,7 @@ quak.repositories[0].allow-redeploy = true
 |-----------------|:-------------|:-------------|
 | `quarkus.http.port` 						| Port Quarkus is running on 				| 8080
 | `quarkus.http.limits.max-body-size`     	| Upload limit Quarkus has 					| 
+| `quarkus.oauth2.enabled`					| If OAuth2 is enabled						| true
 | `quak.repositories[0].name`    			| Name of the repository 					| 
 | `quak.repositories[0].storage-path`    	| Location of the artifacts 				| 
 | `quak.repositories[0].base-url`    		| Repository is served at 					| 
