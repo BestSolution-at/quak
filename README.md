@@ -83,7 +83,7 @@ quak.repositories[0].allow-redeploy = true
 |-----------------|:-------------|:-------------|
 | `quarkus.http.port` 						| Port Quarkus is running on 				| 8080
 | `quarkus.http.limits.max-body-size`     	| Upload limit Quarkus has 					| 
-| `quarkus.oauth2.enabled`					| If OAuth2 is enabled						| true
+| `quarkus.oauth2.enabled`					| If OAuth2 is enabled						| false
 | `quak.repositories[0].name`    			| Name of the repository 					| 
 | `quak.repositories[0].storage-path`    	| Location of the artifacts 				| 
 | `quak.repositories[0].base-url`    		| Repository is served at 					| 
