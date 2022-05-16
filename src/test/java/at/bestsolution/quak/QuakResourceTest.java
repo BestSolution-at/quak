@@ -139,6 +139,10 @@ class QuakResourceTest {
 		// Re-deploy
 		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( DUMMY_FILE_CONTENT ).put( DUMMY_FILE_FOO )
 			.then().statusCode( Status.OK.getStatusCode() );
+		
+		// Post
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( DUMMY_FILE_CONTENT ).post( DUMMY_FILE_FOO )
+			.then().statusCode( Status.OK.getStatusCode() );
 	}
 
 	/**

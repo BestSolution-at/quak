@@ -34,14 +34,11 @@ import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.PreMatching;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
-import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.jboss.logging.Logger;
 
 import io.netty.handler.codec.http.HttpMethod;
@@ -58,12 +55,6 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	@Inject
 	QuakSecurityValidator securityValidator;
 	
-	@Context
-	private UriInfo urlInfo;
-	
-	@Inject
-    JsonWebToken jwt;
-
 	private static final Logger LOG = Logger.getLogger( QuakSecurityInterceptor.class );
 	private static final String AUTHORIZATION_PROPERTY = "Authorization";
 	private static final String AUTHENTICATION_SCHEME_BASIC = "Basic";
@@ -80,36 +71,32 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 		LOG.debugf( "Request received at: %s", context.getUriInfo().getRequestUri().toString() );
 		final SecurityContext securityContext = context.getSecurityContext();
 		final List<String> authorizationHeader = context.getHeaders().get( AUTHORIZATION_PROPERTY );
-		final QuakRepository repository = securityValidator.getQuakRepository( urlInfo.getPath() );
-		QuakAuthorizationRequest request = new QuakAuthorizationRequest( urlInfo.getPath(), null, null, context.getMethod().equals( HttpMethod.PUT.toString() ) || context.getMethod().equals( HttpMethod.POST.toString() ) );
+		final QuakRepository repository = securityValidator.getQuakRepository( context.getUriInfo().getPath() );
+		QuakAuthorizationRequest request = new QuakAuthorizationRequest( context.getUriInfo().getPath(), null, null, 
+				context.getMethod().equals( HttpMethod.PUT.toString() ) || context.getMethod().equals( HttpMethod.POST.toString() ) );
+		
 		if ( repository == null ) {
-			LOG.errorf( "No repository found for path: %s", urlInfo.getPath() );
+			LOG.errorf( "No repository found for path: %s", request.getUrlPath() );
 			context.abortWith( Response.status( Status.NOT_FOUND ).build() );
 		}
 		else if ( isAuthorizationRequired( request, repository ) ) {
-			LOG.debugf( "Validating authentication for user: %s", request.getUsername() );
+			LOG.debugf( "Validating user authentication for repository: %s", repository.getName() );
 			// Check if any authentication is provided.
-			if ( !isAuthenticationProvided( authorizationHeader ) ) {
-				LOG.debugf( "No credentials given for authentication." );
+			if ( !isAuthenticationProvided( authorizationHeader ) || securityContext == null ) {
+				LOG.debug( "No credentials given for authentication." );
 				final Response responseUnauthorized = Response.status( Response.Status.UNAUTHORIZED ).build();
 				responseUnauthorized.getHeaders().add( AUTHENTICATION_RESPONSE_HEADER, AUTHENTICATION_SCHEME_BASIC );
 				context.abortWith( responseUnauthorized );
 			} 
 			else if ( securityContext.getAuthenticationScheme().equals( AUTHENTICATION_SCHEME_BEARER ) ) {
 				// Check if Bearer/Token Authentication is provided and authorization is valid.
-				request.setUsername( securityContext.getUserPrincipal().getName() );
 				if ( !isUserAuthorizedByBearerAuth( securityContext, request ) ) {
 					context.abortWith( Response.status( Response.Status.UNAUTHORIZED ).build() );
 				}
 			} 
 			else if ( securityContext.getAuthenticationScheme().equals( AUTHENTICATION_SCHEME_BASIC ) ) { 
 				// Check if Basic Authentication with username and password is provided and authorization is valid.
-				final String encodedUserPassword = authorizationHeader.get( 0 ).replaceFirst( AUTHENTICATION_SCHEME_BASIC + " ", "" );
-				final String usernameAndPassword = new String( Base64.getDecoder().decode( encodedUserPassword ) );
-				final StringTokenizer tokenizer = new StringTokenizer( usernameAndPassword, ":" );
-				request.setUsername( tokenizer.nextToken() );
-				request.setPassword( tokenizer.nextToken() );
-				if ( !isUserAuthorizedByBasicAuth( request ) ) {
+				if ( !isUserAuthorizedByBasicAuth( authorizationHeader, request ) ) {
 					context.abortWith( Response.status( Response.Status.UNAUTHORIZED ).build() );
 				}
 			} 
@@ -126,23 +113,35 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	 * @param request quak authorization request.
 	 * @return true if authenticated, false if not.
 	 */
-	private boolean isUserAuthorizedByBearerAuth( SecurityContext securityContext, QuakAuthorizationRequest request ) {
-		return securityContext.getUserPrincipal() != null && securityContext.getUserPrincipal().getName().equals( jwt.getName() )
-				&& securityValidator.isUserAuthorized( request );
+	private boolean isUserAuthorizedByBearerAuth( SecurityContext securityContext, QuakAuthorizationRequest request ) {	
+		if ( securityContext.getUserPrincipal() == null || securityContext.getUserPrincipal().getName() == null ) {
+			LOG.errorf( "Bearer authentication failed for request at: %s", request.getUrlPath() );
+			return false;
+		} 
+		else {
+			request.setUsername( securityContext.getUserPrincipal().getName() );
+			return securityValidator.isUserAuthorized( request );
+		}
 	}
 	
 	/**
 	 * Checks if user is authorized by basic username and password authentication.
+	 * @param authorizationHeader String list including authorization header values.
 	 * @param request quak authorization request with credentials.
 	 * @return true if authorized, false if not. 
 	 */
-	private boolean isUserAuthorizedByBasicAuth( QuakAuthorizationRequest request ) {
+	private boolean isUserAuthorizedByBasicAuth( List<String> authorizationHeader, QuakAuthorizationRequest request ) {
+		final String encodedUserPassword = authorizationHeader.get( 0 ).replaceFirst( AUTHENTICATION_SCHEME_BASIC + " ", "" );
+		final String usernameAndPassword = new String( Base64.getDecoder().decode( encodedUserPassword ) );
+		final StringTokenizer tokenizer = new StringTokenizer( usernameAndPassword, ":" );
+		request.setUsername( tokenizer.nextToken() );
+		request.setPassword( tokenizer.nextToken() );
 		try {
 			if ( !securityValidator.isUserAuthenticated( request ) || !securityValidator.isUserAuthorized( request ) ) {
 				return false;
 			}
 		} 
-		catch ( Exception e ) {
+		catch ( IllegalArgumentException e ) {
 			LOG.errorf( "Exception while checking password for: %s, %s", request.getUsername(), e );
 			return false;
 		}

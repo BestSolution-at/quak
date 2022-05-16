@@ -56,8 +56,7 @@ quak.user-permissions[0].may-publish = true
 `may-publish` : true if user has right to publish, false if has only read right.
 
 
-
-## Authentication with tokens
+## Authentication with JWT tokens
 
 Authentication can be done with JWT tokens as well. In this way, Maven users do not need to enter username and password credentials, but only JWT tokens when using quak. Tokens created by an issuer will be verified by quak and token claimed username will be used.
 
@@ -78,3 +77,17 @@ openssl pkcs8 -topk8 -nocrypt -inform pem -in rsaPrivateKey.pem -outform pem -ou
 ```
 
 Once this configuration is done correctly, usernames defined in user-permissions list, will be able to access permitted repositories provided that tokens are available in Maven requests.
+
+
+## Authentication with OAuth2 tokens
+
+Quarkus includes authentication with OAuth2 opaque tokens. With following configuration, quak can be configured to have OAuth2 token authentication enabled.
+
+```
+quarkus.oauth2.enabled = true
+quarkus.oauth2.client-id = client_id
+quarkus.oauth2.client-secret = client_secret
+quarkus.oauth2.introspection-url = https://introspectionUrl/token/introspect
+```
+
+When configuration is done correctly, requests with OAuth2 opaque tokens will be validated by sending them to introspection URL. After validation, extracted username will be queried to see if user has permission rights on quak for given repository.
