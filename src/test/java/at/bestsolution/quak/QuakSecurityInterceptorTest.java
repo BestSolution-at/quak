@@ -211,10 +211,32 @@ class QuakSecurityInterceptorTest {
 	}
 	
 	/**
-	 * Asserts QuakSecurityInterceptor aborts a request with null security context.
+	 * Asserts QuakSecurityInterceptor aborts a request with null user principal name.
 	 */
 	@Test
 	@Order( 8 )
+	void testEmptyUserPrincipalName() {
+		final ContainerRequestContext contextMock = mock( ContainerRequestContext.class );
+		final SecurityContext securityContextMock = mock( SecurityContext.class );
+		final Principal userPrincipal = mock( Principal.class );
+		MultivaluedMap<String, String> headers = new MultivaluedHashMap<String, String>();
+		headers.put( AUTHORIZATION_PROPERTY, Arrays.asList( AUTHENTICATION_SCHEME_BEARER, QuakTestProfile.GOOD_USERNAME ) );
+		when( contextMock.getUriInfo() ).thenReturn( new ResteasyUriInfo( QuakTestProfile.BASE_URL.concat( "/" ),  "/" ) );
+		when( contextMock.getMethod() ).thenReturn( HttpMethod.PUT.toString() );
+		when( contextMock.getHeaders() ).thenReturn( headers );
+		when( contextMock.getSecurityContext() ).thenReturn( securityContextMock );
+		when( userPrincipal.getName() ).thenReturn( "" );
+		when( securityContextMock.getAuthenticationScheme() ).thenReturn( AUTHENTICATION_SCHEME_BEARER );
+		when( securityContextMock.getUserPrincipal() ).thenReturn( userPrincipal );
+		securityInterceptor.filter( contextMock );
+		verify( contextMock, times( 1 ) ).abortWith( any( Response.class ) );
+	}
+	
+	/**
+	 * Asserts QuakSecurityInterceptor aborts a request with null security context.
+	 */
+	@Test
+	@Order( 9 )
 	void testNullSecurityContext() {
 		final ContainerRequestContext contextMock = mock( ContainerRequestContext.class );
 		MultivaluedMap<String, String> headers = new MultivaluedHashMap<String, String>();
@@ -233,7 +255,7 @@ class QuakSecurityInterceptorTest {
 	@Test
 	@TestSecurity( user = QuakTestProfile.GOOD_USERNAME )
     @OidcSecurity( userinfo = { @UserInfo( key = USERINFO_KEY_SUB, value = QuakTestProfile.GOOD_USERNAME) } )
-	@Order( 9 )
+	@Order( 10 )
 	void testGoodSecurityIdentity() {
 		final ContainerRequestContext contextMock = mock( ContainerRequestContext.class );
 		final SecurityContext securityContextMock = mock( SecurityContext.class );
@@ -256,7 +278,7 @@ class QuakSecurityInterceptorTest {
 	@Test
 	@TestSecurity( user = WRONG_USERNAME )
     @OidcSecurity( userinfo = { @UserInfo( key = USERINFO_KEY_SUB, value = WRONG_USERNAME) } )
-	@Order( 9 )
+	@Order( 11 )
 	void testWrongSecurityIdentity() {
 		final ContainerRequestContext contextMock = mock( ContainerRequestContext.class );
 		final SecurityContext securityContextMock = mock( SecurityContext.class );
