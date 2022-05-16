@@ -52,6 +52,9 @@ import org.junit.jupiter.api.TestMethodOrder;
 import io.netty.handler.codec.http.HttpMethod;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
+import io.quarkus.test.security.TestSecurity;
+import io.quarkus.test.security.oidc.OidcSecurity;
+import io.quarkus.test.security.oidc.UserInfo;
 
 /**
  * JUnit test cases for security interceptor of quak.
@@ -92,6 +95,7 @@ class QuakSecurityInterceptorTest {
 	private static final String AUTHORIZATION_PROPERTY = "Authorization";
 	private static final String AUTHENTICATION_SCHEME_BEARER = "Bearer";
 	private static final String UNDEFINED_AUTHORIZATION_SCHEME = "UndefinedScheme";
+	private static final String USERINFO_KEY_SUB = "sub";
 	
 	/**
 	 * Asserts authentication is done correctly.
@@ -219,6 +223,52 @@ class QuakSecurityInterceptorTest {
 		when( contextMock.getMethod() ).thenReturn( HttpMethod.PUT.toString() );
 		when( contextMock.getHeaders() ).thenReturn( headers );
 		when( contextMock.getSecurityContext() ).thenReturn( null );
+		securityInterceptor.filter( contextMock );
+		verify( contextMock, times( 1 ) ).abortWith( any( Response.class ) );
+	}
+	
+	/**
+	 * Asserts QuakSecurityInterceptor does NOT abort a request with good OpenID Connect user info.
+	 */
+	@Test
+	@TestSecurity( user = QuakTestProfile.GOOD_USERNAME )
+    @OidcSecurity( userinfo = { @UserInfo( key = USERINFO_KEY_SUB, value = QuakTestProfile.GOOD_USERNAME) } )
+	@Order( 9 )
+	void testGoodSecurityIdentity() {
+		final ContainerRequestContext contextMock = mock( ContainerRequestContext.class );
+		final SecurityContext securityContextMock = mock( SecurityContext.class );
+		final Principal userPrincipal = mock( Principal.class );
+		MultivaluedMap<String, String> headers = new MultivaluedHashMap<String, String>();
+		headers.put( AUTHORIZATION_PROPERTY, Arrays.asList( AUTHENTICATION_SCHEME_BEARER, QuakTestProfile.GOOD_USERNAME ) );
+		when( contextMock.getUriInfo() ).thenReturn( new ResteasyUriInfo( QuakTestProfile.BASE_URL.concat( "/" ),  "/" ) );
+		when( contextMock.getMethod() ).thenReturn( HttpMethod.PUT.toString() );
+		when( contextMock.getHeaders() ).thenReturn( headers );
+		when( contextMock.getSecurityContext() ).thenReturn( securityContextMock );
+		when( securityContextMock.getAuthenticationScheme() ).thenReturn( AUTHENTICATION_SCHEME_BEARER );
+		when( securityContextMock.getUserPrincipal() ).thenReturn( userPrincipal );
+		securityInterceptor.filter( contextMock );
+		verify( contextMock, times( 0 ) ).abortWith( any( Response.class ) );
+	}
+	
+	/**
+	 * Asserts QuakSecurityInterceptor aborts a request with wrong OpenID Connect user info.
+	 */
+	@Test
+	@TestSecurity( user = WRONG_USERNAME )
+    @OidcSecurity( userinfo = { @UserInfo( key = USERINFO_KEY_SUB, value = WRONG_USERNAME) } )
+	@Order( 9 )
+	void testWrongSecurityIdentity() {
+		final ContainerRequestContext contextMock = mock( ContainerRequestContext.class );
+		final SecurityContext securityContextMock = mock( SecurityContext.class );
+		final Principal userPrincipal = mock( Principal.class );
+		MultivaluedMap<String, String> headers = new MultivaluedHashMap<String, String>();
+		headers.put( AUTHORIZATION_PROPERTY, Arrays.asList( AUTHENTICATION_SCHEME_BEARER, QuakTestProfile.GOOD_USERNAME ) );
+		when( contextMock.getUriInfo() ).thenReturn( new ResteasyUriInfo( QuakTestProfile.BASE_URL.concat( "/" ),  "/" ) );
+		when( contextMock.getMethod() ).thenReturn( HttpMethod.PUT.toString() );
+		when( contextMock.getHeaders() ).thenReturn( headers );
+		when( contextMock.getSecurityContext() ).thenReturn( securityContextMock );
+		when( securityContextMock.getAuthenticationScheme() ).thenReturn( AUTHENTICATION_SCHEME_BEARER );
+		when( securityContextMock.getUserPrincipal() ).thenReturn( userPrincipal );
 		securityInterceptor.filter( contextMock );
 		verify( contextMock, times( 1 ) ).abortWith( any( Response.class ) );
 	}

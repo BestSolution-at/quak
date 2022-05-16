@@ -65,6 +65,8 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	private static final String AUTHENTICATION_SCHEME_BASIC = "Basic";
 	private static final String AUTHENTICATION_SCHEME_BEARER = "Bearer";
 	private static final String AUTHENTICATION_RESPONSE_HEADER = "WWW-Authenticate";
+	private static final String ATTRIBUTE_USERINFO = "userinfo";
+	private static final String ATTRIBUTE_USERINFO_SUB = "sub";
 
 	/**
 	 * Filters out the unauthorized access to quak service. Valid authentication must be provided if repository of requested URL is a private one or request is a
@@ -113,14 +115,14 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	}
 	
 	/**
-	 * Checks if user is authorized by bearer token authentication.
+	 * Checks if user is authorized by one of bearer token authentications.
 	 * @param securityContext security context of request. 
 	 * @param request quak authorization request.
 	 * @return true if authenticated, false if not.
 	 */
 	private boolean isUserAuthorizedByBearerAuth( SecurityContext securityContext, QuakAuthorizationRequest request ) {	
-		if ( securityIdentity.getAttributes().get( "userinfo" ) != null ) {
-			request.setUsername( ( (UserInfo) securityIdentity.getAttributes().get( "userinfo" ) ).getString( "nickname" ) );
+		if ( securityIdentity.getAttributes().get( ATTRIBUTE_USERINFO ) != null ) {
+			request.setUsername( ( (UserInfo) securityIdentity.getAttributes().get( ATTRIBUTE_USERINFO ) ).getString( ATTRIBUTE_USERINFO_SUB ) );
 		}
 		else if ( securityContext.getUserPrincipal() != null && securityContext.getUserPrincipal().getName() != null && !securityContext.getUserPrincipal().getName().isEmpty() ) {
 			request.setUsername( securityContext.getUserPrincipal().getName() );
