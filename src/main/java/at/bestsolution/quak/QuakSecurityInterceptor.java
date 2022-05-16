@@ -42,6 +42,8 @@ import javax.ws.rs.ext.Provider;
 import org.jboss.logging.Logger;
 
 import io.netty.handler.codec.http.HttpMethod;
+import io.quarkus.oidc.UserInfo;
+import io.quarkus.security.identity.SecurityIdentity;
 
 /**
  * Security Interceptor to verify the repository access for a user.
@@ -54,6 +56,9 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	
 	@Inject
 	QuakSecurityValidator securityValidator;
+	
+    @Inject
+    SecurityIdentity securityIdentity;
 	
 	private static final Logger LOG = Logger.getLogger( QuakSecurityInterceptor.class );
 	private static final String AUTHORIZATION_PROPERTY = "Authorization";
@@ -114,14 +119,18 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	 * @return true if authenticated, false if not.
 	 */
 	private boolean isUserAuthorizedByBearerAuth( SecurityContext securityContext, QuakAuthorizationRequest request ) {	
-		if ( securityContext.getUserPrincipal() == null || securityContext.getUserPrincipal().getName() == null ) {
-			LOG.errorf( "Bearer authentication failed for request at: %s", request.getUrlPath() );
-			return false;
+		if ( securityIdentity.getAttributes().get( "userinfo" ) != null ) {
+			request.setUsername( ( (UserInfo) securityIdentity.getAttributes().get( "userinfo" ) ).getString( "nickname" ) );
+		}
+		else if ( securityContext.getUserPrincipal() != null && securityContext.getUserPrincipal().getName() != null && !securityContext.getUserPrincipal().getName().isEmpty() ) {
+			request.setUsername( securityContext.getUserPrincipal().getName() );
 		} 
 		else {
-			request.setUsername( securityContext.getUserPrincipal().getName() );
-			return securityValidator.isUserAuthorized( request );
+			LOG.errorf( "Bearer authentication failed for request at: %s", request.getUrlPath() );
+			return false;
 		}
+		
+		return securityValidator.isUserAuthorized( request );
 	}
 	
 	/**
