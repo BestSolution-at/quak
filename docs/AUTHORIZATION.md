@@ -91,3 +91,20 @@ quarkus.oauth2.introspection-url = https://introspectionUrl/token/introspect
 ```
 
 When configuration is done correctly, requests with OAuth2 opaque tokens will be validated by sending them to introspection URL. After validation, extracted username will be queried to see if user has permission rights on quak for given repository.
+
+
+## Authentication with OpenID Connect tokens
+
+Quarkus includes authentication with OpenID Connect. With following configuration, quak can be configured to have OpenID Connect token authentication enabled.
+
+```
+quarkus.oidc.enabled = true
+quarkus.oidc.auth-server-url = https://oidcDiscoveryUrl
+quarkus.oidc.client-id = client_id
+quarkus.oidc.credentials.secret = client_secret
+quarkus.oidc.authentication.user-info-required = true
+```
+
+When configuration is done correctly, requests with OpenID Connect access tokens will be validated by sending them to authentication server. After validation, extracted username will be queried to see if user has permission rights on quak for given repository.
+
+> **_NOTE:_** The configuration line for user information ( `quarkus.oidc.authentication.user-info-required = true` ) is mandatory for quak to acquire unique user identifier. User attribute `sub` granted by OpenID Connect authentication provider must be used as a username in quak and a user permission must be configured as described in section Defining user permissions and authorization.
