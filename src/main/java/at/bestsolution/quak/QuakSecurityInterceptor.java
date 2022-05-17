@@ -122,16 +122,18 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	 */
 	private boolean isUserAuthorizedByBearerAuth( SecurityContext securityContext, QuakAuthorizationRequest request ) {	
 		if ( securityIdentity.getAttributes().get( ATTRIBUTE_USERINFO ) != null ) {
+			// SecurityIdentity has userinfo and sub meaning that user is authenticated with OpenID Connect tokens.
 			request.setUsername( ( (UserInfo) securityIdentity.getAttributes().get( ATTRIBUTE_USERINFO ) ).getString( ATTRIBUTE_USERINFO_SUB ) );
 		}
 		else if ( securityContext.getUserPrincipal() != null && securityContext.getUserPrincipal().getName() != null && !securityContext.getUserPrincipal().getName().isEmpty() ) {
+			// SecurityContext has UserPrincipal and Name meaning that user is authenticated with either JWT or OAuth2 tokens.
 			request.setUsername( securityContext.getUserPrincipal().getName() );
 		} 
 		else {
-			LOG.errorf( "Bearer authentication failed for request at: %s", request.getUrlPath() );
+			LOG.errorf( "Bearer token authentication failed for request at: %s", request.getUrlPath() );
 			return false;
 		}
-		
+		// Query the received username with a QuakAuthorizationRequest for authorization.
 		return securityValidator.isUserAuthorized( request );
 	}
 	
