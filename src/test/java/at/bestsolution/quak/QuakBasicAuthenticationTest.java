@@ -61,12 +61,6 @@ class QuakBasicAuthenticationTest {
 	@Test
 	@Order( 1 )
 	void testBasicAuthentication() {
-		given().get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
-		given().auth().preemptive().basic( QuakTestProfile.WRONG_USERNAME, QuakTestProfile.WRONG_PASSWORD ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );		
-		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.WRONG_PASSWORD ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
-		given().auth().preemptive().basic( QuakTestProfile.WRONG_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
-		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.OK.getStatusCode() );
-		
 		given().request().body( "dummy file" ).put( QuakResourceTest.DUMMY_FILE_FOO )
 			.then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
 		given().auth().preemptive().basic( QuakTestProfile.WRONG_USERNAME, QuakTestProfile.WRONG_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT ).put( QuakResourceTest.DUMMY_FILE_FOO )
@@ -77,6 +71,12 @@ class QuakBasicAuthenticationTest {
 			.then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
 		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT ).put( QuakResourceTest.DUMMY_FILE_FOO )
 			.then().statusCode( Status.OK.getStatusCode() );
+		
+		given().get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
+		given().auth().preemptive().basic( QuakTestProfile.WRONG_USERNAME, QuakTestProfile.WRONG_PASSWORD ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );		
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.WRONG_PASSWORD ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
+		given().auth().preemptive().basic( QuakTestProfile.WRONG_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.OK.getStatusCode() );
 	}
 		
 	/**
