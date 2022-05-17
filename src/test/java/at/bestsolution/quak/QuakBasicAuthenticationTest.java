@@ -1,6 +1,6 @@
 /*
  * ----------------------------------------------------------------
- * Original File Name: QuakSecurityInterceptorBasicTest.java
+ * Original File Name: QuakBasicAuthenticationTest.java
  * Creation Date:      17.05.2022
  * Description: Test class file of JUnit test cases for Basic 
  * authentication in QuakSecurityInterceptor.     
@@ -50,7 +50,7 @@ import io.quarkus.test.junit.TestProfile;
 @QuarkusTest
 @TestProfile( QuakTestProfile.class )
 @TestMethodOrder( OrderAnnotation.class )
-class QuakSecurityInterceptorBasicTest {
+class QuakBasicAuthenticationTest {
 	
 	public static final String AUTHORIZATION_PROPERTY = "Authorization";
 	public static final String UNDEFINED_AUTHORIZATION_SCHEME = "UndefinedScheme";

@@ -1,6 +1,6 @@
 /*
  * ----------------------------------------------------------------
- * Original File Name: QuakSecurityInterceptorPublicTest.java
+ * Original File Name: QuakPublicRepositoryTest.java
  * Creation Date:      14.04.2022
  * Description: JUnit test cases with public repository profile for 
  * security interceptor of quak.       
@@ -46,7 +46,7 @@ import io.quarkus.test.junit.TestProfile;
 @QuarkusTest
 @TestProfile( QuakTestProfilePublicRepository.class )
 @TestMethodOrder( OrderAnnotation.class )
-class QuakSecurityInterceptorPublicTest {
+class QuakPublicRepositoryTest {
 	
 	/**
 	 * Asserts authentication is done correctly on a public repository.

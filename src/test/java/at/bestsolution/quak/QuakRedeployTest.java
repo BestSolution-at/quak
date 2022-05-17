@@ -1,6 +1,6 @@
 /*
  * ----------------------------------------------------------------
- * Original File Name: QuakResourceRedeployTest.java
+ * Original File Name: QuakRedeployTest.java
  * Creation Date:      29.03.2022
  * Description: Test class file of quak instance.       
  * ----------------------------------------------------------------
@@ -43,7 +43,7 @@ import io.restassured.response.Response;
  */
 @QuarkusTest
 @TestProfile( QuakTestProfileRedeployNotAllowed.class )
-class QuakResourceRedeployTest {
+class QuakRedeployTest {
 
 	/**
 	 * For redeploy tests, the file must be created before.
