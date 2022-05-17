@@ -1,6 +1,6 @@
 /*
  * ----------------------------------------------------------------
- * Original File Name: QuakSecurityInterceptorPublicRepositoryTest.java
+ * Original File Name: QuakSecurityInterceptorPublicTest.java
  * Creation Date:      14.04.2022
  * Description: JUnit test cases with public repository profile for 
  * security interceptor of quak.       
@@ -46,30 +46,27 @@ import io.quarkus.test.junit.TestProfile;
 @QuarkusTest
 @TestProfile( QuakTestProfilePublicRepository.class )
 @TestMethodOrder( OrderAnnotation.class )
-class QuakSecurityInterceptorPublicRepositoryTest {
-	
-	private static final String WRONG_USERNAME = "wrongname";
-	private static final String WRONG_PASSWORD = "wrongpass";
+class QuakSecurityInterceptorPublicTest {
 	
 	/**
-	 * Asserts authentication is done correctly.
+	 * Asserts authentication is done correctly on a public repository.
 	 */
 	@Test
 	@Order( 1 )
-	void testAuthentication() {
+	void testBasicAuthenticationOnPublicRepository() {
 		given().get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.OK.getStatusCode() );
-		given().auth().preemptive().basic( WRONG_USERNAME, WRONG_PASSWORD ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.OK.getStatusCode() );		
-		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, WRONG_PASSWORD ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.OK.getStatusCode() );
-		given().auth().preemptive().basic( WRONG_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( QuakTestProfile.WRONG_USERNAME, QuakTestProfile.WRONG_PASSWORD ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.OK.getStatusCode() );		
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.WRONG_PASSWORD ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.OK.getStatusCode() );
+		given().auth().preemptive().basic( QuakTestProfile.WRONG_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.OK.getStatusCode() );
 		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( QuakTestProfile.BASE_URL.concat( "/" ) ).then().statusCode( Status.OK.getStatusCode() );
 		
 		given().request().body( "dummy file" ).put( QuakResourceTest.DUMMY_FILE_FOO )
 			.then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
-		given().auth().preemptive().basic( WRONG_USERNAME, WRONG_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT ).put( QuakResourceTest.DUMMY_FILE_FOO )
+		given().auth().preemptive().basic( QuakTestProfile.WRONG_USERNAME, QuakTestProfile.WRONG_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT ).put( QuakResourceTest.DUMMY_FILE_FOO )
 			.then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
-		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, WRONG_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT ).put( QuakResourceTest.DUMMY_FILE_FOO )
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.WRONG_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT ).put( QuakResourceTest.DUMMY_FILE_FOO )
 			.then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
-		given().auth().preemptive().basic( WRONG_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT ).put( QuakResourceTest.DUMMY_FILE_FOO )
+		given().auth().preemptive().basic( QuakTestProfile.WRONG_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT ).put( QuakResourceTest.DUMMY_FILE_FOO )
 			.then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
 		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT ).put( QuakResourceTest.DUMMY_FILE_FOO )
 			.then().statusCode( Status.OK.getStatusCode() );

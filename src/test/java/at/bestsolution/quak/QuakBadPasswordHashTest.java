@@ -1,9 +1,9 @@
 /*
  * ----------------------------------------------------------------
- * Original File Name: QuakSecurityBadPasswordHashTest.java
+ * Original File Name: QuakBadPasswordHashTest.java
  * Creation Date:      12.04.2022
- * Description: Test class file of quak security interceptor with 
- * a bad password hash user profile.       
+ * Description: Test class file of quak with a bad password hash 
+ * user profile.       
  * ----------------------------------------------------------------
 
  * ----------------------------------------------------------------
@@ -39,22 +39,21 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 
 /**
- * JUnit test cases for security interceptor of quak
- * with a bad password hash user profile.
+ * JUnit test cases of quak with a bad password hash user profile.
  * 
  * @author: kerim.yeniduenya@bestsolution.at
  */
 @QuarkusTest
 @TestProfile( QuakTestProfileBadPasswordHash.class )
 @TestMethodOrder( OrderAnnotation.class )
-class QuakSecurityBadPasswordHashTest {
+class QuakBadPasswordHashTest {
 	
 	/**
-	 * Asserts authentication is done correctly.
+	 * Asserts authentication fails with bad password hash.
 	 */
 	@Test
 	@Order( 1 )
-	void testAuthentication() {
+	void testAuthenticationWithBadPasswordHash() {
 		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).get( QuakTestProfile.BASE_URL.concat( "/" ) )
 			.then().statusCode( Status.UNAUTHORIZED.getStatusCode() );
 		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT ).put( QuakResourceTest.DUMMY_FILE_FOO )
