@@ -1,6 +1,6 @@
 /*
  * ----------------------------------------------------------------
- * Original File Name: Faculty.java
+ * Original File Name: QuakResource.java
  * Creation Date:      26.01.2022
  * Description: Class file of quak instance.       
  * ----------------------------------------------------------------
@@ -38,9 +38,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -53,9 +55,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.logging.Logger;
 
 import io.quarkus.qute.Template;
+import io.quarkus.runtime.Quarkus;
+import io.quarkus.runtime.StartupEvent;
 
 /**
  * Represents a quak instance.
@@ -67,13 +72,27 @@ public class QuakResource {
 	QuakSecurityValidator securityValidator;
 	
 	@Context
-	private UriInfo urlInfo;
+	UriInfo urlInfo;
 	
 	@Inject
     Template directory;
 	
 	private static final Logger LOG = Logger.getLogger(QuakResource.class);
 	private static final String FILE_SIZE_PATTERN = "#,###.0";
+	
+    /**
+     * Startup event of quak for checking configurations.
+     * @param event Startup event.
+     */
+    void onStart(@Observes StartupEvent event) {               
+    	LOG.info("quak is starting...");
+    	Optional<Boolean> oidcEnabled = ConfigProvider.getConfig().getOptionalValue("quarkus.oidc.enabled", Boolean.class);
+    	Optional<Boolean> userInfoRequired = ConfigProvider.getConfig().getOptionalValue("quarkus.oidc.authentication.user-info-required", Boolean.class);
+    	if ( oidcEnabled.orElse(true) && !userInfoRequired.orElse( false ) ) {
+    		LOG.error("If OpenID Connect is used, 'quarkus.oidc.authentication.user-info-required' must be set to true in application.properties.");
+    		Quarkus.asyncExit( 1 );
+    	}
+    }
 	
 	/**
 	 * @param p path of the file to be checked.

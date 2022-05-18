@@ -44,21 +44,6 @@
 			<artifactId>quarkus-arc</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>io.quarkus</groupId>
-			<artifactId>quarkus-junit5</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.rest-assured</groupId>
-			<artifactId>rest-assured</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 		    <groupId>org.apache.directory.api</groupId>
 		    <artifactId>api-ldap-model</artifactId>
 		    <version>2.1.0</version>
@@ -74,6 +59,30 @@
 		<dependency>
 		    <groupId>io.quarkus</groupId>
 		    <artifactId>quarkus-elytron-security-oauth2</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>io.quarkus</groupId>
+		    <artifactId>quarkus-oidc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-junit5</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.rest-assured</groupId>
+			<artifactId>rest-assured</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+		    <groupId>io.quarkus</groupId>
+		    <artifactId>quarkus-test-security-oidc</artifactId>
+		    <scope>test</scope>
 		</dependency>
 	</dependencies>
 	<build>

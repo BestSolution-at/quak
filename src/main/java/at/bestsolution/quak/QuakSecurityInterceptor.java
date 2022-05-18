@@ -42,6 +42,8 @@ import javax.ws.rs.ext.Provider;
 import org.jboss.logging.Logger;
 
 import io.netty.handler.codec.http.HttpMethod;
+import io.quarkus.oidc.UserInfo;
+import io.quarkus.security.identity.SecurityIdentity;
 
 /**
  * Security Interceptor to verify the repository access for a user.
@@ -55,11 +57,16 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	@Inject
 	QuakSecurityValidator securityValidator;
 	
+    @Inject
+    SecurityIdentity securityIdentity;
+	
 	private static final Logger LOG = Logger.getLogger( QuakSecurityInterceptor.class );
 	private static final String AUTHORIZATION_PROPERTY = "Authorization";
 	private static final String AUTHENTICATION_SCHEME_BASIC = "Basic";
 	private static final String AUTHENTICATION_SCHEME_BEARER = "Bearer";
 	private static final String AUTHENTICATION_RESPONSE_HEADER = "WWW-Authenticate";
+	private static final String ATTRIBUTE_USERINFO = "userinfo";
+	private static final String ATTRIBUTE_USERINFO_SUB = "sub";
 
 	/**
 	 * Filters out the unauthorized access to quak service. Valid authentication must be provided if repository of requested URL is a private one or request is a
@@ -108,20 +115,26 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 	}
 	
 	/**
-	 * Checks if user is authorized by bearer token authentication.
+	 * Checks if user is authorized by one of bearer token authentications.
 	 * @param securityContext security context of request. 
 	 * @param request quak authorization request.
 	 * @return true if authenticated, false if not.
 	 */
 	private boolean isUserAuthorizedByBearerAuth( SecurityContext securityContext, QuakAuthorizationRequest request ) {	
-		if ( securityContext.getUserPrincipal() == null || securityContext.getUserPrincipal().getName() == null ) {
-			LOG.errorf( "Bearer authentication failed for request at: %s", request.getUrlPath() );
-			return false;
+		if ( securityIdentity.getAttributes().get( ATTRIBUTE_USERINFO ) != null ) {
+			// SecurityIdentity has userinfo and sub meaning that user is authenticated with OpenID Connect tokens.
+			request.setUsername( ( (UserInfo) securityIdentity.getAttributes().get( ATTRIBUTE_USERINFO ) ).getString( ATTRIBUTE_USERINFO_SUB ) );
+		}
+		else if ( securityContext.getUserPrincipal() != null && securityContext.getUserPrincipal().getName() != null && !securityContext.getUserPrincipal().getName().isEmpty() ) {
+			// SecurityContext has UserPrincipal and Name meaning that user is authenticated with either JWT or OAuth2 tokens.
+			request.setUsername( securityContext.getUserPrincipal().getName() );
 		} 
 		else {
-			request.setUsername( securityContext.getUserPrincipal().getName() );
-			return securityValidator.isUserAuthorized( request );
+			LOG.errorf( "Bearer token authentication failed for request at: %s", request.getUrlPath() );
+			return false;
 		}
+		// Query the received username with a QuakAuthorizationRequest for authorization.
+		return securityValidator.isUserAuthorized( request );
 	}
 	
 	/**
