@@ -120,4 +120,5 @@ quak.user-permissions[0].repository-name = blueprint
 quak.user-permissions[0].url-paths[0] = /at/bestsolution/(?!.*exceptThisPath).*
 quak.user-permissions[0].may-publish = true
 ```
-Conifugration above gives user1 permisson on paths which begins with "/at/bestsolution/" and does not include "exceptThisPath".
+
+The Configuration above allows user1 to generally access paths which begin with `/at/bestsolution/*`, but denies access to paths which contain `exceptThisPath`. So for example, user1 would have access denied to `/at/bestsolution/exceptThisPath` or also to `/at/bestsolution/example/exceptThisPath`.
