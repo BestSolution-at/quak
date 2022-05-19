@@ -69,27 +69,30 @@ If you want to learn more about building native executables, please consult http
 Following is a sample configuration file placed under the path `target/config/application.properties`.
 
 ```
+quarkus.oauth2.enabled = false
+quarkus.oidc.enabled = false
 quarkus.http.port = 8089
 quarkus.http.limits.max-body-size = 1000M
-quarkus.oauth2.enabled = false
 
 quak.repositories[0].name = blueprint
 quak.repositories[0].storage-path = repos/blueprint
 quak.repositories[0].base-url = /at/bestsolution/blueprint
 quak.repositories[0].allow-redeploy = true
+quak.repositories[0].is-private = false
 ```
 
 | Configuration | Explanation | Default Value
 |-----------------|:-------------|:-------------|
-| `quarkus.http.port` 									| Port Quarkus is running on 							| 8080
-| `quarkus.http.limits.max-body-size`     				| Upload limit Quarkus has 								| 
-| `quarkus.oauth2.enabled`								| If OAuth2 is enabled									| false
-| `quarkus.oidc.enabled`									| If OpenID Connect is enabled							| false
-| `quarkus.oidc.authentication.user-info-required`	| Must be set true for quak to acquire user info		| true
-| `quak.repositories[0].name`    						| Name of the repository 								| 
-| `quak.repositories[0].storage-path`    				| Location of the artifacts 							| 
-| `quak.repositories[0].base-url`    					| Repository is served at 								| 
-| `quak.repositories[0].allow-redeploy`    				| If the same version can be redeployed  				| true
+| `quarkus.http.port` 									| Port Quarkus is running on 														| 8080 (Quarkus)
+| `quarkus.http.limits.max-body-size`     				| Upload limit Quarkus has 															| 10240K (Quarkus)
+| `quarkus.oauth2.enabled`								| If OAuth2 is enabled																| false (quak)
+| `quarkus.oidc.enabled`									| If OpenID Connect is enabled														| false (quak)
+| `quarkus.oidc.authentication.user-info-required`	| If OpenID Connect is used, this must set to true for quak to acquire user info	| true (quak)
+| `quak.repositories[0].name`    						| Name of the repository 															| 
+| `quak.repositories[0].storage-path`    				| Location of the artifacts 														| 
+| `quak.repositories[0].base-url`    					| Repository is served at 															| 
+| `quak.repositories[0].allow-redeploy`    				| If the same version can be redeployed  											| true (quak)
+| `quak.repositories[0].is-private`    					| True if it is a private repository, false if not									| false (quak)
 
 Please note that `quak.repositories` configuration is an **array** and one instance of quak can serve as many as repositories defined here.
 
@@ -104,3 +107,17 @@ Both authentication and authorization can be satisfied in quak with a simple con
 
 Please see ['Authentication and authorization in quak'](docs/AUTHORIZATION.md) for more details.
 
+
+## FAQ
+
+ - Q: How do I give a user permission for paths with an exception of a particular one?
+
+Configuration field `quak.user-permissions[].url-paths[]` is a list of permitted paths, written with regular expressions. Defining a user permission over repository with a negated regular expression can satisfy the condition:
+
+```
+quak.user-permissions[0].username = user1
+quak.user-permissions[0].repository-name = blueprint
+quak.user-permissions[0].url-paths[0] = /at/bestsolution/(?!.*exceptThisPath).*
+quak.user-permissions[0].may-publish = true
+```
+Conifugration above gives user1 permisson on paths which begins with "/at/bestsolution/" and does not include "exceptThisPath".
