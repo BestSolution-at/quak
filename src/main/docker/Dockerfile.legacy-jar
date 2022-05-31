@@ -7,21 +7,21 @@
 #
 # Then, build the image with:
 #
-# docker build -f src/main/docker/Dockerfile.legacy-jar -t quarkus/quack-legacy-jar .
+# docker build -f src/main/docker/Dockerfile.legacy-jar -t quarkus/quak-legacy-jar .
 #
 # Then run the container using:
 #
-# docker run -i --rm -p 8080:8080 quarkus/quack-legacy-jar
+# docker run -i --rm -p 8080:8080 quarkus/quak-legacy-jar
 #
 # If you want to include the debug port into your docker image
 # you will have to expose the debug port (default 5005) like this :  EXPOSE 8080 5005
 #
 # Then run the container using :
 #
-# docker run -i --rm -p 8080:8080 quarkus/quack-legacy-jar
+# docker run -i --rm -p 8080:8080 quarkus/quak-legacy-jar
 #
 ###
-FROM registry.access.redhat.com/ubi8/openjdk-11-runtime:1.10
+FROM registry.bestsolution.dev/bestsolution.at/docker-images/maven:3.8.3-zulu-debian-17-jdk
 
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en'
 
