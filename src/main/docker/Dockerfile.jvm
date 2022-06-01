@@ -21,7 +21,7 @@
 # docker run -i --rm -p 8080:8080 quarkus/quak-jvm
 #
 ###
-FROM registry.bestsolution.dev/bestsolution.at/docker-images/maven:3.8.3-zulu-debian-17-jdk
+FROM eclipse-temurin:18.0.1_10-jre-jammy
 
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en'
 
