@@ -11,14 +11,22 @@
 #
 # Then run the container using:
 #
-# docker run -i --rm -p 8080:8080 quarkus/quak-legacy-jar
+# docker run -i -v $(pwd)/repositories/:/deployments/repositories/ --rm -p 8080:8080 quarkus/quak-legacy-jar
+#
+# Volume directory name "repositories" can be changed and quak repositories must have storage-path 
+# pointing under this directory.
+#
+# If you want to run with an updated configuration, you can to mount application.properties file
+# to "/deployments/config/" directory like this:
+#
+# docker run -i -v $(pwd)/repositories/:/deployments/repositories/ --mount type=bind,source=$(pwd)/src/main/resources/application.properties,target=/deployments/config/application.properties --rm -p 8080:8080 quarkus/quak-legacy-jar
 #
 # If you want to include the debug port into your docker image
 # you will have to expose the debug port (default 5005) like this :  EXPOSE 8080 5005
 #
 # Then run the container using :
 #
-# docker run -i --rm -p 8080:8080 quarkus/quak-legacy-jar
+# docker run -i -v $(pwd)/repositories/:/deployments/repositories/ --rm -p 8080:8080 quarkus/quak-legacy-jar
 #
 ###
 FROM eclipse-temurin:18.0.1_10-jre-jammy
@@ -28,10 +36,11 @@ ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en'
 # Configure the JAVA_OPTIONS, you can add -XshowSettings:vm to also display the heap size.
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
 
-COPY target/lib/* /deployments/lib/
-COPY target/*-runner.jar /deployments/quarkus-run.jar
+WORKDIR /deployments
+
+COPY target/lib/* lib/
+COPY target/*-runner.jar quarkus-run.jar
 
 EXPOSE 8080
-USER 185
 
-ENTRYPOINT [ "java", "-jar", "/deployments/quarkus-run.jar" ]
+ENTRYPOINT [ "java", "-jar", "quarkus-run.jar" ]

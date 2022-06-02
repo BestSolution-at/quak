@@ -11,7 +11,15 @@
 #
 # Then run the container using:
 #
-# docker run -i --rm -p 8080:8080 quarkus/quak
+# docker run -i -v $(pwd)/repositories/:/work/repositories/ --rm -p 8080:8080 quarkus/quak
+#
+# Volume directory name "repositories" can be changed and quak repositories must have storage-path 
+# pointing under this directory.
+#
+# If you want to run with an updated configuration, you can to mount application.properties file
+# to "/work/config/" directory like this:
+#
+# docker run -i -v $(pwd)/repositories/:/work/repositories/ --mount type=bind,source=$(pwd)/src/main/resources/application.properties,target=/work/config/application.properties --rm -p 8080:8080 quarkus/quak
 #
 ###
 FROM quay.io/quarkus/quarkus-micro-image:1.0
@@ -22,6 +30,6 @@ RUN chown 1001 /work \
 COPY --chown=1001:root target/*-runner /work/application
 
 EXPOSE 8080
-USER 1001
+USER root
 
 CMD ["./application", "-Dquarkus.http.host=0.0.0.0"]
