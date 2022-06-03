@@ -1,5 +1,5 @@
 ####
-# This Dockerfile is used in order to build a container that runs the Quarkus application in native (no JVM) mode
+# This Dockerfile is used in order to build a quak container that runs the Quarkus application in native (no JVM) mode
 #
 # Before building the container image run:
 #
@@ -11,23 +11,20 @@
 #
 # Then run the container using:
 #
-# docker run -i -v $(pwd)/repositories/:/work/repositories/ --rm -p 8080:8080 quarkus/quak
+# docker run -i -v quak-repositories/:/quak/repositories/ -v quak-config/:/quak/config/ --rm -p 8080:8080 quarkus/quak
 #
-# Volume directory name "repositories" can be changed and quak repositories must have storage-path 
+# Volume directory "/repositories" can be changed and quak repositories must have storage-path 
 # pointing under this directory.
-#
-# If you want to run with an updated configuration, you can to mount application.properties file
-# to "/work/config/" directory like this:
-#
-# docker run -i -v $(pwd)/repositories/:/work/repositories/ --mount type=bind,source=/some/where/else/application.properties,target=/work/config/application.properties --rm -p 8080:8080 quarkus/quak
 #
 ###
 FROM quay.io/quarkus/quarkus-micro-image:1.0
-WORKDIR /work/
-RUN chown 1001 /work \
-    && chmod "g+rwX" /work \
-    && chown 1001:root /work
-COPY --chown=1001:root target/*-runner /work/application
+
+WORKDIR /quak
+
+RUN chown 1001 /quak \
+    && chmod "g+rwX" /quak \
+    && chown 1001:root /quak
+COPY --chown=1001:root target/*-runner /quak/application
 
 EXPOSE 8080
 USER root

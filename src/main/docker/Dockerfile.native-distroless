@@ -1,5 +1,5 @@
 ####
-# This Dockerfile is used in order to build a distroless container that runs the Quarkus application in native (no JVM) mode
+# This Dockerfile is used in order to build a quak distroless container that runs the Quarkus application in native (no JVM) mode
 #
 # Before building the container image run:
 #
@@ -11,19 +11,17 @@
 #
 # Then run the container using:
 #
-# docker run -i -v $(pwd)/repositories/:/repositories/ --rm -p 8080:8080 quarkus/quak
+# docker run -i -v quak-repositories/:/quak/repositories/ -v quak-config/:/quak/config/ --rm -p 8080:8080 quarkus/quak
 #
-# Volume directory name "repositories" can be changed and quak repositories must have storage-path 
+# Volume directory "/repositories" can be changed and quak repositories must have storage-path 
 # pointing under this directory.
-#
-# If you want to run with an updated configuration, you can to mount application.properties file
-# to "/config/" directory like this:
-#
-# docker run -i -v $(pwd)/repositories/:/repositories/ --mount type=bind,source=/some/where/else/application.properties,target=/config/application.properties --rm -p 8080:8080 quarkus/quak
 #
 ###
 FROM quay.io/quarkus/quarkus-distroless-image:1.0
-COPY target/*-runner /application
+
+WORKDIR /quak
+
+COPY target/*-runner application
 
 EXPOSE 8080
 USER root

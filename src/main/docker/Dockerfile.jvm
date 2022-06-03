@@ -1,5 +1,5 @@
 ####
-# This Dockerfile is used in order to build a container that runs the Quarkus application in JVM mode
+# This Dockerfile is used in order to build a quak container that runs the Quarkus application in JVM mode
 #
 # Before building the container image run:
 #
@@ -11,22 +11,10 @@
 #
 # Then run the container using:
 #
-# docker run -i -v $(pwd)/repositories/:/deployments/repositories/ --rm -p 8080:8080 quarkus/quak-jvm
+# docker run -i -v quak-repositories/:/quak/repositories/ -v quak-config/:/quak/config/ --rm -p 8080:8080 quarkus/quak-jvm
 #
-# Volume directory name "repositories" can be changed and quak repositories must have storage-path 
+# Volume directory "/repositories" can be changed and quak repositories must have storage-path 
 # pointing under this directory.
-#
-# If you want to run with an updated configuration, you can to mount application.properties file
-# to "/deployments/config/" directory like this:
-#
-# docker run -i -v $(pwd)/repositories/:/deployments/repositories/ --mount type=bind,source=/some/where/else/application.properties,target=/deployments/config/application.properties --rm -p 8080:8080 quarkus/quak-jvm
-#
-# If you want to include the debug port into your docker image
-# you will have to expose the debug port (default 5005) like this :  EXPOSE 8080 5005
-#
-# Then run the container using :
-#
-# docker run -i -v $(pwd)/repositories/:/deployments/repositories/ --rm -p 8080:8080 quarkus/quak-jvm
 #
 ###
 FROM eclipse-temurin:18.0.1_10-jre-jammy
@@ -36,7 +24,7 @@ ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en'
 # Configure the JAVA_OPTIONS, you can add -XshowSettings:vm to also display the heap size.
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
 
-WORKDIR /deployments
+WORKDIR /quak
 
 # We make four distinct layers so if there are application changes the library layers can be re-used
 COPY target/quarkus-app/lib/ lib/
