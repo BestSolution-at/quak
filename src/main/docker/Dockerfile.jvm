@@ -7,7 +7,7 @@
 #
 # Then, build the image with:
 #
-# docker build -f src/main/docker/Dockerfile.jvm -t quarkus/quak-jvm .
+# docker build --build-arg UID=$UID -f src/main/docker/Dockerfile.jvm -t quarkus/quak-jvm .
 #
 # Then run the container using:
 #
@@ -23,6 +23,15 @@ ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en'
 
 # Configure the JAVA_OPTIONS, you can add -XshowSettings:vm to also display the heap size.
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
+
+# Defines argument which can be passed during build time.
+ARG UID=1000
+
+# User with given UID is created.
+RUN useradd -Ms /bin/bash -g root -G sudo -u $UID quakrunner
+
+# Switch to quak runner user by default.
+USER quakrunner
 
 WORKDIR /quak
 

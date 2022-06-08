@@ -7,7 +7,7 @@
 #
 # Then, build the image with:
 #
-# docker build -f src/main/docker/Dockerfile.native -t quarkus/quak .
+# docker build --build-arg UID=$UID -f src/main/docker/Dockerfile.native -t quarkus/quak .
 #
 # Then run the container using:
 #
@@ -19,14 +19,16 @@
 ###
 FROM quay.io/quarkus/quarkus-micro-image:1.0
 
-WORKDIR /quak
+# User ID argument which can be passed during build time.
+ARG UID=1000
 
-RUN chown 1001 /quak \
-    && chmod "g+rwX" /quak \
-    && chown 1001:root /quak
-COPY --chown=1001:root target/*-runner /quak/application
+# Switch to quak user by default.
+USER $UID
+
+WORKDIR /quak
+    
+COPY target/*-runner application
 
 EXPOSE 8080
-USER root
 
 CMD ["./application", "-Dquarkus.http.host=0.0.0.0"]

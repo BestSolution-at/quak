@@ -7,7 +7,7 @@
 #
 # Then, build the image with:
 #
-# docker build -f src/main/docker/Dockerfile.native-distroless -t quarkus/quak .
+# docker build --build-arg UID=$UID -f src/main/docker/Dockerfile.native-distroless -t quarkus/quak .
 #
 # Then run the container using:
 #
@@ -19,11 +19,16 @@
 ###
 FROM quay.io/quarkus/quarkus-distroless-image:1.0
 
+# User ID argument which can be passed during build time.
+ARG UID=1000
+
+# Switch to quak user by default.
+USER $UID
+
 WORKDIR /quak
 
 COPY target/*-runner application
 
 EXPOSE 8080
-USER root
 
 CMD ["./application", "-Dquarkus.http.host=0.0.0.0"]
