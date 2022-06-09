@@ -1,22 +1,47 @@
 ####
 # This Dockerfile is used in order to build a quak distroless container that runs the Quarkus application in native (no JVM) mode
 #
-# Before building the container image run:
+# Build the image like:
 #
-# ./mvnw package -Pnative
+# docker build --build-arg UID=$UID --build-arg VERSION=VERSION_NO --build-arg REVISION=REVISION_NO -f src/main/docker/Dockerfile.native-distroless -t quarkus/quak .
 #
-# Then, build the image with:
+# Run the container like:
 #
-# docker build --build-arg UID=$UID -f src/main/docker/Dockerfile.native-distroless -t quarkus/quak .
-#
-# Then run the container using:
-#
-# docker run -i -v quak-repositories/:/quak/repositories/ -v quak-config/:/quak/config/ --rm -p 8080:8080 quarkus/quak
+# docker run -i -u $(id -u) -v quak-repositories/:/quak/repositories/ -v quak-config/:/quak/config/ --rm -p 8080:8080 quarkus/quak
 #
 # Volume directory "/repositories" can be changed and quak repositories must have storage-path 
 # pointing under this directory.
 #
 ###
+
+# Build stage
+FROM quay.io/quarkus/ubi-quarkus-native-image:22.0-java11 AS build
+
+COPY --chown=quarkus:quarkus . /home/quak-build
+
+USER quarkus
+
+WORKDIR /home/quak-build
+
+RUN ./mvnw -B org.apache.maven.plugins:maven-dependency-plugin:3.1.2:go-offline
+
+RUN ./mvnw package -Pnative
+
+# Build-time metadata stage
+ARG BUILD_DATE
+ARG VERSION
+ARG REVISION
+LABEL org.opencontainers.image.created=$BUILD_DATE \
+      org.opencontainers.image.title="quak" \
+      org.opencontainers.image.description="Lightweight Maven repository server which uses Quarkus, the Supersonic Subatomic Java Framework." \
+      org.opencontainers.image.url="https://www.bestsolution.at/" \
+      org.opencontainers.image.revision=$REVISION \
+      org.opencontainers.image.source="https://github.com/BestSolution-at/quak" \
+      org.opencontainers.image.documentation="https://github.com/BestSolution-at/quak" \
+      org.opencontainers.image.vendor="BestSolution.at" \
+      org.opencontainers.image.version=$VERSION
+
+# Run stage
 FROM quay.io/quarkus/quarkus-distroless-image:1.0
 
 # User ID argument which can be passed during build time.
@@ -27,7 +52,7 @@ USER $UID
 
 WORKDIR /quak
 
-COPY target/*-runner application
+COPY --from=build /home/quak-build/target/*-runner application
 
 EXPOSE 8080
 
