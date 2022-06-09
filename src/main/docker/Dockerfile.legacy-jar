@@ -3,11 +3,11 @@
 #
 # Build the image like:
 #
-# docker build --build-arg UID=$UID --build-arg VERSION=VERSION_NO --build-arg REVISION=REVISION_NO -f src/main/docker/Dockerfile.legacy-jar -t quarkus/quak-legacy-jar .
+# docker build --build-arg VERSION=VERSION_NO --build-arg REVISION=REVISION_NO -f src/main/docker/Dockerfile.legacy-jar -t quarkus/quak-legacy-jar .
 #
 # Run the container like:
 #
-# docker run -i -u $(id -u) -v quak-repositories/:/quak/repositories/ -v quak-config/:/quak/config/ --rm -p 8080:8080 quarkus/quak-legacy-jar
+# docker run -i -u $(id -u) --mount type=bind,source=$(pwd)/repositories/,target=/quak/repositories/ --mount type=bind,source=$(pwd)/config/,target=/quak/config/ --rm -p 8080:8080 quarkus/quak-legacy-jar
 #
 # Volume directory "/repositories" can be changed and quak repositories must have storage-path 
 # pointing under this directory.
@@ -45,11 +45,11 @@ ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en'
 # Configure the JAVA_OPTIONS, you can add -XshowSettings:vm to also display the heap size.
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
 
-# User ID
-ARG UID=1000
+# quak User ID
+ARG QUAK_UID=1000
 
-# User with given UID is created.
-RUN useradd -Ms /bin/bash -g root -G sudo -u $UID quakrunner
+# User with given ID is added.
+RUN useradd -d /quak -s /bin/bash -u $QUAK_UID quakrunner
 
 # Switch to quak runner user by default.
 USER quakrunner

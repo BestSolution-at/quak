@@ -3,11 +3,11 @@
 #
 # Build the image like:
 #
-# docker build --build-arg UID=$UID --build-arg VERSION=VERSION_NO --build-arg REVISION=REVISION_NO -f src/main/docker/Dockerfile.native -t quarkus/quak .
+# docker build --build-arg VERSION=VERSION_NO --build-arg REVISION=REVISION_NO -f src/main/docker/Dockerfile.native -t quarkus/quak .
 #
 # Run the container like:
 #
-# docker run -i -u $(id -u) -v quak-repositories/:/quak/repositories/ -v quak-config/:/quak/config/ --rm -p 8080:8080 quarkus/quak
+# docker run -i -u $(id -u) --mount type=bind,source=$(pwd)/repositories/,target=/quak/repositories/ --mount type=bind,source=$(pwd)/config/,target=/quak/config/ --rm -p 8080:8080 quarkus/quak
 #
 # Volume directory "/repositories" can be changed and quak repositories must have storage-path 
 # pointing under this directory.
@@ -44,11 +44,11 @@ LABEL org.opencontainers.image.created=$BUILD_DATE \
 # Run stage
 FROM quay.io/quarkus/quarkus-micro-image:1.0
 
-# User ID argument which can be passed during build time.
-ARG UID=1000
+# quak User ID
+ARG QUAK_UID=1000
 
 # Switch to quak user by default.
-USER $UID
+USER $QUAK_UID
 
 WORKDIR /quak
     
