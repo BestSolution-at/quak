@@ -45,22 +45,26 @@ ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en'
 # Configure the JAVA_OPTIONS, you can add -XshowSettings:vm to also display the heap size.
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
 
+WORKDIR /quak
+
 # quak User ID
 ARG QUAK_UID=1000
 
 # User with given ID is added.
 RUN useradd -d /quak -s /bin/bash -u $QUAK_UID quakrunner
 
+RUN chown quakrunner .
+
 # Switch to quak runner user by default.
 USER quakrunner
-
-WORKDIR /quak
 
 # We make four distinct layers so if there are application changes the library layers can be re-used
 COPY --from=build /home/quak-build/target/quarkus-app/lib/ lib/
 COPY --from=build /home/quak-build/target/quarkus-app/*.jar .
 COPY --from=build /home/quak-build/target/quarkus-app/app/ app/
 COPY --from=build /home/quak-build/target/quarkus-app/quarkus/ quarkus/
+
+RUN [ -d repositories ] || mkdir repositories
 
 EXPOSE 8080
 
