@@ -44,15 +44,19 @@ LABEL org.opencontainers.image.created=$BUILD_DATE \
 # Run stage
 FROM quay.io/quarkus/quarkus-micro-image:1.0
 
+WORKDIR /quak
+
 # quak User ID
 ARG QUAK_UID=1000
 
+RUN chown $QUAK_UID .
+
 # Switch to quak user by default.
 USER $QUAK_UID
-
-WORKDIR /quak
     
 COPY --from=build /home/quak-build/target/*-runner application
+
+RUN [ -d repositories ] || mkdir repositories
 
 EXPOSE 8080
 
