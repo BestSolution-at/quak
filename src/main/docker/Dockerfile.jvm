@@ -53,7 +53,8 @@ ARG QUAK_UID=1000
 # User with given ID is added.
 RUN useradd -d /quak -s /bin/bash -u $QUAK_UID quakrunner
 
-RUN chown quakrunner .
+RUN [ -d repositories ] || mkdir repositories
+RUN chown quakrunner repositories
 
 # Switch to quak runner user by default.
 USER quakrunner
@@ -63,8 +64,6 @@ COPY --from=build /home/quak-build/target/quarkus-app/lib/ lib/
 COPY --from=build /home/quak-build/target/quarkus-app/*.jar .
 COPY --from=build /home/quak-build/target/quarkus-app/app/ app/
 COPY --from=build /home/quak-build/target/quarkus-app/quarkus/ quarkus/
-
-RUN [ -d repositories ] || mkdir repositories
 
 EXPOSE 8080
 

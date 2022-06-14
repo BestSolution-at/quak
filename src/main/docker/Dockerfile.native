@@ -49,14 +49,13 @@ WORKDIR /quak
 # quak User ID
 ARG QUAK_UID=1000
 
-RUN chown $QUAK_UID .
+RUN [ -d repositories ] || mkdir repositories
+RUN chown $QUAK_UID repositories
 
 # Switch to quak user by default.
 USER $QUAK_UID
     
 COPY --from=build /home/quak-build/target/*-runner application
-
-RUN [ -d repositories ] || mkdir repositories
 
 EXPOSE 8080
 
