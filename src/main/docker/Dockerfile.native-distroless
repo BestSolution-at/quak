@@ -9,6 +9,8 @@
 #
 # docker run -i -u $(id -u) --mount type=bind,source=$(pwd)/repositories/,target=/quak/repositories/ --mount type=bind,source=$(pwd)/config/,target=/quak/config/ --rm -p 8080:8080 quarkus/quak
 #
+# Please note that for distroless images user ID must be provided and repositories directory must be mounted, since distroless images lack shell functionalities. 
+#
 # Volume directory "/repositories" can be changed and quak repositories must have storage-path 
 # pointing under this directory.
 #
