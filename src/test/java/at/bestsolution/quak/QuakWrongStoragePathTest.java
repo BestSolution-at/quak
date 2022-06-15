@@ -55,7 +55,7 @@ class QuakWrongStoragePathTest {
 	@Test
 	@Order( 1 )
 	@Launch(value = {}, exitCode = 1)
-	void testUserInfoRequiredFalse( LaunchResult result ) {
+	void testWrongStoragePath( LaunchResult result ) {
 		assertEquals( 1, result.exitCode() );
 	}
 }
