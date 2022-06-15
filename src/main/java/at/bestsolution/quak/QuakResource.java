@@ -28,6 +28,7 @@ package at.bestsolution.quak;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.FileTime;
 import java.text.DecimalFormat;
@@ -58,6 +59,7 @@ import javax.ws.rs.core.UriInfo;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.logging.Logger;
 
+import at.bestsolution.quak.QuakConfiguration.Repository;
 import io.quarkus.qute.Template;
 import io.quarkus.runtime.Quarkus;
 import io.quarkus.runtime.StartupEvent;
@@ -71,6 +73,9 @@ public class QuakResource {
 	@Inject
 	QuakSecurityValidator securityValidator;
 	
+	@Inject
+	QuakConfigurationController configurationController;
+	
 	@Context
 	UriInfo urlInfo;
 	
@@ -78,6 +83,7 @@ public class QuakResource {
     Template directory;
 	
 	private static final Logger LOG = Logger.getLogger(QuakResource.class);
+	private static final java.nio.file.Path REPOSITORIES_PATH = Paths.get( "repositories/" ); 
 	private static final String FILE_SIZE_PATTERN = "#,###.0";
 	
     /**
@@ -90,6 +96,11 @@ public class QuakResource {
     	Optional<Boolean> userInfoRequired = ConfigProvider.getConfig().getOptionalValue("quarkus.oidc.authentication.user-info-required", Boolean.class);
     	if ( oidcEnabled.orElse(true) && !userInfoRequired.orElse( false ) ) {
     		LOG.error("If OpenID Connect is used, 'quarkus.oidc.authentication.user-info-required' must be set to true in application.properties.");
+    		Quarkus.asyncExit( 1 );
+    	}
+    	Optional<Repository> wrongPathRepo = configurationController.getRepositories().stream().filter( r -> r.storagePath().isAbsolute() ).findFirst();
+    	if ( wrongPathRepo.isPresent() ) {
+    		LOG.errorf( "Repository with name '%s' has absolute storage path. Please use a relative path to be used under '../repositories' directory.", wrongPathRepo.get().name() );
     		Quarkus.asyncExit( 1 );
     	}
     }
@@ -117,17 +128,17 @@ public class QuakResource {
 	 */
 	private java.nio.file.Path resolveFileSystemPath(QuakRepository repository, String url) {
 		int length = repository.getBaseUrl().length();
-		String relative = url.substring( length );
+		String relativeURL = url.substring( length );
 		
-		if ( relative.length() > 0 && relative.charAt( 0 ) == '/' ) {
-			relative = relative.substring( 1 );
+		if ( relativeURL.length() > 0 && relativeURL.charAt( 0 ) == '/' ) {
+			relativeURL = relativeURL.substring( 1 );
 		}
 		
-		if ( relative.isEmpty() ) {
+		if ( relativeURL.isEmpty() ) {
 			return repository.getStoragePath();
 		}
 		
-		return repository.getStoragePath().resolve( relative ).normalize();
+		return REPOSITORIES_PATH.resolve( repository.getStoragePath() ).resolve( relativeURL ).normalize();
 	}
 	
 	private String getFormattedFileSize(long size) {

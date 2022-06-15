@@ -9,9 +9,6 @@
 #
 # docker run -i -u $(id -u) --mount type=bind,source=$(pwd)/repositories/,target=/quak/repositories/ --mount type=bind,source=$(pwd)/config/,target=/quak/config/ --rm -p 8080:8080 quarkus/quak-legacy-jar
 #
-# Volume directory "/repositories" can be changed and quak repositories must have storage-path 
-# pointing under this directory.
-#
 ###
 
 # Build stage

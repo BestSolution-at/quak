@@ -11,9 +11,6 @@
 #
 # Please note that for distroless images user ID must be provided and repositories directory must be mounted, since distroless images lack shell functionalities. 
 #
-# Volume directory "/repositories" can be changed and quak repositories must have storage-path 
-# pointing under this directory.
-#
 ###
 
 # Build stage
