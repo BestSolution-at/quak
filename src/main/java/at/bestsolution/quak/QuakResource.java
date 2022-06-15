@@ -100,7 +100,7 @@ public class QuakResource {
     	}
     	Optional<Repository> wrongPathRepo = configurationController.getRepositories().stream().filter( r -> r.storagePath().isAbsolute() ).findFirst();
     	if ( wrongPathRepo.isPresent() ) {
-    		LOG.errorf( "Repository with name '%s' has absolute storage path. Please use a relative path to be used under '../repositories' directory.", wrongPathRepo.get().name() );
+    		LOG.errorf( "Repository '%s' has an absolute storage path. This is not allowed. Repository directories will reside below the mandatory '$QUAK_SERVICE_USER/repositories' directory.", wrongPathRepo.get().name() );
     		Quarkus.asyncExit( 1 );
     	}
     }
