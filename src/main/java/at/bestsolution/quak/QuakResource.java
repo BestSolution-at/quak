@@ -135,7 +135,7 @@ public class QuakResource {
 		}
 		
 		if ( relativeURL.isEmpty() ) {
-			return repository.getStoragePath();
+			return REPOSITORIES_PATH.resolve( repository.getStoragePath() );
 		}
 		
 		return REPOSITORIES_PATH.resolve( repository.getStoragePath() ).resolve( relativeURL ).normalize();
