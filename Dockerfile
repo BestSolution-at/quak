@@ -18,7 +18,7 @@ COPY . /home/quak-build
 
 WORKDIR /home/quak-build
 
-RUN apt-get install mvn
+RUN apt-get update && apt-get -y install mvn
 RUN mvn package
 # RUN mvn -N wrapper:wrapper
 # RUN ./mvnw package
