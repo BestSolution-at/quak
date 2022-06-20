@@ -18,6 +18,8 @@ COPY . /home/quak-build
 
 WORKDIR /home/quak-build
 
+RUN mvn -N wrapper:wrapper
+
 RUN ./mvnw package -Dquarkus.package.type=legacy-jar
 
 # Build-time metadata stage
