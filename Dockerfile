@@ -18,10 +18,10 @@ COPY . /home/quak-build
 
 WORKDIR /home/quak-build
 
-#RUN mvn -N wrapper:wrapper
-#RUN ./mvnw package
-
+RUN apt-get install mvn
 RUN mvn package
+# RUN mvn -N wrapper:wrapper
+# RUN ./mvnw package
 
 # Build-time metadata stage
 ARG BUILD_DATE
