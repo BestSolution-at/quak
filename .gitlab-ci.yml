@@ -2,6 +2,7 @@ stages:
   - maven-compile
   - maven-verify
   - maven-sonar
+  - docker-build
   
 include:
   - project: 'BestSolution.at/gitlab-pipelines'
@@ -11,9 +12,18 @@ include:
       - '/jobs/maven/compile.yml'
       - '/jobs/maven/verify.yml'
       - '/jobs/maven/sonar.yml'
+      - '/jobs/docker/build.yml'
 
 maven-verify:
   artifacts:
     reports:
       junit:
         - ./**/target/surefire-reports/TEST-*Test.xml
+        
+docker-build:
+  variables:
+    IMAGE_NAME: "quak"
+    DOCKER_EXTRA_TAG: "quak"
+
+        
+        
