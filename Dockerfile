@@ -11,7 +11,6 @@
 #
 ###
 
-# Run stage
 FROM eclipse-temurin:18.0.1_10-jre-jammy
 
 # Build-time metadata stage

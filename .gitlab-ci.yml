@@ -23,7 +23,5 @@ maven-verify:
 docker-build:
   variables:
     IMAGE_NAME: "quak"
-    DOCKER_EXTRA_TAG: "quak"
-
         
         
