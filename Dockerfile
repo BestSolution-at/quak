@@ -18,9 +18,10 @@ COPY . /home/quak-build
 
 WORKDIR /home/quak-build
 
-RUN mvn -N wrapper:wrapper
+#RUN mvn -N wrapper:wrapper
+#RUN ./mvnw package
 
-RUN ./mvnw package
+RUN mvn package
 
 # Build-time metadata stage
 ARG BUILD_DATE
