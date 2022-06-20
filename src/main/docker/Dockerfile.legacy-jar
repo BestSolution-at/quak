@@ -1,37 +1,64 @@
 ####
-# This Dockerfile is used in order to build a container that runs the Quarkus application in JVM mode
+# This Dockerfile is used in order to build a quak container that runs the Quarkus application in JVM legacy mode
 #
-# Before building the container image run:
+# Build the image like:
 #
-# ./mvnw package -Dquarkus.package.type=legacy-jar
+# docker build --build-arg VERSION=VERSION_NO --build-arg REVISION=REVISION_NO -f src/main/docker/Dockerfile.legacy-jar -t quarkus/quak-legacy-jar .
 #
-# Then, build the image with:
+# Run the container like:
 #
-# docker build -f src/main/docker/Dockerfile.legacy-jar -t quarkus/quack-legacy-jar .
-#
-# Then run the container using:
-#
-# docker run -i --rm -p 8080:8080 quarkus/quack-legacy-jar
-#
-# If you want to include the debug port into your docker image
-# you will have to expose the debug port (default 5005) like this :  EXPOSE 8080 5005
-#
-# Then run the container using :
-#
-# docker run -i --rm -p 8080:8080 quarkus/quack-legacy-jar
+# docker run -i -u $(id -u) --mount type=bind,source=$(pwd)/repositories/,target=/quak/repositories/ --mount type=bind,source=$(pwd)/config/,target=/quak/config/ --rm -p 8080:8080 quarkus/quak-legacy-jar
 #
 ###
-FROM registry.access.redhat.com/ubi8/openjdk-11-runtime:1.10
+
+# Build stage
+FROM eclipse-temurin:18.0.1_10-jdk-jammy AS build
+
+COPY . /home/quak-build
+
+WORKDIR /home/quak-build
+
+RUN ./mvnw package -Dquarkus.package.type=legacy-jar
+
+# Build-time metadata stage
+ARG BUILD_DATE
+ARG VERSION
+ARG REVISION
+LABEL org.opencontainers.image.created=$BUILD_DATE \
+      org.opencontainers.image.title="quak" \
+      org.opencontainers.image.description="Lightweight Maven repository server which uses Quarkus, the Supersonic Subatomic Java Framework." \
+      org.opencontainers.image.url="https://www.bestsolution.at/" \
+      org.opencontainers.image.revision=$REVISION \
+      org.opencontainers.image.source="https://github.com/BestSolution-at/quak" \
+      org.opencontainers.image.documentation="https://github.com/BestSolution-at/quak" \
+      org.opencontainers.image.vendor="BestSolution.at" \
+      org.opencontainers.image.version=$VERSION
+
+# Run stage
+FROM eclipse-temurin:18.0.1_10-jre-jammy
 
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en'
 
 # Configure the JAVA_OPTIONS, you can add -XshowSettings:vm to also display the heap size.
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
 
-COPY target/lib/* /deployments/lib/
-COPY target/*-runner.jar /deployments/quarkus-run.jar
+WORKDIR /quak
+
+# quak User ID
+ARG QUAK_UID=1000
+
+# User with given ID is added.
+RUN useradd -d /quak -s /bin/bash -u $QUAK_UID quakrunner
+
+RUN [ -d repositories ] || mkdir repositories
+RUN chown quakrunner repositories
+
+# Switch to quak runner user by default.
+USER quakrunner
+
+COPY --from=build /home/quak-build/target/lib/* lib/
+COPY --from=build /home/quak-build/target/*-runner.jar quarkus-run.jar
 
 EXPOSE 8080
-USER 185
 
-ENTRYPOINT [ "java", "-jar", "/deployments/quarkus-run.jar" ]
+ENTRYPOINT [ "java", "-jar", "quarkus-run.jar" ]
