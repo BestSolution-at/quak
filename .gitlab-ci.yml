@@ -58,7 +58,7 @@ docker-hub-deploy:
     - .docker-dind-service
   variables:
     IMAGE_NAME: "quak"
-    DOCKERHUB_IMAGE_BASE: "docker.io/bestsolutionat/quak"
+    DOCKERHUB_IMAGE_BASE: "bestsolutionat/quak"
   before_script:
     - !reference [.docker-build, before_script]
     - |
