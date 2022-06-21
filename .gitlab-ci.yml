@@ -16,11 +16,11 @@ include:
       #- '/jobs/maven/sonar.yml'
       - '/jobs/docker/build.yml'
 
-maven-verify:
-  artifacts:
-    reports:
-      junit:
-        - ./**/target/surefire-reports/TEST-*Test.xml
+#maven-verify:
+#  artifacts:
+#    reports:
+#      junit:
+#        - ./**/target/surefire-reports/TEST-*Test.xml
 
 collect-metadata:
   extends: .maven
