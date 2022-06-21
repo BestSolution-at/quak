@@ -24,10 +24,7 @@ maven-verify:
 collect-metadata:
   extends: .maven
   stage: docker-prepare
-  variables:
-    GIT_STRATEGY: none
   script:
-    - rm -f buildinfo.env
     - echo "QUAK_BUILD_TIME=$(date --date="${CI_PIPELINE_CREATED_AT}" --utc +%Y-%m-%dT%H:%M:%SZ)" >> buildinfo.env
     - cd $CI_PARENT_POM_LOCATION
     - mvn $CI_MAVEN_OPTS $ADDITIONAL_MAVEN_OPTS org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression="project.version" -Doutput=maven-project-version.txt
