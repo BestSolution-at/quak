@@ -26,12 +26,12 @@ collect-metadata:
   stage: docker-prepare
   variables:
     GIT_STRATEGY: none
-    CI_MAVEN_OPTS: "--fail-at-end"
+    CI_MAVEN_OPTS: ""
   script:
     - rm -f buildinfo.env
-    - echo "QUAK_BUILD_TIME=$(date --date="${CI_PIPELINE_CREATED_AT}" --rfc-3339=seconds)" >> buildinfo.env
+    - echo QUAK_BUILD_TIME=\"$(date --date="${CI_PIPELINE_CREATED_AT}" --utc +%Y-%m-%dT%H:%M:%SZ)\" >> buildinfo.env
     - cd $CI_PARENT_POM_LOCATION
-    - echo "QUAK_VERSION=$(mvn $CI_MAVEN_OPTS $ADDITIONAL_MAVEN_OPTS help:evaluate -Dexpression=project.version -q -DforceStdout)" >> ${CI_PROJECT_DIR}/buildinfo.env
+    - echo QUAK_VERSION=\"$(mvn $CI_MAVEN_OPTS $ADDITIONAL_MAVEN_OPTS help:evaluate -Dexpression="project.version" -q -DforceStdout)\" >> ${CI_PROJECT_DIR}/buildinfo.env
   rules:
     - !reference [docker-build, rules]
   needs: []
