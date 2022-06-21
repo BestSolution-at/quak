@@ -1,7 +1,7 @@
 stages:
   - maven-compile
-  #- maven-verify
-  #- maven-sonar
+  - maven-verify
+  - maven-sonar
   - docker-prepare
   - docker-build
   - docker-deploy
@@ -12,15 +12,15 @@ include:
     file: 
       - '/templates/maven-base.yml'
       - '/jobs/maven/compile.yml'
-      #- '/jobs/maven/verify.yml'
-      #- '/jobs/maven/sonar.yml'
+      - '/jobs/maven/verify.yml'
+      - '/jobs/maven/sonar.yml'
       - '/jobs/docker/build.yml'
 
-#maven-verify:
-#  artifacts:
-#    reports:
-#      junit:
-#        - ./**/target/surefire-reports/TEST-*Test.xml
+maven-verify:
+  artifacts:
+    reports:
+      junit:
+        - ./**/target/surefire-reports/TEST-*Test.xml
 
 collect-metadata:
   extends: .maven
