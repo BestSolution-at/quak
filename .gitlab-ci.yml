@@ -62,7 +62,7 @@ docker-hub-deploy:
     - !reference [.docker-build, before_script]
     - |
       echo "Logging in to Docker Hub with credentials..."
-      echo "$DOCKER_HUB_TOKEN" | docker login -u "$DOCKER_HUB_USER" --password-stdin"
+      echo "$DOCKER_HUB_TOKEN" | docker login -u "$DOCKER_HUB_USER" --password-stdin
   script:
     - docker pull ${IMAGE_TAGGED}
     - docker tag ${IMAGE_TAGGED} ${DOCKERHUB_IMAGE_BASE}:${QUAK_VERSION}
