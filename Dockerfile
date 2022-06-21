@@ -13,7 +13,6 @@
 
 FROM eclipse-temurin:18.0.1_10-jre-jammy
 
-# Build-time metadata stage
 LABEL org.opencontainers.image.title="quak" \
       org.opencontainers.image.description="Lightweight Maven repository server which uses Quarkus, the Supersonic Subatomic Java Framework." \
       org.opencontainers.image.url="https://www.bestsolution.at/" \
