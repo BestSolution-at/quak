@@ -26,15 +26,20 @@ collect-metadata:
   stage: docker-prepare
   variables:
     GIT_STRATEGY: none
-    CI_MAVEN_OPTS: ""
   script:
     - rm -f buildinfo.env
-    - echo QUAK_BUILD_TIME=\"$(date --date="${CI_PIPELINE_CREATED_AT}" --utc +%Y-%m-%dT%H:%M:%SZ)\" >> buildinfo.env
+    - echo "QUAK_BUILD_TIME=$(date --date="${CI_PIPELINE_CREATED_AT}" --utc +%Y-%m-%dT%H:%M:%SZ)" >> buildinfo.env
     - cd $CI_PARENT_POM_LOCATION
-    - echo QUAK_VERSION=\"$(mvn $CI_MAVEN_OPTS $ADDITIONAL_MAVEN_OPTS help:evaluate -Dexpression="project.version" -q -DforceStdout)\" >> ${CI_PROJECT_DIR}/buildinfo.env
+    - mvn $CI_MAVEN_OPTS $ADDITIONAL_MAVEN_OPTS org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression="project.version" -Doutput=maven-project-version.txt
+    - echo "QUAK_VERSION=$(cat maven-project-version.txt)" >> ${CI_PROJECT_DIR}/buildinfo.env
   rules:
     - !reference [docker-build, rules]
   needs: []
+  cache:
+    paths:
+      - ".m2/repository/"
+    key: $CI_COMMIT_REF_SLUG
+    policy: pull
   artifacts:
     expire_in: 6 hours
     reports:
@@ -44,6 +49,6 @@ docker-build:
   variables:
     IMAGE_NAME: "quak"
     DOCKER_BUILD_ARGUMENTS: >-
-      --label org.opencontainers.image.created="${QUAK_BUILD_TIME}"
-      --label org.opencontainers.image.revision="${CI_COMMIT_SHA}"
-      --label org.opencontainers.image.version="${QUAK_VERSION}"
+      --label org.opencontainers.image.created=${QUAK_BUILD_TIME}
+      --label org.opencontainers.image.revision=${CI_COMMIT_SHA}
+      --label org.opencontainers.image.version=${QUAK_VERSION}
