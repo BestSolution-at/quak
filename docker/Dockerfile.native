@@ -3,7 +3,7 @@
 #
 # Build the image like:
 #
-# docker build -f src/main/docker/Dockerfile.native -t quarkus/quak .
+# docker build -f docker/Dockerfile.native -t quarkus/quak .
 #
 # Run the container like:
 #
