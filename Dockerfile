@@ -3,29 +3,22 @@
 #
 # Build the image like:
 #
-# docker build --build-arg VERSION=VERSION_NO --build-arg REVISION=REVISION_NO -f src/main/docker/Dockerfile.jvm -t quarkus/quak-jvm .
+# docker build -t quak:latest .
 #
 # Run the container like:
 #
-# docker run -i -u $(id -u) --mount type=bind,source=$(pwd)/repositories/,target=/quak/repositories/ --mount type=bind,source=$(pwd)/config/,target=/quak/config/ --rm -p 8080:8080 quarkus/quak-jvm
+# docker run -i -u $(id -u) --mount type=bind,source=$(pwd)/repositories/,target=/quak/repositories/ --mount type=bind,source=$(pwd)/config/,target=/quak/config/ --rm -p 8080:8080 quak:latest
 #
 ###
 
 FROM eclipse-temurin:18.0.1_10-jre-jammy
 
-# Build-time metadata stage
-ARG BUILD_DATE
-ARG VERSION
-ARG REVISION
-LABEL org.opencontainers.image.created=$BUILD_DATE \
-      org.opencontainers.image.title="quak" \
+LABEL org.opencontainers.image.title="quak" \
       org.opencontainers.image.description="Lightweight Maven repository server which uses Quarkus, the Supersonic Subatomic Java Framework." \
       org.opencontainers.image.url="https://www.bestsolution.at/" \
-      org.opencontainers.image.revision=$REVISION \
       org.opencontainers.image.source="https://github.com/BestSolution-at/quak" \
       org.opencontainers.image.documentation="https://github.com/BestSolution-at/quak" \
-      org.opencontainers.image.vendor="BestSolution.at" \
-      org.opencontainers.image.version=$VERSION
+      org.opencontainers.image.vendor="BestSolution.at"
 
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en'
 
