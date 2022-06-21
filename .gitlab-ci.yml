@@ -4,6 +4,7 @@ stages:
   - maven-sonar
   - docker-prepare
   - docker-build
+  - docker-hub-deploy
   
 include:
   - project: 'BestSolution.at/gitlab-pipelines'
@@ -49,3 +50,32 @@ docker-build:
       --label org.opencontainers.image.created=${QUAK_BUILD_TIME}
       --label org.opencontainers.image.revision=${CI_COMMIT_SHA}
       --label org.opencontainers.image.version=${QUAK_VERSION}
+      
+docker-hub-deploy:
+  stage: docker-deploy
+  image: nexus.ci.bestsolution.at:8083/docker:stable
+  variables:
+    DOCKERHUB_IMAGE_BASE: "docker.io/bestsolutionat/quak"
+  before_script:
+    - |
+      export CI_APPLICATION_REPOSITORY=${CI_REGISTRY_IMAGE}/${IMAGE_NAME}
+      export IMAGE_TAGGED=${CI_APPLICATION_REPOSITORY}:${CI_COMMIT_SHA}
+    - |
+      echo "Logging in to GitLab Container Registry with CI credentials..."
+      echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    - |
+      echo "Logging in to Docker Hub with credentials..."
+      echo "$DOCKER_HUB_TOKEN" | docker login -u "$DOCKER_HUB_USER" --password-stdin"
+  script:
+    - docker pull ${IMAGE_LATEST}
+    - docker tag ${IMAGE_LATEST} ${DOCKERHUB_IMAGE_BASE}:${QUAK_VERSION}
+    - docker push ${DOCKERHUB_IMAGE_BASE}:${QUAK_VERSION}
+    - docker tag ${IMAGE_LATEST} ${DOCKERHUB_IMAGE_BASE}:latest
+    - docker push ${DOCKERHUB_IMAGE_BASE}:latest
+  rules:
+    - if: '$CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG =~ /^R.*/'
+      when: manual
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG =~ /^R.*/ && $CI_DEPLOY_FREEZE != null'
+      when: manual
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG =~ /^R.*/'
+      when: on_success
