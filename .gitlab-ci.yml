@@ -4,7 +4,7 @@ stages:
   - maven-sonar
   - docker-prepare
   - docker-build
-  - docker-hub-deploy
+  - docker-deploy
   
 include:
   - project: 'BestSolution.at/gitlab-pipelines'
