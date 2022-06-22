@@ -1,5 +1,5 @@
 stages:
-  - maven-compile
+  - maven-package
   - maven-verify
   - maven-sonar
   - docker-prepare
@@ -11,7 +11,7 @@ include:
     ref: 1.11.0
     file: 
       - '/templates/maven-base.yml'
-      - '/jobs/maven/compile.yml'
+      - '/jobs/maven/package.yml'
       - '/jobs/maven/verify.yml'
       - '/jobs/maven/sonar.yml'
       - '/jobs/docker/build.yml'
