@@ -1,5 +1,5 @@
 stages:
-  - maven-package
+  - maven-compile
   - maven-verify
   - maven-sonar
   - docker-prepare
@@ -11,7 +11,7 @@ include:
     ref: 1.11.0
     file: 
       - '/templates/maven-base.yml'
-      - '/jobs/maven/package.yml'
+      - '/jobs/maven/compile.yml'
       - '/jobs/maven/verify.yml'
       - '/jobs/maven/sonar.yml'
       - '/jobs/docker/build.yml'
@@ -71,6 +71,8 @@ docker-hub-deploy:
     - docker tag ${IMAGE_TAGGED} ${DOCKERHUB_IMAGE_BASE}:latest
     - docker push ${DOCKERHUB_IMAGE_BASE}:latest
   rules:
+    - if: '$CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG =~ /^R.*/'
+      when: manual
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG =~ /^R.*/ && $CI_DEPLOY_FREEZE != null'
       when: manual
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG =~ /^R.*/'
