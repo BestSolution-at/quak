@@ -1,13 +1,15 @@
 ####
-# This Dockerfile is used in order to build a quak container that runs the Quarkus application in native (no JVM) mode
+# This Dockerfile is used in order to build a quak distroless container that runs the Quarkus application in native (no JVM) mode
 #
 # Build the image like:
 #
-# docker build --build-arg VERSION=VERSION_NO --build-arg REVISION=REVISION_NO -f src/main/docker/Dockerfile.native -t quarkus/quak .
+# docker build -f docker/Dockerfile.native-distroless -t quarkus/quak .
 #
 # Run the container like:
 #
 # docker run -i -u $(id -u) --mount type=bind,source=$(pwd)/repositories/,target=/quak/repositories/ --mount type=bind,source=$(pwd)/config/,target=/quak/config/ --rm -p 8080:8080 quarkus/quak
+#
+# Please note that for distroless images user ID must be provided and repositories directory must be mounted, since distroless images lack shell functionalities. 
 #
 ###
 
@@ -24,34 +26,24 @@ RUN ./mvnw -B org.apache.maven.plugins:maven-dependency-plugin:3.1.2:go-offline
 
 RUN ./mvnw package -Pnative
 
-# Build-time metadata stage
-ARG BUILD_DATE
-ARG VERSION
-ARG REVISION
-LABEL org.opencontainers.image.created=$BUILD_DATE \
-      org.opencontainers.image.title="quak" \
+# Run stage
+FROM quay.io/quarkus/quarkus-distroless-image:1.0
+
+LABEL org.opencontainers.image.title="quak" \
       org.opencontainers.image.description="Lightweight Maven repository server which uses Quarkus, the Supersonic Subatomic Java Framework." \
       org.opencontainers.image.url="https://www.bestsolution.at/" \
-      org.opencontainers.image.revision=$REVISION \
       org.opencontainers.image.source="https://github.com/BestSolution-at/quak" \
       org.opencontainers.image.documentation="https://github.com/BestSolution-at/quak" \
-      org.opencontainers.image.vendor="BestSolution.at" \
-      org.opencontainers.image.version=$VERSION
-
-# Run stage
-FROM quay.io/quarkus/quarkus-micro-image:1.0
-
-WORKDIR /quak
+      org.opencontainers.image.vendor="BestSolution.at"
 
 # quak User ID
 ARG QUAK_UID=1000
 
-RUN [ -d repositories ] || mkdir repositories
-RUN chown $QUAK_UID repositories
-
 # Switch to quak user by default.
 USER $QUAK_UID
-    
+
+WORKDIR /quak
+
 COPY --from=build /home/quak-build/target/*-runner application
 
 EXPOSE 8080

@@ -3,7 +3,7 @@
 #
 # Build the image like:
 #
-# docker build --build-arg VERSION=VERSION_NO --build-arg REVISION=REVISION_NO -f src/main/docker/Dockerfile.legacy-jar -t quarkus/quak-legacy-jar .
+# docker build -f docker/Dockerfile.legacy-jar -t quarkus/quak-legacy-jar .
 #
 # Run the container like:
 #
@@ -12,7 +12,7 @@
 ###
 
 # Build stage
-FROM eclipse-temurin:18.0.1_10-jdk-jammy AS build
+FROM eclipse-temurin:17-jdk-jammy AS build
 
 COPY . /home/quak-build
 
@@ -20,22 +20,15 @@ WORKDIR /home/quak-build
 
 RUN ./mvnw package -Dquarkus.package.type=legacy-jar
 
-# Build-time metadata stage
-ARG BUILD_DATE
-ARG VERSION
-ARG REVISION
-LABEL org.opencontainers.image.created=$BUILD_DATE \
-      org.opencontainers.image.title="quak" \
+# Run stage
+FROM eclipse-temurin:17-jre-jammy
+
+LABEL org.opencontainers.image.title="quak" \
       org.opencontainers.image.description="Lightweight Maven repository server which uses Quarkus, the Supersonic Subatomic Java Framework." \
       org.opencontainers.image.url="https://www.bestsolution.at/" \
-      org.opencontainers.image.revision=$REVISION \
       org.opencontainers.image.source="https://github.com/BestSolution-at/quak" \
       org.opencontainers.image.documentation="https://github.com/BestSolution-at/quak" \
-      org.opencontainers.image.vendor="BestSolution.at" \
-      org.opencontainers.image.version=$VERSION
-
-# Run stage
-FROM eclipse-temurin:18.0.1_10-jre-jammy
+      org.opencontainers.image.vendor="BestSolution.at"
 
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en'
 

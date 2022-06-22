@@ -2,6 +2,9 @@ stages:
   - maven-compile
   - maven-verify
   - maven-sonar
+  - docker-prepare
+  - docker-build
+  - docker-deploy
   
 include:
   - project: 'BestSolution.at/gitlab-pipelines'
@@ -11,9 +14,64 @@ include:
       - '/jobs/maven/compile.yml'
       - '/jobs/maven/verify.yml'
       - '/jobs/maven/sonar.yml'
+      - '/jobs/docker/build.yml'
 
 maven-verify:
   artifacts:
     reports:
       junit:
         - ./**/target/surefire-reports/TEST-*Test.xml
+
+collect-metadata:
+  extends: .maven
+  stage: docker-prepare
+  script:
+    - echo "QUAK_BUILD_TIME=$(date --date="${CI_PIPELINE_CREATED_AT}" --utc +%Y-%m-%dT%H:%M:%SZ)" >> buildinfo.env
+    - cd $CI_PARENT_POM_LOCATION
+    - mvn $CI_MAVEN_OPTS $ADDITIONAL_MAVEN_OPTS org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression="project.version" -Doutput=maven-project-version.txt
+    - echo "QUAK_VERSION=$(cat maven-project-version.txt)" >> ${CI_PROJECT_DIR}/buildinfo.env
+  rules:
+    - !reference [docker-build, rules]
+  needs: []
+  cache:
+    paths:
+      - ".m2/repository/"
+    key: $CI_COMMIT_REF_SLUG
+    policy: pull
+  artifacts:
+    expire_in: 6 hours
+    reports:
+      dotenv: buildinfo.env
+
+docker-build:
+  variables:
+    IMAGE_NAME: "quak"
+    DOCKER_BUILD_ARGUMENTS: >-
+      --label org.opencontainers.image.created=${QUAK_BUILD_TIME}
+      --label org.opencontainers.image.revision=${CI_COMMIT_SHA}
+      --label org.opencontainers.image.version=${QUAK_VERSION}
+      
+docker-hub-deploy:
+  stage: docker-deploy
+  extends: 
+    - .docker-build
+    - .docker-dind-service
+  variables:
+    IMAGE_NAME: "quak"
+    DOCKERHUB_IMAGE_BASE: "bestsolutionat/quak"
+  before_script:
+    - !reference [.docker-build, before_script]
+    - |
+      echo "Logging in to Docker Hub with credentials..."
+      echo "$DOCKER_HUB_TOKEN" | docker login -u "$DOCKER_HUB_USER" --password-stdin
+  script:
+    - docker pull ${IMAGE_TAGGED}
+    - docker tag ${IMAGE_TAGGED} ${DOCKERHUB_IMAGE_BASE}:${QUAK_VERSION}
+    - docker push ${DOCKERHUB_IMAGE_BASE}:${QUAK_VERSION}
+    - docker tag ${IMAGE_TAGGED} ${DOCKERHUB_IMAGE_BASE}:latest
+    - docker push ${DOCKERHUB_IMAGE_BASE}:latest
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG =~ /^R.*/ && $CI_DEPLOY_FREEZE != null'
+      when: manual
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG =~ /^R.*/'
+      when: on_success

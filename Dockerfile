@@ -3,39 +3,22 @@
 #
 # Build the image like:
 #
-# docker build --build-arg VERSION=VERSION_NO --build-arg REVISION=REVISION_NO -f src/main/docker/Dockerfile.jvm -t quarkus/quak-jvm .
+# docker build -t quak:latest .
 #
 # Run the container like:
 #
-# docker run -i -u $(id -u) --mount type=bind,source=$(pwd)/repositories/,target=/quak/repositories/ --mount type=bind,source=$(pwd)/config/,target=/quak/config/ --rm -p 8080:8080 quarkus/quak-jvm
+# docker run -i -u $(id -u) --mount type=bind,source=$(pwd)/repositories/,target=/quak/repositories/ --mount type=bind,source=$(pwd)/config/,target=/quak/config/ --rm -p 8080:8080 quak:latest
 #
 ###
 
-# Build stage
-FROM eclipse-temurin:18.0.1_10-jdk-jammy AS build
+FROM eclipse-temurin:17-jre-jammy
 
-COPY . /home/quak-build
-
-WORKDIR /home/quak-build
-
-RUN ./mvnw package
-
-# Build-time metadata stage
-ARG BUILD_DATE
-ARG VERSION
-ARG REVISION
-LABEL org.opencontainers.image.created=$BUILD_DATE \
-      org.opencontainers.image.title="quak" \
+LABEL org.opencontainers.image.title="quak" \
       org.opencontainers.image.description="Lightweight Maven repository server which uses Quarkus, the Supersonic Subatomic Java Framework." \
       org.opencontainers.image.url="https://www.bestsolution.at/" \
-      org.opencontainers.image.revision=$REVISION \
       org.opencontainers.image.source="https://github.com/BestSolution-at/quak" \
       org.opencontainers.image.documentation="https://github.com/BestSolution-at/quak" \
-      org.opencontainers.image.vendor="BestSolution.at" \
-      org.opencontainers.image.version=$VERSION
-
-# Run stage
-FROM eclipse-temurin:18.0.1_10-jre-jammy
+      org.opencontainers.image.vendor="BestSolution.at"
 
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en'
 
@@ -57,10 +40,10 @@ RUN chown quakrunner repositories
 USER quakrunner
 
 # We make four distinct layers so if there are application changes the library layers can be re-used
-COPY --from=build /home/quak-build/target/quarkus-app/lib/ lib/
-COPY --from=build /home/quak-build/target/quarkus-app/*.jar .
-COPY --from=build /home/quak-build/target/quarkus-app/app/ app/
-COPY --from=build /home/quak-build/target/quarkus-app/quarkus/ quarkus/
+COPY ./target/quarkus-app/lib/ lib/
+COPY ./target/quarkus-app/*.jar .
+COPY ./target/quarkus-app/app/ app/
+COPY ./target/quarkus-app/quarkus/ quarkus/
 
 EXPOSE 8080
 
