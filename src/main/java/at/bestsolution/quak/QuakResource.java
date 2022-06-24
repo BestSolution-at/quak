@@ -83,7 +83,7 @@ public class QuakResource {
     Template directory;
 	
 	private static final Logger LOG = Logger.getLogger(QuakResource.class);
-	private static final java.nio.file.Path REPOSITORIES_PATH = Paths.get( "repositories/" ); 
+	public static final java.nio.file.Path REPOSITORIES_PATH = Paths.get( "repositories/" ); 
 	private static final String FILE_SIZE_PATTERN = "#,###.0";
 	
     /**
@@ -273,7 +273,6 @@ public class QuakResource {
 			else {
 				Files.copy( messageBody, file );
 			}
-			
 		} 
 		catch (IOException e) {
 			LOG.error( "Exception while creating directories!", e );
@@ -281,6 +280,13 @@ public class QuakResource {
 		}
 		
 		LOG.infof( "Artifact (%s) is successfully uploaded for repository: %s", file.getFileName(), repository.getName() );
+		
+		// If maven-metadata-xml is uploaded, asynchronous CleanUp task will be started.
+		if ( file.getFileName().toString().equals( "maven-metadata.xml" ) ) {
+			QuakCleanUp cleanUpTask = new QuakCleanUp( repository, file.toAbsolutePath().toFile() );
+			cleanUpTask.start();
+		}
+		
 		return Response.ok().build();
 	}
 	
