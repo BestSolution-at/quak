@@ -90,7 +90,7 @@ public class QuakCleanUp extends Thread {
 			// Read metadata.xml file
 			DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
 			// Disable DOCTYPE declaration for vulnerabilities
-			builderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+			builderFactory.setFeature( "http://apache.org/xml/features/disallow-doctype-decl", true );
 			// Process XML securely, avoid attacks like XML External Entities
 			builderFactory.setFeature( XMLConstants.FEATURE_SECURE_PROCESSING, true );
 			DocumentBuilder builder = builderFactory.newDocumentBuilder();
@@ -98,7 +98,7 @@ public class QuakCleanUp extends Thread {
 			document.getDocumentElement().normalize();
 			XPath xPath = XPathFactory.newInstance().newXPath();
 
-			// Extract metadata variables for repository
+			// Extract metadata variables
 			String version = xPath.compile( "/metadata/version" ).evaluate( document );
 			String versionNo = version.split( "-" )[0];
 			String timestamp = xPath.compile( "/metadata/versioning/snapshot/timestamp" ).evaluate( document );
@@ -107,11 +107,11 @@ public class QuakCleanUp extends Thread {
 
 			// If version is empty it is root metadata-xml, no clean-up required.
 			if ( !version.isEmpty() ) {
-				// Remove or move all deploy files which are done previously, and not of the current build.
 				Path repositoryStoragePath = QuakResource.REPOSITORIES_PATH.resolve( repository.getStoragePath() ).resolve( version );
-				// list all files NOT matching the goodFilesPattern or metadata
+				// list all files NOT matching the previousArtifactsPattern or metadata
 				Stream<Path> filePaths = Files.find( repositoryStoragePath, 1, (path, basicFileAttributes) -> path.toFile().getName().matches( previousArtifactsPattern ) && path.toFile().isFile() );
 				try {
+					// Delete or move all deploy files which are done previously, and not of the current build.
 					filePaths.forEach( p -> moveFile( p.toFile() ) );
 				} 
 				finally {
