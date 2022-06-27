@@ -65,6 +65,16 @@ public class QuakCleanUp extends Thread {
 	 * Maven metadata XML file which has newly uploaded.
 	 */
 	private File metadataXml;
+	
+	/**
+	 * True if clean up with deletion, false if only move.
+	 */
+	private boolean isDelete = false;
+	
+	/**
+	 * Directory name for keeping files to be deleted.
+	 */
+	private static final String TRASH_DIRECTORY_NAME = ".filesToBeDeleted"; 
 
 	/**
 	 * Constructs a task for cleaning up storage path of the repository which
@@ -74,10 +84,13 @@ public class QuakCleanUp extends Thread {
 	 *            to be cleaned up.
 	 * @param metadataXml
 	 *            maven-metadata.xml file which is newly uploaded.
+	 * @param isDelete
+	 * 			  true if clean up with deletion, false if only move.
 	 */
-	public QuakCleanUp( QuakRepository repository, File metadataXml ) {
+	public QuakCleanUp( QuakRepository repository, File metadataXml, boolean isDelete ) {
 		this.repository = repository;
 		this.metadataXml = metadataXml;
+		this.isDelete = isDelete;
 	}
 
 	/**
@@ -112,7 +125,12 @@ public class QuakCleanUp extends Thread {
 				Stream<Path> filePaths = Files.find( repositoryStoragePath, 1, (path, basicFileAttributes) -> path.toFile().getName().matches( previousArtifactsPattern ) && path.toFile().isFile() );
 				try {
 					// Delete or move all deploy files which are done previously, and not of the current build.
-					filePaths.forEach( p -> moveFile( p.toFile() ) );
+					if ( isDelete ) {
+						filePaths.forEach( p -> deleteFile( p.toFile() ) );
+					} 
+					else {
+						filePaths.forEach( p -> moveFile( p.toFile() ) );
+					}
 				} 
 				finally {
 					filePaths.close();
@@ -127,8 +145,8 @@ public class QuakCleanUp extends Thread {
 	private void moveFile( File file ) {
 		try {
 			 if ( file.isFile() ) {
-				 Files.createDirectories( file.toPath().getParent().resolve( ".filesToBeRemoved" ) );
-				 Files.move( file.toPath(), file.toPath().getParent().resolve( ".filesToBeRemoved" ).resolve( file.getName() ), REPLACE_EXISTING );
+				 Files.createDirectories( file.toPath().getParent().resolve( TRASH_DIRECTORY_NAME ) );
+				 Files.move( file.toPath(), file.toPath().getParent().resolve( TRASH_DIRECTORY_NAME ).resolve( file.getName() ), REPLACE_EXISTING );
 				 LOG.infof( "Artifact (%s) is moved. Repository: %s", file.getName(), repository.getName() );
              }
 		} 
@@ -137,7 +155,6 @@ public class QuakCleanUp extends Thread {
 		}
 	}
 
-	@SuppressWarnings( "unused" )
 	private void deleteFile( File file ) {
 		try {
 			if ( file.isFile() ) {
