@@ -26,6 +26,8 @@
 
 package at.bestsolution.quak;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -45,20 +47,33 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 /**
- * Runnable class for cleaning up storage path of the repository which has new maven-metadadata.xml uploaded.
+ * Runnable class for cleaning up storage path of the repository which has new
+ * maven-metadadata.xml uploaded.
  * 
  * @author: kerim.yeniduenya@bestsolution.at
  */
 public class QuakCleanUp extends Thread {
+
+	private static final Logger LOG = Logger.getLogger( QuakCleanUp.class );
 	
-	private static final Logger LOG = Logger.getLogger(QuakCleanUp.class);
+	/**
+	 * Repository to be cleaned up.
+	 */
 	private QuakRepository repository;
+	
+	/**
+	 * Maven metadata XML file which has newly uploaded.
+	 */
 	private File metadataXml;
 
 	/**
-	 * Constructs a task for cleaning up storage path of the repository which has new maven-metadadata.xml uploaded.
-	 * @param repository to be cleaned up.
-	 * @param metadataXml maven-metadata.xml file which is newly uploaded.
+	 * Constructs a task for cleaning up storage path of the repository which
+	 * has new maven-metadadata.xml uploaded.
+	 * 
+	 * @param repository
+	 *            to be cleaned up.
+	 * @param metadataXml
+	 *            maven-metadata.xml file which is newly uploaded.
 	 */
 	public QuakCleanUp( QuakRepository repository, File metadataXml ) {
 		this.repository = repository;
@@ -66,42 +81,72 @@ public class QuakCleanUp extends Thread {
 	}
 
 	/**
-	 * Task for cleaning up storage path of the repository which has new maven-metadadata.xml uploaded.
+	 * Task for cleaning up storage path of the repository which has new
+	 * maven-metadadata.xml uploaded.
 	 */
 	@Override
 	public void run() {
 		try {
 			// Read metadata.xml file
 			DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+			// Disable DOCTYPE declaration for vulnerabilities
+			builderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
 			// Process XML securely, avoid attacks like XML External Entities
 			builderFactory.setFeature( XMLConstants.FEATURE_SECURE_PROCESSING, true );
 			DocumentBuilder builder = builderFactory.newDocumentBuilder();
-		    Document document = builder.parse( metadataXml.getAbsolutePath() );
-		    document.getDocumentElement().normalize();
-		    XPath xPath = XPathFactory.newInstance().newXPath();
-		    
-		    // Extract metadata variables for repository
-		    String version = xPath.compile( "/metadata/version" ).evaluate( document );
-		    String buildNumber = xPath.compile( "/metadata/versioning/snapshot/buildNumber" ).evaluate( document );
-		    String filenamePrefix = repository.getName().concat( "-" ).concat( version.split( "-" )[0] );
+			Document document = builder.parse( metadataXml.getAbsolutePath() );
+			document.getDocumentElement().normalize();
+			XPath xPath = XPathFactory.newInstance().newXPath();
 
-		    // Remove or move all deploys which are done previously, and not of the current build.
-			Path repositoryStoragePath = QuakResource.REPOSITORIES_PATH.resolve( repository.getStoragePath() ).resolve( version );
-			Stream<java.nio.file.Path> filePaths = Files.list( repositoryStoragePath );
-			filePaths.filter( p -> p.getFileName().toString().startsWith( filenamePrefix ) && !p.getFileName().toString().contains( "-".concat( buildNumber ).concat( "." ) ) ).forEach( p -> moveFile( p.toFile() ) );
-			filePaths.close();
-			
+			// Extract metadata variables for repository
+			String version = xPath.compile( "/metadata/version" ).evaluate( document );
+			String versionNo = version.split( "-" )[0];
+			String timestamp = xPath.compile( "/metadata/versioning/snapshot/timestamp" ).evaluate( document );
+			String buildNumber = xPath.compile( "/metadata/versioning/snapshot/buildNumber" ).evaluate( document );
+			String previousArtifactsPattern = "(^((?!(".concat( versionNo ).concat( "-" ).concat( timestamp ).concat( "-" ).concat( buildNumber ).concat( ")|(maven-metadata.xml)).)*$)" );
+
+			// If version is empty it is root metadata-xml, no clean-up required.
+			if ( !version.isEmpty() ) {
+				// Remove or move all deploy files which are done previously, and not of the current build.
+				Path repositoryStoragePath = QuakResource.REPOSITORIES_PATH.resolve( repository.getStoragePath() ).resolve( version );
+				// list all files NOT matching the goodFilesPattern or metadata
+				Stream<Path> filePaths = Files.find( repositoryStoragePath, 1, (path, basicFileAttributes) -> path.toFile().getName().matches( previousArtifactsPattern ) && path.toFile().isFile() );
+				try {
+					filePaths.forEach( p -> moveFile( p.toFile() ) );
+				} 
+				finally {
+					filePaths.close();
+				}
+			}
 		} 
-		catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e ) {
+		catch ( ParserConfigurationException | SAXException | IOException | XPathExpressionException e ) {
 			LOG.error( "Exception while CleanUp!", e );
-		} 
+		}
 	}
-	
+
 	private void moveFile( File file ) {
-		LOG.infof( "Artifact (%s) is moved. Repository: %s", file.getName(), repository.getName() );
+		try {
+			 if ( file.isFile() ) {
+				 Files.createDirectories( file.toPath().getParent().resolve( ".filesToBeRemoved" ) );
+				 Files.move( file.toPath(), file.toPath().getParent().resolve( ".filesToBeRemoved" ).resolve( file.getName() ), REPLACE_EXISTING );
+				 LOG.infof( "Artifact (%s) is moved. Repository: %s", file.getName(), repository.getName() );
+             }
+		} 
+		catch ( IOException e ) {
+			LOG.error( "Exception while moving the file!", e );
+		}
 	}
-	
-	private void removeFile( File file ) {
-		LOG.infof( "Artifact (%s) is removed. Repository: %s", file.getName(), repository.getName() );
+
+	@SuppressWarnings( "unused" )
+	private void deleteFile( File file ) {
+		try {
+			if ( file.isFile() ) {
+				Files.deleteIfExists( file.toPath() );
+				LOG.infof( "Artifact (%s) is deleted. Repository: %s", file.getName(), repository.getName() );
+			}
+		} 
+		catch ( IOException e ) {
+			LOG.error( "Exception while deleting the file!", e );
+		}
 	}
 }
