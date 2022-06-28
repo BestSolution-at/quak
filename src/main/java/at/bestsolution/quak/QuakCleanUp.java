@@ -32,6 +32,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.stream.Stream;
 
 import javax.xml.XMLConstants;
@@ -119,25 +121,26 @@ public class QuakCleanUp extends Thread {
 			String previousArtifactsPattern = "(^((?!(".concat( versionNo ).concat( "-" ).concat( timestamp ).concat( "-" ).concat( buildNumber ).concat( ")|(maven-metadata.xml)).)*$)" );
 
 			// If version is empty it is root metadata-xml, no clean-up required.
-			if ( !version.isEmpty() ) {
+			if ( !version.isEmpty() && !timestamp.isEmpty()) {
+				Long timestampValue = new SimpleDateFormat("yyyyMMdd.HHmmss").parse( timestamp ).getTime();
 				Path repositoryStoragePath = QuakResource.REPOSITORIES_PATH.resolve( repository.getStoragePath() ).resolve( version );
 				// list all files matching the previousArtifactsPattern or metadata
 				Stream<Path> filePaths = Files.find( repositoryStoragePath, 1, (path, basicFileAttributes) -> path.toFile().getName().matches( previousArtifactsPattern ) && path.toFile().isFile() );
 				try {
 					// Delete or move all deploy files which are done previously, and not of the current build.
 					if ( hardDelete ) {
-						filePaths.forEach( p -> deleteFile( p.toFile() ) );
+						filePaths.filter( p -> p.toFile().lastModified() > timestampValue ).forEach( p -> deleteFile( p.toFile() ) );
 					} 
 					else {
-						filePaths.forEach( p -> moveFile( p.toFile() ) );
+						filePaths.filter( p -> p.toFile().lastModified() > timestampValue ).forEach( p -> moveFile( p.toFile() ) );
 					}
 				} 
 				finally {
 					filePaths.close();
 				}
 			}
-		} 
-		catch ( ParserConfigurationException | SAXException | IOException | XPathExpressionException e ) {
+		}
+		catch ( ParserConfigurationException | SAXException | IOException | XPathExpressionException | ParseException e ) {
 			LOG.error( "Exception while CleanUp!", e );
 		}
 	}
