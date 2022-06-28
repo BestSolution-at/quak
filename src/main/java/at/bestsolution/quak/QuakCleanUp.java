@@ -67,9 +67,9 @@ public class QuakCleanUp extends Thread {
 	private File metadataXml;
 	
 	/**
-	 * True if clean up with deletion, false if only move.
+	 * True if clean up with hard delete, false if soft delete.
 	 */
-	private boolean isDelete = false;
+	private boolean hardDelete = false;
 	
 	/**
 	 * Directory name for keeping files to be deleted.
@@ -84,13 +84,13 @@ public class QuakCleanUp extends Thread {
 	 *            to be cleaned up.
 	 * @param metadataXml
 	 *            maven-metadata.xml file which is newly uploaded.
-	 * @param isDelete
-	 * 			  true if clean up with deletion, false if only move.
+	 * @param hardDelete
+	 * 			  true if clean up with hard delete, false if soft delete.
 	 */
-	public QuakCleanUp( QuakRepository repository, File metadataXml, boolean isDelete ) {
+	public QuakCleanUp( QuakRepository repository, File metadataXml, boolean hardDelete ) {
 		this.repository = repository;
 		this.metadataXml = metadataXml;
-		this.isDelete = isDelete;
+		this.hardDelete = hardDelete;
 	}
 
 	/**
@@ -121,11 +121,11 @@ public class QuakCleanUp extends Thread {
 			// If version is empty it is root metadata-xml, no clean-up required.
 			if ( !version.isEmpty() ) {
 				Path repositoryStoragePath = QuakResource.REPOSITORIES_PATH.resolve( repository.getStoragePath() ).resolve( version );
-				// list all files NOT matching the previousArtifactsPattern or metadata
+				// list all files matching the previousArtifactsPattern or metadata
 				Stream<Path> filePaths = Files.find( repositoryStoragePath, 1, (path, basicFileAttributes) -> path.toFile().getName().matches( previousArtifactsPattern ) && path.toFile().isFile() );
 				try {
 					// Delete or move all deploy files which are done previously, and not of the current build.
-					if ( isDelete ) {
+					if ( hardDelete ) {
 						filePaths.forEach( p -> deleteFile( p.toFile() ) );
 					} 
 					else {
