@@ -124,15 +124,19 @@ public class QuakCleanUp extends Thread {
 			if ( !version.isEmpty() && !timestamp.isEmpty()) {
 				Long timestampValue = new SimpleDateFormat("yyyyMMdd.HHmmss").parse( timestamp ).getTime();
 				Path repositoryStoragePath = QuakResource.REPOSITORIES_PATH.resolve( repository.getStoragePath() ).resolve( version );
-				// list all files matching the previousArtifactsPattern or metadata
+				// List all files matching the previousArtifactsPattern or metadata
 				Stream<Path> filePaths = Files.find( repositoryStoragePath, 1, (path, basicFileAttributes) -> path.toFile().getName().matches( previousArtifactsPattern ) && path.toFile().isFile() );
 				try {
-					// Delete or move all deploy files which are done previously, and not of the current build.
-					if ( hardDelete ) {
-						filePaths.filter( p -> p.toFile().lastModified() > timestampValue ).forEach( p -> deleteFile( p.toFile() ) );
-					} 
-					else {
-						filePaths.filter( p -> p.toFile().lastModified() > timestampValue ).forEach( p -> moveFile( p.toFile() ) );
+					for ( Path path : filePaths.toList() ) {
+						// Delete or move all deploy files which are created before build timestamp
+						if ( Files.getLastModifiedTime( path ).toMillis() < timestampValue ) {
+							if ( hardDelete ) {
+								deleteFile( path.toFile() );
+							} 
+							else {
+								moveFile( path.toFile() );
+							}
+						}
 					}
 				} 
 				finally {
