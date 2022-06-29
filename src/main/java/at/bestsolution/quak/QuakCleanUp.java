@@ -3,7 +3,7 @@
  * Original File Name: QuakCleanUp.java
  * Creation Date:      24.06.2022
  * Description: Class file of task for cleaning up storage path of 
- * the repository which has new maven-metadadata.xml uploaded.       
+ * the repository which has maven-metadadata.xml uploaded.       
  * ----------------------------------------------------------------
 
  * ----------------------------------------------------------------
@@ -49,7 +49,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 /**
- * Runnable class for cleaning up storage path of the repository which has new
+ * Runnable class for cleaning up storage path of the repository which has
  * maven-metadadata.xml uploaded.
  * 
  * @author: kerim.yeniduenya@bestsolution.at
@@ -59,14 +59,9 @@ public class QuakCleanUp implements Runnable {
 	private static final Logger LOG = Logger.getLogger( QuakCleanUp.class );
 	
 	/**
-	 * Repository to be cleaned up.
-	 */
-	private QuakRepository repository;
-	
-	/**
 	 * Maven metadata XML file which has newly uploaded.
 	 */
-	private File metadataXml;
+	private Path path;
 	
 	/**
 	 * True if clean up with hard delete, false if soft delete.
@@ -79,24 +74,21 @@ public class QuakCleanUp implements Runnable {
 	private static final String TRASH_DIRECTORY_NAME = ".filesToBeDeleted"; 
 
 	/**
-	 * Constructs a task for cleaning up storage path of the repository which
-	 * has new maven-metadadata.xml uploaded.
+	 * Constructs a task for cleaning up a storage path of the repository which
+	 * has maven-metadadata.xml uploaded.
 	 * 
-	 * @param repository
-	 *            to be cleaned up.
-	 * @param metadataXml
-	 *            maven-metadata.xml file which is newly uploaded.
+	 * @param path
+	 *            path to be cleaned up.
 	 * @param hardDelete
 	 * 			  true if clean up with hard delete, false if soft delete.
 	 */
-	public QuakCleanUp( QuakRepository repository, File metadataXml, boolean hardDelete ) {
-		this.repository = repository;
-		this.metadataXml = metadataXml;
+	public QuakCleanUp( Path path, boolean hardDelete ) {
+		this.path = path;
 		this.hardDelete = hardDelete;
 	}
 
 	/**
-	 * Task for cleaning up storage path of the repository which has new
+	 * Task for cleaning up storage path of the repository which has
 	 * maven-metadadata.xml uploaded.
 	 */
 	public void run() {
@@ -108,7 +100,7 @@ public class QuakCleanUp implements Runnable {
 			// Process XML securely, avoid attacks like XML External Entities
 			builderFactory.setFeature( XMLConstants.FEATURE_SECURE_PROCESSING, true );
 			DocumentBuilder builder = builderFactory.newDocumentBuilder();
-			Document document = builder.parse( metadataXml.getAbsolutePath() );
+			Document document = builder.parse( path.toString() );
 			document.getDocumentElement().normalize();
 			XPath xPath = XPathFactory.newInstance().newXPath();
 
@@ -122,18 +114,18 @@ public class QuakCleanUp implements Runnable {
 			// If version is empty it is root metadata-xml, no clean-up required.
 			if ( !version.isEmpty() && !timestamp.isEmpty()) {
 				Long timestampValue = new SimpleDateFormat("yyyyMMdd.HHmmss").parse( timestamp ).getTime();
-				Path repositoryStoragePath = QuakResource.REPOSITORIES_PATH.resolve( repository.getStoragePath() ).resolve( version );
+				Path storagePath = path.getParent();
 				// List all files matching the previousArtifactsPattern or metadata
-				Stream<Path> filePaths = Files.find( repositoryStoragePath, 1, (path, basicFileAttributes) -> path.toFile().getName().matches( previousArtifactsPattern ) && path.toFile().isFile() );
+				Stream<Path> filePaths = Files.find( storagePath, 1, (p, basicFileAttributes) -> p.toFile().getName().matches( previousArtifactsPattern ) && p.toFile().isFile() );
 				try {
-					for ( Path path : filePaths.toList() ) {
+					for ( Path p : filePaths.toList() ) {
 						// Delete or move all deploy files which are created before build timestamp
-						if ( Files.getLastModifiedTime( path ).toMillis() < timestampValue ) {
+						if ( Files.getLastModifiedTime( p ).toMillis() < timestampValue ) {
 							if ( hardDelete ) {
-								deleteFile( path.toFile() );
+								deleteFile( p.toFile() );
 							} 
 							else {
-								moveFile( path.toFile() );
+								moveFile( p.toFile() );
 							}
 						}
 					}
@@ -153,7 +145,7 @@ public class QuakCleanUp implements Runnable {
 			 if ( file.isFile() ) {
 				 Files.createDirectories( file.toPath().getParent().resolve( TRASH_DIRECTORY_NAME ) );
 				 Files.move( file.toPath(), file.toPath().getParent().resolve( TRASH_DIRECTORY_NAME ).resolve( file.getName() ), REPLACE_EXISTING );
-				 LOG.infof( "Artifact (%s) is moved. Repository: %s", file.getName(), repository.getName() );
+				 LOG.infof( "Artifact (%s) is moved.", file.getName() );
              }
 		} 
 		catch ( IOException e ) {
@@ -165,7 +157,7 @@ public class QuakCleanUp implements Runnable {
 		try {
 			if ( file.isFile() ) {
 				Files.deleteIfExists( file.toPath() );
-				LOG.infof( "Artifact (%s) is deleted. Repository: %s", file.getName(), repository.getName() );
+				LOG.infof( "Artifact (%s) is deleted.", file.getName() );
 			}
 		} 
 		catch ( IOException e ) {
