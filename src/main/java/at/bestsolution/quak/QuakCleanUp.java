@@ -32,8 +32,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.stream.Stream;
 
 import javax.xml.XMLConstants;
@@ -59,7 +57,12 @@ public class QuakCleanUp implements Runnable {
 	private static final Logger LOG = Logger.getLogger( QuakCleanUp.class );
 	
 	/**
-	 * Maven metadata XML file which has newly uploaded.
+	 * Maven metadata XML file name.
+	 */
+	private static final String MAVEN_METADATA_XML_FILE_NAME = "maven-metadata.xml";
+	
+	/**
+	 * Path to be cleaned up.
 	 */
 	private Path path;
 	
@@ -100,7 +103,7 @@ public class QuakCleanUp implements Runnable {
 			// Process XML securely, avoid attacks like XML External Entities
 			builderFactory.setFeature( XMLConstants.FEATURE_SECURE_PROCESSING, true );
 			DocumentBuilder builder = builderFactory.newDocumentBuilder();
-			Document document = builder.parse( path.toString() );
+			Document document = builder.parse( path.resolve( MAVEN_METADATA_XML_FILE_NAME ).toString() );
 			document.getDocumentElement().normalize();
 			XPath xPath = XPathFactory.newInstance().newXPath();
 
@@ -109,18 +112,16 @@ public class QuakCleanUp implements Runnable {
 			String versionNo = version.split( "-" )[0];
 			String timestamp = xPath.compile( "/metadata/versioning/snapshot/timestamp" ).evaluate( document );
 			String buildNumber = xPath.compile( "/metadata/versioning/snapshot/buildNumber" ).evaluate( document );
-			String previousArtifactsPattern = "(^((?!(".concat( versionNo ).concat( "-" ).concat( timestamp ).concat( "-" ).concat( buildNumber ).concat( ")|(maven-metadata.xml)).)*$)" );
+			String notFromCurrentBuildPattern = "(^((?!(".concat( versionNo ).concat( "-" ).concat( timestamp ).concat( "-" ).concat( buildNumber ).concat( ")|(maven-metadata.xml)).)*$)" );
 
 			// If version is empty it is root metadata-xml, no clean-up required.
 			if ( !version.isEmpty() && !timestamp.isEmpty()) {
-				Long timestampValue = new SimpleDateFormat("yyyyMMdd.HHmmss").parse( timestamp ).getTime();
-				Path storagePath = path.getParent();
-				// List all files matching the previousArtifactsPattern or metadata
-				Stream<Path> filePaths = Files.find( storagePath, 1, (p, basicFileAttributes) -> p.toFile().getName().matches( previousArtifactsPattern ) && p.toFile().isFile() );
+				// List all files matching the pattern
+				Stream<Path> filePaths = Files.find( path, 1, (p, basicFileAttributes) -> p.toFile().getName().matches( notFromCurrentBuildPattern ) && p.toFile().isFile() );
 				try {
 					for ( Path p : filePaths.toList() ) {
-						// Delete or move all deploy files which are created before build timestamp
-						if ( Files.getLastModifiedTime( p ).toMillis() < timestampValue ) {
+						// Delete or move all deploy files which are created before maven-metadata.xml and not from current build.
+						if ( Files.getLastModifiedTime( p ).toMillis() < Files.getLastModifiedTime( path.resolve( MAVEN_METADATA_XML_FILE_NAME ) ).toMillis() ) {
 							if ( hardDelete ) {
 								deleteFile( p.toFile() );
 							} 
@@ -135,7 +136,7 @@ public class QuakCleanUp implements Runnable {
 				}
 			}
 		}
-		catch ( ParserConfigurationException | SAXException | IOException | XPathExpressionException | ParseException e ) {
+		catch ( ParserConfigurationException | SAXException | IOException | XPathExpressionException  e) {
 			LOG.error( "Exception while CleanUp!", e );
 		}
 	}

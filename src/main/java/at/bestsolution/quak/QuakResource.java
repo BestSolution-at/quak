@@ -283,7 +283,7 @@ public class QuakResource {
 		
 		// If maven-metadata-xml is uploaded, asynchronous CleanUp task will be started.
 		if ( file.getFileName().toString().equals( "maven-metadata.xml" ) ) {
-			QuakCleanUp cleanUpTask = new QuakCleanUp( file.toAbsolutePath(), configurationController.getRepository( path ).cleanUp().hardDelete() );
+			QuakCleanUp cleanUpTask = new QuakCleanUp( file.getParent(), configurationController.getRepository( path ).cleanUp().hardDelete() );
 			new Thread( cleanUpTask ).start();
 		}
 		
