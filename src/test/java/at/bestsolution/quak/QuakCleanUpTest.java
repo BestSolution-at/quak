@@ -1,7 +1,7 @@
 /*
  * ----------------------------------------------------------------
  * Original File Name: QuakCleanUpTest.java
- * Creation Date:      29.03.2022
+ * Creation Date:      29.06.2022
  * Description: Test class file of JUnit test cases for clean-up 
  * task of quak.      
  * ----------------------------------------------------------------
@@ -61,7 +61,7 @@ import io.quarkus.test.junit.TestProfile;
  */
 @QuarkusTest
 @TestProfile( QuakTestProfile.class )
-class QuakCleanUpTest {
+abstract class QuakCleanUpTest {
 
 	public static final int MAX_TEST_BUILD_NUMBER = 100;
 	public static final String DUMMY_FILE_CONTENT = "dummy file";
@@ -85,37 +85,55 @@ class QuakCleanUpTest {
 	}
 
 	/**
-	 * Asserts that clean-up is done correctly.
+	 * Asserts that clean-up is done correctly with hard delete.
 	 */
 	@Test
-	void testCleanUp() {
+	void testHardDeleteCleanUp() {
+		// Do a dummy Maven deploy.
+		String dummyFileNameCurrentDeploy = doDummyMavenDeploy();
+
+		// File from previous deploy must be deleted.
+		Awaitility.await().until( () -> Files.notExists( QuakResource.REPOSITORIES_PATH.resolve( QuakTestProfile.STORAGE_PATH ).resolve( DUMMY_VERSION ).resolve( DUMMY_FILE_NAME_PREVUOUS_DEPLOY ) ) );
+		// File from current deploy must stay undeleted.
+		Awaitility.await().until( () -> Files.exists( QuakResource.REPOSITORIES_PATH.resolve( QuakTestProfile.STORAGE_PATH ).resolve( DUMMY_VERSION ).resolve( dummyFileNameCurrentDeploy ) ) );
+		
+		// Do another maven deploy simultaneously and see files stay undeleted.
+		String dummyFileNameSimultaneousDeploy = doDummyMavenDeploy();
+		Awaitility.await().until( () -> Files.exists( QuakResource.REPOSITORIES_PATH.resolve( QuakTestProfile.STORAGE_PATH ).resolve( DUMMY_VERSION ).resolve( dummyFileNameSimultaneousDeploy ) ) );
+	}
+	
+	/**
+	 * @return
+	 * 		name of the file created.
+	 */
+	protected String doDummyMavenDeploy() {
 		String deployTimestamp = new SimpleDateFormat( "yyyyMMdd.HHmmss" ).format( new java.util.Date() );
 
 		Random random = new Random();
 		String deployBuildNumber = String.valueOf( random.nextInt( MAX_TEST_BUILD_NUMBER ) );
 
 		String dummyFileNameCurrentDeploy = DUMMY_VERSION.concat( "-" ).concat( deployTimestamp ).concat( "-" ).concat( deployBuildNumber );
-		String dummyFileCurrentDeploy = QuakTestProfile.BASE_URL.concat( "/" ).concat( DUMMY_VERSION ).concat( "/" )
-				.concat( DUMMY_VERSION.concat( "-" ).concat( deployTimestamp ).concat( "-" ).concat( deployBuildNumber ) );
+		String dummyFileCurrentDeploy = QuakTestProfile.BASE_URL.concat( "/" ).concat( DUMMY_VERSION ).concat( "/" ).concat( dummyFileNameCurrentDeploy );
+		
 		
 		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT )
 			.put( dummyFileCurrentDeploy ).then().statusCode( Status.OK.getStatusCode() );
 		
-		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT )
-			.put( DUMMY_FILE_CONCURRENT ).then().statusCode( Status.OK.getStatusCode() );
-		
 		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( getTestMavenMetadataXmlFileContent( deployTimestamp, deployBuildNumber ) )
 			.put( MAVEN_METADATA_FILE ).then().statusCode( Status.OK.getStatusCode() );
 		
-		// File from previous deploy must be removed.
-		Awaitility.await().until( () -> Files.notExists( QuakResource.REPOSITORIES_PATH.resolve( QuakTestProfile.STORAGE_PATH ).resolve( DUMMY_VERSION ).resolve( DUMMY_FILE_NAME_PREVUOUS_DEPLOY ) ) );
-		// File from current deploy must stay available.
-		Awaitility.await().until( () -> Files.exists( QuakResource.REPOSITORIES_PATH.resolve( QuakTestProfile.STORAGE_PATH ).resolve( DUMMY_VERSION ).resolve( dummyFileNameCurrentDeploy ) ) );
-		// File which is not from current deploy but uploaded concurrently (within same seconds) must stay available.
-		Awaitility.await().until( () -> Files.exists( QuakResource.REPOSITORIES_PATH.resolve( QuakTestProfile.STORAGE_PATH ).resolve( DUMMY_VERSION ).resolve( DUMMY_FILE_NAME_CONCURRENT_DEPLOY ) ) );
+		return dummyFileNameCurrentDeploy;
 	}
 
-	private String getTestMavenMetadataXmlFileContent(String deployTimestamp, String deployBuildNumber) {
+	/**
+	 * @param deployTimestamp
+	 * 		timestamp of dummy deploy.
+	 * @param deployBuildNumber
+	 * 		build number of dummy deploy.
+	 * @return
+	 * 		test Maven metadata.xml file content.
+	 */
+	protected String getTestMavenMetadataXmlFileContent(String deployTimestamp, String deployBuildNumber) {
 		DocumentBuilder builder = null;
 		try {
 			builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();

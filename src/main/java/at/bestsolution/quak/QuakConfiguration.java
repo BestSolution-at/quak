@@ -31,6 +31,7 @@ import java.util.List;
 import io.quarkus.runtime.annotations.StaticInitSafe;
 import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithDefault;
+import io.smallrye.config.WithName;
 
 /**
  * Represents a quak configuration. Contains a list of repository configurations.
@@ -85,6 +86,24 @@ public interface QuakConfiguration {
 		 */
 		@WithDefault("true")
 		public boolean allowRedeploy();
+		
+		/**
+		 * @return
+		 * 		clean up configuration of repository.
+		 */
+		public CleanUp cleanUp();
+	}
+	
+	/**
+	 * Represents a clean up configuration.
+	 */
+	public interface CleanUp {
+		/**
+		 * @return
+		 * 		true if clean up with hard delete, false if soft delete.
+		 */
+		@WithDefault("true")
+		public boolean hardDelete();
 	}
 	
 	/**
