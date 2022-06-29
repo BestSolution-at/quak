@@ -33,8 +33,9 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.apache.directory.api.ldap.model.password.BCrypt;
 import org.jboss.logging.Logger;
+
+import io.quarkus.elytron.security.common.BcryptUtil;
 
 /**
  * Validator class for credentials and permissions of quak users.
@@ -91,7 +92,7 @@ public class QuakSecurityValidator {
 	 * @return true if username and password is valid, false if not.
 	 */
 	public boolean isUserAuthenticated( QuakAuthorizationRequest request ) {
-		 return ( credentials.containsKey( request.getUsername() ) && BCrypt.checkPw( request.getPassword(), credentials.get( request.getUsername() ) ) );
+		 return ( credentials.containsKey( request.getUsername() ) && BcryptUtil.matches( request.getPassword(), credentials.get( request.getUsername() ) ) );
 	}
 
 	

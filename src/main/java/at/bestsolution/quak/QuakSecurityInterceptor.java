@@ -154,7 +154,7 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 				return false;
 			}
 		} 
-		catch ( IllegalArgumentException e ) {
+		catch ( RuntimeException e ) {
 			LOG.errorf( "Exception while checking password for: %s, %s", request.getUsername(), e );
 			return false;
 		}
