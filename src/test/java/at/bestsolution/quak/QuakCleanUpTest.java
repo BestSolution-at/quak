@@ -67,14 +67,10 @@ class QuakCleanUpTest {
 	public static final String DUMMY_FILE_CONTENT = "dummy file";
 	public static final String DUMMY_VERSION = "1.0.0";
 	public static final String DUMMY_FILE_NAME_PREVUOUS_DEPLOY = "dummy_file_previous_deploy.foo";
-	public static final String DUMMY_FILE_PREVIOUS = QuakTestProfile.BASE_URL.concat( "/" ).concat( DUMMY_VERSION ).concat( "/" )
-			.concat( DUMMY_FILE_NAME_PREVUOUS_DEPLOY );
+	public static final String DUMMY_FILE_PREVIOUS = QuakTestProfile.BASE_URL.concat( "/" ).concat( DUMMY_VERSION ).concat( "/" ).concat( DUMMY_FILE_NAME_PREVUOUS_DEPLOY );
+	public static final String DUMMY_FILE_NAME_CONCURRENT_DEPLOY = "dummy_file_concurrent_deploy.foo";
+	public static final String DUMMY_FILE_CONCURRENT = QuakTestProfile.BASE_URL.concat( "/" ).concat( DUMMY_VERSION ).concat( "/" ).concat( DUMMY_FILE_NAME_CONCURRENT_DEPLOY );
 	public static final String MAVEN_METADATA_FILE = QuakTestProfile.BASE_URL.concat( "/" ).concat( DUMMY_VERSION ).concat( "/maven-metadata.xml" );
-
-	private String deployTimestamp;
-	private String deployBuildNumber;
-	private String dummyFileNameCurrentDeploy;
-	private String dummyFileCurrentDeploy;
 
 	/**
 	 * Maven deploy is imitated before each test.
@@ -89,30 +85,37 @@ class QuakCleanUpTest {
 	}
 
 	/**
-	 * Asserts that clean-up is done.
+	 * Asserts that clean-up is done correctly.
 	 */
 	@Test
 	void testCleanUp() {
-		deployTimestamp = new SimpleDateFormat( "yyyyMMdd.HHmmss" ).format( new java.util.Date() );
+		String deployTimestamp = new SimpleDateFormat( "yyyyMMdd.HHmmss" ).format( new java.util.Date() );
 
 		Random random = new Random();
-		deployBuildNumber = String.valueOf( random.nextInt( MAX_TEST_BUILD_NUMBER ) );
+		String deployBuildNumber = String.valueOf( random.nextInt( MAX_TEST_BUILD_NUMBER ) );
 
-		dummyFileNameCurrentDeploy = DUMMY_VERSION.concat( "-" ).concat( deployTimestamp ).concat( "-" ).concat( deployBuildNumber );
-		dummyFileCurrentDeploy = QuakTestProfile.BASE_URL.concat( "/" ).concat( DUMMY_VERSION ).concat( "/" )
+		String dummyFileNameCurrentDeploy = DUMMY_VERSION.concat( "-" ).concat( deployTimestamp ).concat( "-" ).concat( deployBuildNumber );
+		String dummyFileCurrentDeploy = QuakTestProfile.BASE_URL.concat( "/" ).concat( DUMMY_VERSION ).concat( "/" )
 				.concat( DUMMY_VERSION.concat( "-" ).concat( deployTimestamp ).concat( "-" ).concat( deployBuildNumber ) );
 		
 		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT )
 			.put( dummyFileCurrentDeploy ).then().statusCode( Status.OK.getStatusCode() );
 		
-		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( createMavenMetadataFileContent() )
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( QuakResourceTest.DUMMY_FILE_CONTENT )
+			.put( DUMMY_FILE_CONCURRENT ).then().statusCode( Status.OK.getStatusCode() );
+		
+		given().auth().preemptive().basic( QuakTestProfile.GOOD_USERNAME, QuakTestProfile.GOOD_PASSWORD ).request().body( getTestMavenMetadataXmlFileContent( deployTimestamp, deployBuildNumber ) )
 			.put( MAVEN_METADATA_FILE ).then().statusCode( Status.OK.getStatusCode() );
 		
+		// File from previous deploy must be removed.
 		Awaitility.await().until( () -> Files.notExists( QuakResource.REPOSITORIES_PATH.resolve( QuakTestProfile.STORAGE_PATH ).resolve( DUMMY_VERSION ).resolve( DUMMY_FILE_NAME_PREVUOUS_DEPLOY ) ) );
+		// File from current deploy must stay available.
 		Awaitility.await().until( () -> Files.exists( QuakResource.REPOSITORIES_PATH.resolve( QuakTestProfile.STORAGE_PATH ).resolve( DUMMY_VERSION ).resolve( dummyFileNameCurrentDeploy ) ) );
+		// File which is not from current deploy but uploaded concurrently (within same seconds) must stay available.
+		Awaitility.await().until( () -> Files.exists( QuakResource.REPOSITORIES_PATH.resolve( QuakTestProfile.STORAGE_PATH ).resolve( DUMMY_VERSION ).resolve( DUMMY_FILE_NAME_CONCURRENT_DEPLOY ) ) );
 	}
 
-	private String createMavenMetadataFileContent() {
+	private String getTestMavenMetadataXmlFileContent(String deployTimestamp, String deployBuildNumber) {
 		DocumentBuilder builder = null;
 		try {
 			builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
