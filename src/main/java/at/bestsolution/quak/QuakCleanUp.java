@@ -108,11 +108,12 @@ public class QuakCleanUp implements Runnable {
 			XPath xPath = XPathFactory.newInstance().newXPath();
 
 			// Extract metadata variables
+			String artifactId = xPath.compile( "/metadata/artifactId" ).evaluate( document );
 			String version = xPath.compile( "/metadata/version" ).evaluate( document );
 			String versionNo = version.split( "-" )[0];
 			String timestamp = xPath.compile( "/metadata/versioning/snapshot/timestamp" ).evaluate( document );
 			String buildNumber = xPath.compile( "/metadata/versioning/snapshot/buildNumber" ).evaluate( document );
-			String notFromCurrentBuildPattern = "(^((?!(".concat( versionNo ).concat( "-" ).concat( timestamp ).concat( "-" ).concat( buildNumber ).concat( ")|(maven-metadata.xml)).)*$)" );
+			String notFromCurrentBuildPattern = "(^((?!(".concat( artifactId ).concat( "-" ).concat( versionNo ).concat( "-" ).concat( timestamp ).concat( "-" ).concat( buildNumber ).concat( ")|(maven-metadata.xml)).)*$)" );
 
 			// If version is empty it is root metadata-xml, no clean-up required.
 			if ( !version.isEmpty() && !timestamp.isEmpty()) {

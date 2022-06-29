@@ -112,7 +112,7 @@ abstract class QuakCleanUpTest {
 		Random random = new Random();
 		String deployBuildNumber = String.valueOf( random.nextInt( MAX_TEST_BUILD_NUMBER ) );
 
-		String dummyFileNameCurrentDeploy = DUMMY_VERSION.concat( "-" ).concat( deployTimestamp ).concat( "-" ).concat( deployBuildNumber );
+		String dummyFileNameCurrentDeploy = QuakTestProfile.REPOSITORY_NAME.concat( "-" ).concat( DUMMY_VERSION ).concat( "-" ).concat( deployTimestamp ).concat( "-" ).concat( deployBuildNumber );
 		String dummyFileCurrentDeploy = QuakTestProfile.BASE_URL.concat( "/" ).concat( DUMMY_VERSION ).concat( "/" ).concat( dummyFileNameCurrentDeploy );
 		
 		
