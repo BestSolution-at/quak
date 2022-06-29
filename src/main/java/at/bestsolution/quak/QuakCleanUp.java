@@ -54,7 +54,7 @@ import org.xml.sax.SAXException;
  * 
  * @author: kerim.yeniduenya@bestsolution.at
  */
-public class QuakCleanUp extends Thread {
+public class QuakCleanUp implements Runnable {
 
 	private static final Logger LOG = Logger.getLogger( QuakCleanUp.class );
 	
@@ -99,7 +99,6 @@ public class QuakCleanUp extends Thread {
 	 * Task for cleaning up storage path of the repository which has new
 	 * maven-metadadata.xml uploaded.
 	 */
-	@Override
 	public void run() {
 		try {
 			// Read metadata.xml file
