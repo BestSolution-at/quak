@@ -57,6 +57,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.logging.Logger;
 
 import at.bestsolution.quak.QuakConfiguration.Repository;
@@ -82,6 +83,9 @@ public class QuakResource {
 	@Inject
     Template directory;
 	
+	@Inject
+	ManagedExecutor executor;
+	
 	private static final Logger LOG = Logger.getLogger(QuakResource.class);
 	private static final java.nio.file.Path REPOSITORIES_PATH = Paths.get( "repositories/" ); 
 	private static final String FILE_SIZE_PATTERN = "#,###.0";
@@ -103,6 +107,7 @@ public class QuakResource {
     		LOG.errorf( "Repository '%s' has an absolute storage path. This is not allowed. Repository directories will reside below the mandatory '$QUAK_SERVICE_USER/repositories' directory.", wrongPathRepo.get().name() );
     		Quarkus.asyncExit( 1 );
     	}
+    	executor = ManagedExecutor.builder().maxAsync( configurationController.getConfiguration().maxConcurrentCleanUpTasks() ).build();
     }
 	
 	/**
@@ -273,7 +278,6 @@ public class QuakResource {
 			else {
 				Files.copy( messageBody, file );
 			}
-			
 		} 
 		catch (IOException e) {
 			LOG.error( "Exception while creating directories!", e );
@@ -281,6 +285,13 @@ public class QuakResource {
 		}
 		
 		LOG.infof( "Artifact (%s) is successfully uploaded for repository: %s", file.getFileName(), repository.getName() );
+		
+		// If maven-metadata-xml is uploaded, asynchronous CleanUp task will be started.
+		if ( file.getFileName().toString().equals( "maven-metadata.xml" ) ) {
+			QuakCleanUp cleanUpTask = new QuakCleanUp( file.getParent(), configurationController.getRepository( path ).cleanUp().hardDelete() );
+			executor.submit( cleanUpTask );
+		}
+		
 		return Response.ok().build();
 	}
 	

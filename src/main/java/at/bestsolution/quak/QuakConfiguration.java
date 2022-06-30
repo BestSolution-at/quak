@@ -40,6 +40,13 @@ import io.smallrye.config.WithDefault;
 public interface QuakConfiguration {
 	
 	/**
+	 * @return
+	 * 		maximum number of clean up tasks which can run concurrently.
+	 */
+	@WithDefault("5")
+	public int maxConcurrentCleanUpTasks();
+	
+	/**
 	 * @return list of repositories defined in quak configuration.
 	 */
 	public List<Repository> repositories();
@@ -85,6 +92,24 @@ public interface QuakConfiguration {
 		 */
 		@WithDefault("true")
 		public boolean allowRedeploy();
+		
+		/**
+		 * @return
+		 * 		clean up configuration of repository.
+		 */
+		public CleanUp cleanUp();
+	}
+	
+	/**
+	 * Represents a clean up configuration.
+	 */
+	public interface CleanUp {
+		/**
+		 * @return
+		 * 		true if clean up with hard delete, false if soft delete.
+		 */
+		@WithDefault("true")
+		public boolean hardDelete();
 	}
 	
 	/**

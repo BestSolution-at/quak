@@ -78,6 +78,7 @@ public class QuakTestProfile implements QuarkusTestProfile {
 											+ "MOXmexy0rebvRtd8Z66R_fJTQObRXtyiG5f6F5yNF6SwLry6to2wcBsEFDEZjoi"
 											+ "pkNnXmB9EwlfnWBfTjz7dJFPo6l9APipUl8tYHYw";
 	public static final String INVALID_TOKEN = "WRONG_TOKEN";
+	public static final String SOFT_DELETE = "false";
 
 
     /**
