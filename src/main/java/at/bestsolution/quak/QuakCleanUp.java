@@ -114,15 +114,16 @@ public class QuakCleanUp implements Runnable {
 			String versionNo = version.split( "-" )[0];
 			String timestamp = xPath.compile( "/metadata/versioning/snapshot/timestamp" ).evaluate( document );
 			String buildNumber = xPath.compile( "/metadata/versioning/snapshot/buildNumber" ).evaluate( document );
+			Long metadataTimestamp = metadataXml.toFile().lastModified();
 
 			// If version is empty it is root metadata-xml, no clean-up required.
 			if ( !version.isEmpty() && !timestamp.isEmpty() ) {
-				String fileStart = String.format( "%s-%s-%s-%s", artifactId, versionNo, timestamp, buildNumber );
+				String buildFilesPrefix = String.format( "%s-%s-%s-%s", artifactId, versionNo, timestamp, buildNumber );
 				Stream<Path> filePaths = Files.list( path );
 				try {
 					filePaths.filter( fp -> !fp.getFileName().startsWith( MAVEN_METADATA_XML_FILE_NAME )
-											&& !fp.getFileName().startsWith( fileStart )
-											&& fp.toFile().lastModified() < metadataXml.toFile().lastModified() )
+											&& !fp.getFileName().startsWith( buildFilesPrefix )
+											&& fp.toFile().lastModified() < metadataTimestamp )
 							.forEach( fp -> {
 								if ( hardDelete ) {
 									deleteFile( fp.toFile() );
