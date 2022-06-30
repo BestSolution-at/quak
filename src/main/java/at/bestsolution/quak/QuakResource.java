@@ -57,6 +57,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.logging.Logger;
 
 import at.bestsolution.quak.QuakConfiguration.Repository;
@@ -81,6 +82,9 @@ public class QuakResource {
 	
 	@Inject
     Template directory;
+	
+	@Inject 
+	ManagedExecutor executor;
 	
 	private static final Logger LOG = Logger.getLogger(QuakResource.class);
 	private static final java.nio.file.Path REPOSITORIES_PATH = Paths.get( "repositories/" ); 
@@ -284,7 +288,7 @@ public class QuakResource {
 		// If maven-metadata-xml is uploaded, asynchronous CleanUp task will be started.
 		if ( file.getFileName().toString().equals( "maven-metadata.xml" ) ) {
 			QuakCleanUp cleanUpTask = new QuakCleanUp( file.getParent(), configurationController.getRepository( path ).cleanUp().hardDelete() );
-			new Thread( cleanUpTask ).start();
+			executor.submit( cleanUpTask );
 		}
 		
 		return Response.ok().build();
