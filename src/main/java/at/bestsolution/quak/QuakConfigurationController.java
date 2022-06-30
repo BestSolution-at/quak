@@ -44,6 +44,14 @@ public class QuakConfigurationController {
 	
 	@Inject
 	QuakConfiguration configuration;
+	
+	/**
+	 * @return
+	 * 		quak configuration.
+	 */
+	public QuakConfiguration getConfiguration() {
+		return configuration;
+	}
 		
 	/**
 	 * Searches for a repository configuration which has a base URL matching with beginning of the path.

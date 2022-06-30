@@ -40,6 +40,13 @@ import io.smallrye.config.WithDefault;
 public interface QuakConfiguration {
 	
 	/**
+	 * @return
+	 * 		maximum number of clean up tasks which can run concurrently.
+	 */
+	@WithDefault("5")
+	public int maxConcurrentCleanUpTasks();
+	
+	/**
 	 * @return list of repositories defined in quak configuration.
 	 */
 	public List<Repository> repositories();

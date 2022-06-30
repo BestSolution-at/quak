@@ -83,7 +83,7 @@ public class QuakResource {
 	@Inject
     Template directory;
 	
-	@Inject 
+	@Inject
 	ManagedExecutor executor;
 	
 	private static final Logger LOG = Logger.getLogger(QuakResource.class);
@@ -107,6 +107,7 @@ public class QuakResource {
     		LOG.errorf( "Repository '%s' has an absolute storage path. This is not allowed. Repository directories will reside below the mandatory '$QUAK_SERVICE_USER/repositories' directory.", wrongPathRepo.get().name() );
     		Quarkus.asyncExit( 1 );
     	}
+    	executor = ManagedExecutor.builder().maxAsync( configurationController.getConfiguration().maxConcurrentCleanUpTasks() ).build();
     }
 	
 	/**
