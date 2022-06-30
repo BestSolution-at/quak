@@ -96,6 +96,7 @@ public class QuakCleanUp implements Runnable {
 	 */
 	public void run() {
 		try {
+			Path metadataXml = path.resolve( MAVEN_METADATA_XML_FILE_NAME );
 			// Read metadata.xml file
 			DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
 			// Disable DOCTYPE declaration for vulnerabilities
@@ -103,7 +104,7 @@ public class QuakCleanUp implements Runnable {
 			// Process XML securely, avoid attacks like XML External Entities
 			builderFactory.setFeature( XMLConstants.FEATURE_SECURE_PROCESSING, true );
 			DocumentBuilder builder = builderFactory.newDocumentBuilder();
-			Document document = builder.parse( path.resolve( MAVEN_METADATA_XML_FILE_NAME ).toString() );
+			Document document = builder.parse( metadataXml.toString() );
 			document.getDocumentElement().normalize();
 			XPath xPath = XPathFactory.newInstance().newXPath();
 
@@ -113,31 +114,30 @@ public class QuakCleanUp implements Runnable {
 			String versionNo = version.split( "-" )[0];
 			String timestamp = xPath.compile( "/metadata/versioning/snapshot/timestamp" ).evaluate( document );
 			String buildNumber = xPath.compile( "/metadata/versioning/snapshot/buildNumber" ).evaluate( document );
-			String notFromCurrentBuildPattern = "(^((?!(".concat( artifactId ).concat( "-" ).concat( versionNo ).concat( "-" ).concat( timestamp ).concat( "-" ).concat( buildNumber ).concat( ")|(maven-metadata.xml)).)*$)" );
 
 			// If version is empty it is root metadata-xml, no clean-up required.
-			if ( !version.isEmpty() && !timestamp.isEmpty()) {
-				// List all files matching the pattern
-				Stream<Path> filePaths = Files.find( path, 1, (p, basicFileAttributes) -> p.toFile().getName().matches( notFromCurrentBuildPattern ) && p.toFile().isFile() );
+			if ( !version.isEmpty() && !timestamp.isEmpty() ) {
+				String fileStart = String.format( "%s-%s-%s-%s", artifactId, versionNo, timestamp, buildNumber );
+				Stream<Path> filePaths = Files.list( path );
 				try {
-					for ( Path p : filePaths.toList() ) {
-						// Delete or move all deploy files which are created before maven-metadata.xml and not from current build.
-						if ( Files.getLastModifiedTime( p ).toMillis() < Files.getLastModifiedTime( path.resolve( MAVEN_METADATA_XML_FILE_NAME ) ).toMillis() ) {
-							if ( hardDelete ) {
-								deleteFile( p.toFile() );
-							} 
-							else {
-								moveFile( p.toFile() );
-							}
-						}
-					}
+					filePaths.filter( fp -> !fp.getFileName().startsWith( MAVEN_METADATA_XML_FILE_NAME )
+											&& !fp.getFileName().startsWith( fileStart )
+											&& fp.toFile().lastModified() < metadataXml.toFile().lastModified() )
+							.forEach( fp -> {
+								if ( hardDelete ) {
+									deleteFile( fp.toFile() );
+								} 
+								else {
+									moveFile( fp.toFile() );
+								}
+							} );
 				} 
 				finally {
 					filePaths.close();
 				}
 			}
-		}
-		catch ( ParserConfigurationException | SAXException | IOException | XPathExpressionException  e) {
+		} 
+		catch ( ParserConfigurationException | SAXException | IOException | XPathExpressionException e ) {
 			LOG.error( "Exception while CleanUp!", e );
 		}
 	}
