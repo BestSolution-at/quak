@@ -121,8 +121,8 @@ public class QuakCleanUp implements Runnable {
 				String buildFilesPrefix = String.format( "%s-%s-%s-%s", artifactId, versionNo, timestamp, buildNumber );
 				Stream<Path> filePaths = Files.list( path );
 				try {
-					filePaths.filter( fp -> !fp.getFileName().startsWith( MAVEN_METADATA_XML_FILE_NAME )
-											&& !fp.getFileName().startsWith( buildFilesPrefix )
+					filePaths.filter( fp -> !fp.toFile().getName().startsWith( MAVEN_METADATA_XML_FILE_NAME )
+											&& !fp.toFile().getName().startsWith( buildFilesPrefix )
 											&& fp.toFile().lastModified() < metadataTimestamp )
 							.forEach( fp -> {
 								if ( hardDelete ) {
