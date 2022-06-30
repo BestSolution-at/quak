@@ -72,14 +72,14 @@ class QuakCleanUpSoftDeleteTest extends QuakCleanUpTest {
 		String dummyFileNameCurrentDeploy = doDummyMavenDeploy();
 
 		// File from previous deploy must be moved.
-		Awaitility.await().until( () -> Files.notExists( QuakResource.REPOSITORIES_PATH.resolve( QuakTestProfile.STORAGE_PATH ).resolve( DUMMY_VERSION ).resolve( DUMMY_FILE_NAME_PREVUOUS_DEPLOY ) ) );
-		Awaitility.await().until( () -> Files.exists( QuakResource.REPOSITORIES_PATH.resolve( QuakTestProfile.STORAGE_PATH ).resolve( DUMMY_VERSION ).resolve( TRASH_DIRECTORY_NAME ).resolve( DUMMY_FILE_NAME_PREVUOUS_DEPLOY ) ) );
+		Awaitility.await().until( () -> Files.notExists( REPOSITORIES_PATH.resolve( QuakTestProfile.STORAGE_PATH ).resolve( DUMMY_VERSION ).resolve( DUMMY_FILE_NAME_PREVUOUS_DEPLOY ) ) );
+		Awaitility.await().until( () -> Files.exists( REPOSITORIES_PATH.resolve( QuakTestProfile.STORAGE_PATH ).resolve( DUMMY_VERSION ).resolve( TRASH_DIRECTORY_NAME ).resolve( DUMMY_FILE_NAME_PREVUOUS_DEPLOY ) ) );
 		
 		// File from current deploy must stay undeleted.
-		Awaitility.await().until( () -> Files.exists( QuakResource.REPOSITORIES_PATH.resolve( QuakTestProfile.STORAGE_PATH ).resolve( DUMMY_VERSION ).resolve( dummyFileNameCurrentDeploy ) ) );
+		Awaitility.await().until( () -> Files.exists( REPOSITORIES_PATH.resolve( QuakTestProfile.STORAGE_PATH ).resolve( DUMMY_VERSION ).resolve( dummyFileNameCurrentDeploy ) ) );
 		
 		// Do another maven deploy simultaneously and see files stay undeleted.
 		String dummyFileNameSimultaneousDeploy = doDummyMavenDeploy();
-		Awaitility.await().until( () -> Files.exists( QuakResource.REPOSITORIES_PATH.resolve( QuakTestProfile.STORAGE_PATH ).resolve( DUMMY_VERSION ).resolve( dummyFileNameSimultaneousDeploy ) ) );
+		Awaitility.await().until( () -> Files.exists( REPOSITORIES_PATH.resolve( QuakTestProfile.STORAGE_PATH ).resolve( DUMMY_VERSION ).resolve( dummyFileNameSimultaneousDeploy ) ) );
 	}
 }

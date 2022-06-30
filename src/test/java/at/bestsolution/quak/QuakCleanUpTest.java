@@ -30,6 +30,8 @@ import static io.restassured.RestAssured.given;
 
 import java.io.StringWriter;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Random;
 
@@ -71,6 +73,7 @@ abstract class QuakCleanUpTest {
 	public static final String DUMMY_FILE_NAME_CONCURRENT_DEPLOY = "dummy_file_concurrent_deploy.foo";
 	public static final String DUMMY_FILE_CONCURRENT = QuakTestProfile.BASE_URL.concat( "/" ).concat( DUMMY_VERSION ).concat( "/" ).concat( DUMMY_FILE_NAME_CONCURRENT_DEPLOY );
 	public static final String MAVEN_METADATA_FILE = QuakTestProfile.BASE_URL.concat( "/" ).concat( DUMMY_VERSION ).concat( "/maven-metadata.xml" );
+	protected static final Path REPOSITORIES_PATH = Paths.get( "repositories/" );
 
 	/**
 	 * Maven deploy is imitated before each test.
@@ -93,13 +96,13 @@ abstract class QuakCleanUpTest {
 		String dummyFileNameCurrentDeploy = doDummyMavenDeploy();
 
 		// File from previous deploy must be deleted.
-		Awaitility.await().until( () -> Files.notExists( QuakResource.REPOSITORIES_PATH.resolve( QuakTestProfile.STORAGE_PATH ).resolve( DUMMY_VERSION ).resolve( DUMMY_FILE_NAME_PREVUOUS_DEPLOY ) ) );
+		Awaitility.await().until( () -> Files.notExists( REPOSITORIES_PATH.resolve( QuakTestProfile.STORAGE_PATH ).resolve( DUMMY_VERSION ).resolve( DUMMY_FILE_NAME_PREVUOUS_DEPLOY ) ) );
 		// File from current deploy must stay undeleted.
-		Awaitility.await().until( () -> Files.exists( QuakResource.REPOSITORIES_PATH.resolve( QuakTestProfile.STORAGE_PATH ).resolve( DUMMY_VERSION ).resolve( dummyFileNameCurrentDeploy ) ) );
+		Awaitility.await().until( () -> Files.exists( REPOSITORIES_PATH.resolve( QuakTestProfile.STORAGE_PATH ).resolve( DUMMY_VERSION ).resolve( dummyFileNameCurrentDeploy ) ) );
 		
 		// Do another maven deploy simultaneously and see files stay undeleted.
 		String dummyFileNameSimultaneousDeploy = doDummyMavenDeploy();
-		Awaitility.await().until( () -> Files.exists( QuakResource.REPOSITORIES_PATH.resolve( QuakTestProfile.STORAGE_PATH ).resolve( DUMMY_VERSION ).resolve( dummyFileNameSimultaneousDeploy ) ) );
+		Awaitility.await().until( () -> Files.exists( REPOSITORIES_PATH.resolve( QuakTestProfile.STORAGE_PATH ).resolve( DUMMY_VERSION ).resolve( dummyFileNameSimultaneousDeploy ) ) );
 	}
 	
 	/**

@@ -83,7 +83,7 @@ public class QuakResource {
     Template directory;
 	
 	private static final Logger LOG = Logger.getLogger(QuakResource.class);
-	public static final java.nio.file.Path REPOSITORIES_PATH = Paths.get( "repositories/" ); 
+	private static final java.nio.file.Path REPOSITORIES_PATH = Paths.get( "repositories/" ); 
 	private static final String FILE_SIZE_PATTERN = "#,###.0";
 	
     /**
