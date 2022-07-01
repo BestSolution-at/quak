@@ -1,1 +1,3 @@
 /target/
+/repositories/
+.flattened-pom.xml

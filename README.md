@@ -1,124 +1,69 @@
-# quak Project
+# quak repository server
 
-quak is a Maven repository server which uses Quarkus, the Supersonic Subatomic Java Framework. 
+[BestSolution.at](https://www.bestsolution.at) **quak** is an open source, low profile [Apache Maven](https://maven.apache.org/) repository server based on [Quarkus](https://quarkus.io/), the Supersonic Subatomic Java Framework.
 
-It can be used to deploy or install artifacts. 
+It can currently be used to deploy and host maven artifacts.
 
-Since it is based on Quarkus, it is fast and lightweight compared to Reposilite, Nexus and Archiva. 
+Because it is based on Quarkus, it is both fast and lightweight compared to other repository servers. It is built around the idea to be reduced to the max, meaning that while it may lack some fancy features, it is intended to provide what you need >90% of the time.
 
-If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
+If you want to learn more about quak, please visit its website https://github.com/BestSolution-at/quak
 
-## What it is and what it is not
+## What is quak?
 
-quak is:
- - a Maven repository server **only**
- - lightweight
- - fast
- - secure
- - platform intependent
+**quak IS:**
 
-quak is **NOT**
- - a Maven proxy
-	
+* a Maven repository server (but we may extend it for other formats in the future)
+* lightweight
+* fast
+* production ready and battle tested
+* secure
+* platform independent
 
-## Running the application in dev mode
+**quak is NOT:**
 
-You can run your application in dev mode that enables live coding using:
-```shell script
-./mvnw compile quarkus:dev
-```
+* a Maven proxy (yet)
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/q/dev/.
+## Rationale behind quak
 
-## Packaging and running the application
+Almost all our Java software projects are built upon Maven and we have been using Maven repository servers for just as long. In the past, we mostly relied upon the [Nexus Repository Manager](https://www.sonatype.com/products/nexus-repository), but we have also worked with others, like [Reposilite](https://reposilite.com).
 
-The application can be packaged using:
-```shell script
-./mvnw package
-```
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+Unfortunately, in our environments, we found them lacking for a number of reasons: they were either too complex to manage, and/or did not fit well into today's k8s/terraform world, and/or were not stable enough, and/or were lacking the security features we needed.
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
+So our internal requirements were basically as follows:
 
-If you want to build an _über-jar_, execute the following command:
-```shell script
-./mvnw package -Dquarkus.package.type=uber-jar
-```
+- Fast, stable and secure
+- Minimal resource consumption
+- Simple, templating friendly, config-file based administration
+- k8s ready
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
+Our initial focus is on hosting maven artifacts, including deployment. In the future, we may also add other repository formats, such as npm, see the [roadmap](docs/ROADMAP.md) for quak.
 
-## Creating a native executable
+## Main features
 
-You can create a native executable using: 
-```shell script
-./mvnw package -Pnative
-```
+* 100% Open Source under the [Apache 2.0 License](LICENSE)
+* Intended to be very resource friendly
+* Out-of-the box HTTP Basic, JWT, OAuth2, and OIDC support for authentication
+* Public and private repositories
+* Platform independent
+* No BLOB but real file system storage (facilitating backup and native file system de-duplication)
+* k8s ready
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using: 
-```shell script
-./mvnw package -Pnative -Dquarkus.native.container-build=true
-```
+## Getting quak
 
-You can then execute your native executable with: `./target/quack-1.0.0-SNAPSHOT-runner`
+There are various ways how to get quak:
 
-If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.
+* Compile your own quak as described in [Building and developing](docs/DEVELOPMENT.md)
+* Use the docker images from https://hub.docker.com/r/bestsolutionat/quak
+* In the future, we intend to offer debian and FreeBSD packages as well
 
-## Configuration
+## Configuring and running quak
 
-Following is a sample configuration file placed under the path: `$PWD/config/application.properties`.
+The configuration is explained in a dedicated [configuration](docs/CONFIGURATION.md) document and how to run it, for example using docker, is explained in  [running quak](docs/RUNNING.md).
 
-```
-quarkus.oauth2.enabled = false
-quarkus.oidc.enabled = false
-quarkus.http.port = 8089
-quarkus.http.limits.max-body-size = 1000M
+## Roadmap
 
-quak.repositories[0].name = blueprint
-quak.repositories[0].storage-path = repos/blueprint
-quak.repositories[0].base-url = /at/bestsolution/blueprint
-quak.repositories[0].allow-redeploy = true
-quak.repositories[0].is-private = false
-```
+See the dedicated [Roadmap](docs/ROADMAP.md) document.
 
-| Configuration | Explanation | Default Value
-|-----------------|:-------------|:-------------|
-| `quarkus.http.port` 									| Port Quarkus is running on 														| 8080 (Quarkus)
-| `quarkus.http.limits.max-body-size`     				| Upload limit Quarkus has 															| 10240K (Quarkus)
-| `quarkus.oauth2.enabled`								| If OAuth2 is enabled																| false (quak)
-| `quarkus.oidc.enabled`									| If OpenID Connect is enabled														| false (quak)
-| `quarkus.oidc.authentication.user-info-required`	| If OpenID Connect is used, this must set to true for quak to acquire user info	| true (quak)
-| `quak.repositories[0].name`    						| Name of the repository 															| 
-| `quak.repositories[0].storage-path`    				| Location of the artifacts 														| 
-| `quak.repositories[0].base-url`    					| Repository is served at 															| 
-| `quak.repositories[0].allow-redeploy`    				| If the same version can be redeployed  											| true (quak)
-| `quak.repositories[0].is-private`    					| True if it is a private repository, false if not									| false (quak)
+## Building and developing quak
 
-Please note that `quak.repositories` configuration is an **array** and one instance of quak can serve as many as repositories defined here.
-
-Given "blueprint" name is and example repository to explain how to define a repository.
-
-For information about Quarkus configuration please see: https://quarkus.io/guides/config-reference .
-
-
-## Authentication and authorization
-
-Both authentication and authorization can be satisfied in quak with a simple configuration. Users can be defined with read/write permissions on different paths and repositories.
-
-Please see ['Authentication and authorization in quak'](docs/AUTHORIZATION.md) for more details.
-
-
-## FAQ
-
- - Q: How do I give a user permission for paths with an exception of a particular one?
-
-Configuration field `quak.user-permissions[].url-paths[]` is a list of permitted paths, written with regular expressions. Defining a user permission over repository with a negated regular expression can satisfy the condition:
-
-```
-quak.user-permissions[0].username = user1
-quak.user-permissions[0].repository-name = blueprint
-quak.user-permissions[0].url-paths[0] = /at/bestsolution/(?!.*exceptThisPath).*
-quak.user-permissions[0].may-publish = true
-```
-
-The Configuration above allows user1 to generally access paths which begin with `/at/bestsolution/*`, but denies access to paths which contain `exceptThisPath`. So for example, user1 would have access denied to `/at/bestsolution/exceptThisPath` or also to `/at/bestsolution/example/exceptThisPath`.
+See the dedicated [Building and developing](docs/DEVELOPMENT.md) document.
