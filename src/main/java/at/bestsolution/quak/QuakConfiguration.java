@@ -33,11 +33,17 @@ import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithDefault;
 
 /**
- * Represents a quak configuration. Contains a list of repository configurations.
+ * Represents quak configurations. 
  */
 @StaticInitSafe
 @ConfigMapping( prefix = "quak" )
 public interface QuakConfiguration {
+	
+	/**
+	 * @return
+	 * 		HTTP configuration of quak.
+	 */
+	public HTTP http();
 	
 	/**
 	 * @return
@@ -60,6 +66,26 @@ public interface QuakConfiguration {
 	 * @return list of user permissions defined in quak configuration.
 	 */
 	public List<UserPermission> userPermissions();
+	
+	/**
+	 * Represents a quak http configuration.
+	 */
+	public interface HTTP {
+		
+		/**
+		 * @return 
+		 * 		the TCP port quak will be listening on.
+		 */
+		@WithDefault("8080")
+		public int port();
+		
+		/**
+		 * @return 
+		 * 		the max size of uploaded artifacts.
+		 */
+		@WithDefault("10240K")
+		public String maxBodySize();
+	}
 	
 	/**
 	 * Represents a repository configuration.
