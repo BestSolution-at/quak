@@ -1,0 +1,59 @@
+# example configuration for quak
+#
+# configuration basics
+# ------------------
+# quak listens on http://127.0.0.1:8089
+quak.http.host = 127.0.0.1
+quak.http.port = 8089
+# the max size of uploaded artifacts is 1000 MB
+quak.http.max-body-size = 1000M
+
+# first repostory called "blueprint"
+# ------------------
+# define the repo's unique name
+quak.repositories[0].name = blueprint
+
+# the repo's physical storage location is $PWD/repos/blueprint
+quak.repositories[0].storage-path = repos/blueprint
+
+# the URL path to access the repository will be /at/bestsolution/blueprint
+# so the entire URL will look something like this:
+# http://localhost:8089/at/bestsolution/blueprint/
+quak.repositories[0].base-url = /at/bestsolution/blueprint
+
+# same version artifacts can be redeployed => this is typically true for
+# snaphot repositories
+quak.repositories[0].allow-redeploy = true
+
+# this is a public repository, it won't require authentication to browse it,
+# but uploads will always require authentication nevertheless
+quak.repositories[0].is-private = false
+
+# authentication type is HTTP Basic
+quak.auth-type = http-basic
+
+# user definitions
+# ------------------
+
+# add an user for HTTP basic authentication
+quak.basic-users[0].username = user1
+# BCrypt hashed password for HTTP basic authentication.
+quak.basic-users[0].password = hashed_very_secret_highly_complex_password
+
+# user permissions
+# ------------------
+
+# define some permissions for user with username "user1" 
+quak.user-permissions[0].username = user1
+# the permissions granted to user1 will be for the "blueprint" repository  
+quak.user-permissions[0].repository-name = blueprint
+# a listing of URL path patterns where the permissions will be applied
+# in our sample '/.*' case this translates to "all directories of the repository"
+quak.user-permissions[0].url-paths[0] = /.*
+# this negated regular expression excludes the given pattern from the permitted directories
+# so user1 would not be allowed to publish anything in the /at/bestsolution/topSecretProject directry
+quak.user-permissions[0].url-paths[1] = /at/bestsolution/(?!.*topSecretProject).*
+# give the user publishing (=write) permissions
+quak.user-permissions[0].may-publish = true
+
+
