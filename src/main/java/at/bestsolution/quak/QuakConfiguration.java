@@ -95,21 +95,18 @@ public interface QuakConfiguration {
 		 * @return 
 		 * 		the TCP port quak will be listening on.
 		 */
-		@WithDefault("8080")
 		public int port();
 		
 		/**
 		 * @return 
 		 * 		the TCP host quak will be listening on.
 		 */
-		@WithDefault("0.0.0.0")
 		public String host();
 		
 		/**
 		 * @return 
 		 * 		the max size of uploaded artifacts.
 		 */
-		@WithDefault("10240K")
 		public String maxBodySize();
 	}
 	
@@ -140,7 +137,6 @@ public interface QuakConfiguration {
 		 * @return 
 		 * 		if the OAuth2 extension is enabled.
 		 */
-		@WithDefault("false")
 		public boolean enabled();
 		
 		/**
@@ -171,7 +167,6 @@ public interface QuakConfiguration {
 		 * @return 
 		 * 		if the OIDC extension is enabled.
 		 */
-		@WithDefault("false")
 		public boolean enabled();
 		
 		/**
@@ -196,7 +191,6 @@ public interface QuakConfiguration {
 		 * @return 
 		 * 		if this property is set to 'true' then an OIDC UserInfo endpoint will be called. Must be true for quak OIDC authentication.
 		 */
-		@WithDefault("true")
 		public boolean userInfoRequired();
 	}
 	
