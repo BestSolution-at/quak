@@ -27,17 +27,42 @@ package at.bestsolution.quak;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 import io.quarkus.runtime.annotations.StaticInitSafe;
 import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithDefault;
 
 /**
- * Represents a quak configuration. Contains a list of repository configurations.
+ * Represents quak configurations. 
  */
 @StaticInitSafe
 @ConfigMapping( prefix = "quak" )
 public interface QuakConfiguration {
+	
+	/**
+	 * @return
+	 * 		HTTP configuration of quak.
+	 */
+	public HTTP http();
+	
+	/**
+	 * @return
+	 * 		JWT configuration of quak.
+	 */
+	public JWT jwt();
+	
+	/**
+	 * @return
+	 * 		OAuth2 configuration of quak.
+	 */
+	public OAuth2 oauth2();
+	
+	/**
+	 * @return
+	 * 		OpenID Connect configuration of quak.
+	 */
+	public OIDC oidc();
 	
 	/**
 	 * @return
@@ -60,6 +85,114 @@ public interface QuakConfiguration {
 	 * @return list of user permissions defined in quak configuration.
 	 */
 	public List<UserPermission> userPermissions();
+	
+	/**
+	 * Represents a quak http configuration.
+	 */
+	public interface HTTP {
+		
+		/**
+		 * @return 
+		 * 		the TCP port quak will be listening on.
+		 */
+		public int port();
+		
+		/**
+		 * @return 
+		 * 		the TCP host quak will be listening on.
+		 */
+		public String host();
+		
+		/**
+		 * @return 
+		 * 		the max size of uploaded artifacts.
+		 */
+		public String maxBodySize();
+	}
+	
+	/**
+	 * Represents a quak JWT configuration.
+	 */
+	public interface JWT {
+		
+		/**
+		 * @return 
+		 * 		location of JWT token issuer public key.
+		 */
+		public Optional<String> issuerPublicKey();
+		
+		/**
+		 * @return 
+		 * 		name of JWT token issuer.
+		 */
+		public Optional<String> issuerName();
+	}
+	
+	/**
+	 * Represents a quak OAuth2 configuration.
+	 */
+	public interface OAuth2 {
+		
+		/**
+		 * @return 
+		 * 		if the OAuth2 extension is enabled.
+		 */
+		public boolean enabled();
+		
+		/**
+		 * @return 
+		 * 		OAuth2 client id used to validate the token. Mandatory if the OAuth2 is enabled.
+		 */
+		public Optional<String> clientId();
+		
+		/**
+		 * @return 
+		 * 		OAuth2 client secret used to validate the token. Mandatory if the OAuth2 is enabled.
+		 */
+		public Optional<String> clientSecret();
+		
+		/**
+		 * @return 
+		 * 		OAuth2 introspection endpoint URL used to validate the token. Mandatory if the extension is enabled.
+		 */
+		public Optional<String> introspectionUrl();
+	}
+	
+	/**
+	 * Represents a quak OpenID Connect configuration.
+	 */
+	public interface OIDC {
+		
+		/**
+		 * @return 
+		 * 		if the OIDC extension is enabled.
+		 */
+		public boolean enabled();
+		
+		/**
+		 * @return 
+		 * 		OIDC client id used to validate the token. Mandatory if the OIDC is enabled.
+		 */
+		public Optional<String> clientId();
+		
+		/**
+		 * @return 
+		 * 		OIDC client secret used to validate the token. Mandatory if the OIDC is enabled.
+		 */
+		public Optional<String> sharedSecret();
+		
+		/**
+		 * @return 
+		 * 		base URL of OIDC server, for example, https://host:port/auth.
+		 */
+		public Optional<String> authServerUrl();
+		
+		/**
+		 * @return 
+		 * 		if this property is set to 'true' then an OIDC UserInfo endpoint will be called. Must be true for quak OIDC authentication.
+		 */
+		public boolean userInfoRequired();
+	}
 	
 	/**
 	 * Represents a repository configuration.
