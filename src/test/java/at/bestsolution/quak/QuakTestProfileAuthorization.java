@@ -51,8 +51,8 @@ public class QuakTestProfileAuthorization extends QuakTestProfile {
     public Map<String, String> getConfigOverrides() {
     	Map<String, String> testConfigurations = super.getConfigOverrides();
     	// Insert Admin User
-    	testConfigurations.put( "quak.users[1].username", USERNAME_ADMIN );
-    	testConfigurations.put( "quak.users[1].password", GOOD_PASSWORD_HASH );
+    	testConfigurations.put( "quak.basic-users[1].username", USERNAME_ADMIN );
+    	testConfigurations.put( "quak.basic-users[1].password", GOOD_PASSWORD_HASH );
     	// Insert Permissions
     	testConfigurations.put( "quak.user-permissions[1].username", GOOD_USERNAME );
     	testConfigurations.put( "quak.user-permissions[1].repository-name", REPOSITORY_NAME_READ_ONLY );

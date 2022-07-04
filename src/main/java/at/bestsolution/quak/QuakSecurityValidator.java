@@ -68,7 +68,7 @@ public class QuakSecurityValidator {
 		credentials = new HashMap<>();
 		repositories = new ArrayList<>();
 		
-		confController.getUsers().stream().forEach( u -> credentials.put( u.username(), u.password() ) );
+		confController.getBasicUsers().stream().forEach( u -> credentials.put( u.username(), u.password() ) );
 		confController.getRepositories().forEach( re -> repositories.add( new QuakRepository( re.name(), re.baseUrl(), re.isPrivate(), re.allowRedeploy(), re.storagePath() ) ) );
 		confController.getUserPermissions().forEach( pe ->  repositories.stream().filter( re -> pe.repositoryName().equals( re.getName() ) ).findFirst().get().
 				getUserPermissions().add( new QuakUserPermission( pe.username(), pe.mayPublish(), pe.urlPaths() ) ) );

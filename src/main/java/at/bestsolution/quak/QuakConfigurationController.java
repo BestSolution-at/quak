@@ -32,7 +32,7 @@ import javax.inject.Inject;
 
 import at.bestsolution.quak.QuakConfiguration.UserPermission;
 import at.bestsolution.quak.QuakConfiguration.Repository;
-import at.bestsolution.quak.QuakConfiguration.User;
+import at.bestsolution.quak.QuakConfiguration.BasicUser;
 
 /**
  * Quak Configuration controller for handling the configuration data.
@@ -71,11 +71,12 @@ public class QuakConfigurationController {
 	}
 	
 	/**
-	 * Get the list of users defined in configuration.
-	 * @return list of users.
+	 * Get the list of basic authentication users defined in configuration.
+	 * @return 
+	 * 		List of basic authentication users.
 	 */
-	public List<User> getUsers() {
-		return configuration.users();
+	public List<BasicUser> getBasicUsers() {
+		return configuration.basicUsers();
 	}
 	
 	/**

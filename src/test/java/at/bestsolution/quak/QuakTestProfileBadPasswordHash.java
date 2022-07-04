@@ -42,7 +42,7 @@ public class QuakTestProfileBadPasswordHash extends QuakTestProfile {
     @Override
     public Map<String, String> getConfigOverrides() {
     	Map<String, String> testConfigurations = super.getConfigOverrides();
-    	testConfigurations.put( "quak.users[0].password", BAD_PASSWORD_HASH );
+    	testConfigurations.put( "quak.basic-users[0].password", BAD_PASSWORD_HASH );
         return testConfigurations;
     }
 }

@@ -77,9 +77,10 @@ public interface QuakConfiguration {
 	public List<Repository> repositories();
 	
 	/**
-	 * @return list of users defined in quak configuration.
+	 * @return 
+	 * 		List of basic authentication users defined in quak configuration.
 	 */
-	public List<User> users();
+	public List<BasicUser> basicUsers();
 	
 	/**
 	 * @return list of user permissions defined in quak configuration.
@@ -246,16 +247,18 @@ public interface QuakConfiguration {
 	}
 	
 	/**
-	 * Represents a quak user.
+	 * Represents a quak basic authentication user.
 	 */
-	public interface User {
+	public interface BasicUser {
 		/**
-		 * @return username of quak user. It is a unique identifier.
+		 * @return 
+		 * 		username of quak user. It is a unique identifier.
 		 */
 		public String username();
 		
 		/**
-		 * @return password of quak user, hashed with BCrypt hash algorithm.
+		 * @return 
+		 * 		password of quak user, hashed with BCrypt hash algorithm.
 		 */
 		public String password();
 	}
