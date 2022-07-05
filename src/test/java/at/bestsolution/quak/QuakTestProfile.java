@@ -95,8 +95,8 @@ public class QuakTestProfile implements QuarkusTestProfile {
     	testConfigurations.put( "quak.repositories[0].base-url", BASE_URL );
     	testConfigurations.put( "quak.repositories[0].allow-redeploy", ALLOW_REDEPLOY );
     	testConfigurations.put( "quak.repositories[0].is-private", PRIVATE_REPOSITORY );
-    	testConfigurations.put( "quak.users[0].username", GOOD_USERNAME );
-    	testConfigurations.put( "quak.users[0].password", GOOD_PASSWORD_HASH );
+    	testConfigurations.put( "quak.basic-users[0].username", GOOD_USERNAME );
+    	testConfigurations.put( "quak.basic-users[0].password", GOOD_PASSWORD_HASH );
     	testConfigurations.put( "quarkus.http.limits.max-body-size", MAX_BODY_SIZE );
     	testConfigurations.put( "quak.user-permissions[0].username", GOOD_USERNAME );
     	testConfigurations.put( "quak.user-permissions[0].repository-name", REPOSITORY_NAME );
