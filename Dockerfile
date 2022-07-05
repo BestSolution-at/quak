@@ -13,6 +13,9 @@
 
 FROM eclipse-temurin:17-jre-jammy
 
+# For vulnerabilities be up-to-date
+RUN apt-get update && apt-get upgrade -y
+
 LABEL org.opencontainers.image.title="quak" \
       org.opencontainers.image.description="Lightweight Maven repository server which uses Quarkus, the Supersonic Subatomic Java Framework." \
       org.opencontainers.image.url="https://www.bestsolution.at/" \
