@@ -87,7 +87,6 @@ public class QuakResource {
 	ManagedExecutor executor;
 	
 	private static final Logger LOG = Logger.getLogger(QuakResource.class);
-	private static final java.nio.file.Path REPOSITORIES_PATH = Paths.get( "repositories/" ); 
 	private static final String FILE_SIZE_PATTERN = "#,###.0";
 	
     /**
@@ -134,16 +133,17 @@ public class QuakResource {
 	private java.nio.file.Path resolveFileSystemPath(QuakRepository repository, String url) {
 		int length = repository.getBaseUrl().length();
 		String relativeURL = url.substring( length );
+		java.nio.file.Path repositoriesBase = configurationController.getConfiguration().repositoriesBasePath();
 		
 		if ( relativeURL.length() > 0 && relativeURL.charAt( 0 ) == '/' ) {
 			relativeURL = relativeURL.substring( 1 );
 		}
 		
 		if ( relativeURL.isEmpty() ) {
-			return REPOSITORIES_PATH.resolve( repository.getStoragePath() );
+			return repositoriesBase.resolve( repository.getStoragePath() );
 		}
 		
-		return REPOSITORIES_PATH.resolve( repository.getStoragePath() ).resolve( relativeURL ).normalize();
+		return repositoriesBase.resolve( repository.getStoragePath() ).resolve( relativeURL ).normalize();
 	}
 	
 	private String getFormattedFileSize(long size) {
