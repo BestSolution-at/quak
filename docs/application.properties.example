@@ -10,14 +10,14 @@ quak.http.max-body-size = 1000M
 
 # absolute base path to store repositories under
 # if this is not set, it will default to $PWD/repositories
-quak.repository-base-path = /var/quak
+quak.repositories-base-path = /var/quak
 
 # first repostory called "blueprint"
 # ------------------
 # define the repo's unique name
 quak.repositories[0].name = blueprint
 
-# the repo's physical storage location is quak.repository-base-path + repos/blueprint
+# the repo's physical storage location is quak.repositores-base-path + repos/blueprint
 # So, in our example, the repository will be located at /var/quak/repos/blueprint
 quak.repositories[0].storage-path = repos/blueprint
 

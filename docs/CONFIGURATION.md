@@ -37,23 +37,24 @@ Apart from that, the location of the configuration file can be specified various
 
 ## Configuration options
 
-| Configuration                             | Explanation                                                  | Default Value  |
-| ----------------------------------------- | :----------------------------------------------------------- | :------------- |
-| `quak.http.host`                          | IP address or hostname that quak will be listening on        | **127.0.0.1**  |
-| `quak.http.port`                          | the TCP port quak will be listening on                       | **8080**       |
-| `quak.http.max-body-size`                 | the max size of uploaded artifacts                           | **10240K**     |
-| `quak.auth-type`                          | one of<br />* `http-basic`<br />* `JWT`<br />* `oauth2`<br />* `oidc`<br /><br />see [Authentication and Authorization](docs/AUTH.md) for more information and configuration options. | **http-basic** |
-| `quak.repositories[].name`                | the verbose, unique name of the repository                   |                |
-| `quak.repositories[].storage-path`        | the physical storage location of the artifacts               |                |
-| `quak.repositories[].base-url`            | the URL the repository will be served at                     |                |
-| `quak.repositories[].allow-redeploy`      | are redeployments of identical artifact versions allowed (hint: for **snapshots**, this is typically **true** whereas for **release** repositories this is typically **false**) | **true**       |
-| `quak.repositories[].is-private`          | private repositories can only be accessed by authenticated users | **false**      |
-| `quak.basic-users[].username`             | the unique name of a user, only for HTTP Basic authentication |                |
-| `quak.basic-users[].password`             | an user's encrypted password for HTTP Basic authentication   |                |
-| `quak.user-permissions[].username`        | the username to define permissions for                       |                |
-| `quak.user-permissions[].repository-name` | the repository-name to define permissions for                |                |
-| `quak.user-permissions[].url-paths[]`     | [Java regex](https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html) defining a path within a repository to define permissions for |                |
-| `quak.user-permissions[].may-publish`     | if true, the user may deploy artifacts                       | **false**      |
+| Configuration                             | Explanation                                                  | Default Value       |
+| ----------------------------------------- | :----------------------------------------------------------- | :------------------ |
+| `quak.http.host`                          | IP address or hostname that quak will be listening on        | **127.0.0.1**       |
+| `quak.http.port`                          | the TCP port quak will be listening on                       | **8080**            |
+| `quak.http.max-body-size`                 | the max size of uploaded artifacts                           | **10240K**          |
+| `quak.auth-type`                          | one of<br />* `http-basic`<br />* `JWT`<br />* `oauth2`<br />* `oidc`<br /><br />see [Authentication and Authorization](docs/AUTH.md) for more information and configuration options. | **http-basic**      |
+| `quak.repository-base-path`               | the absolute base path where repositories will be stored     | `$PWD/repositories` |
+| `quak.repositories[].name`                | the verbose, unique name of the repository                   |                     |
+| `quak.repositories[].storage-path`        | the relative, physical storage location of the artifacts<br />The absolute path is constructed via `quak.repository-base-path+quak.repositories[].storage-path` |                     |
+| `quak.repositories[].base-url`            | the URL the repository will be served at                     |                     |
+| `quak.repositories[].allow-redeploy`      | are redeployments of identical artifact versions allowed (hint: for **snapshots**, this is typically **true** whereas for **release** repositories this is typically **false**) | **true**            |
+| `quak.repositories[].is-private`          | private repositories can only be accessed by authenticated users | **false**           |
+| `quak.basic-users[].username`             | the unique name of a user, only for HTTP Basic authentication |                     |
+| `quak.basic-users[].password`             | an user's encrypted password for HTTP Basic authentication   |                     |
+| `quak.user-permissions[].username`        | the username to define permissions for                       |                     |
+| `quak.user-permissions[].repository-name` | the repository-name to define permissions for                |                     |
+| `quak.user-permissions[].url-paths[]`     | [Java regex](https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html) defining a path within a repository to define permissions for |                     |
+| `quak.user-permissions[].may-publish`     | if true, the user may deploy artifacts                       | **false**           |
 
 Please note that `quak.repositories[]`, `quak.basic-users[]`, `quak.user-permissions[]` and `quak-user-permissions[].url-paths[]` are **arrays**.
 
@@ -73,6 +74,9 @@ quak.http.host = 127.0.0.1
 quak.http.port = 8089
 # the max size of uploaded artifacts is 1000 MB
 quak.max-body-size = 1000M
+
+# absolute base path to store repositories under
+quak.repositories-base-path = /var/quak
 
 # define a repository called "blueprint"
 quak.repositories[0].name = blueprint
