@@ -8,12 +8,17 @@ quak.http.port = 8089
 # the max size of uploaded artifacts is 1000 MB
 quak.http.max-body-size = 1000M
 
+# absolute base path to store repositories under
+# if this is not set, it will default to $PWD/repositories
+quak.repository-base-path = /var/quak
+
 # first repostory called "blueprint"
 # ------------------
 # define the repo's unique name
 quak.repositories[0].name = blueprint
 
-# the repo's physical storage location is $PWD/repos/blueprint
+# the repo's physical storage location is quak.repository-base-path + repos/blueprint
+# So, in our example, the repository will be located at /var/quak/repos/blueprint
 quak.repositories[0].storage-path = repos/blueprint
 
 # the URL path to access the repository will be /at/bestsolution/blueprint

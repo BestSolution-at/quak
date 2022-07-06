@@ -76,7 +76,7 @@ quak.max-body-size = 1000M
 
 # define a repository called "blueprint"
 quak.repositories[0].name = blueprint
-# the repositorie's physical storage location is $PWD/repos/blueprint
+# the repository's physical storage location is $PWD/repos/blueprint
 quak.repositories[0].storage-path = repos/blueprint
 # the URL path to access the repository will be /at/bestsolution/blueprint
 # so the entire URL will look something like this:
