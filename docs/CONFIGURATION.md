@@ -43,9 +43,9 @@ Apart from that, the location of the configuration file can be specified various
 | `quak.http.port`                          | the TCP port quak will be listening on                       | **8080**            |
 | `quak.http.max-body-size`                 | the max size of uploaded artifacts                           | **10240K**          |
 | `quak.auth-type`                          | one of<br />* `http-basic`<br />* `JWT`<br />* `oauth2`<br />* `oidc`<br /><br />see [Authentication and Authorization](docs/AUTH.md) for more information and configuration options. | **http-basic**      |
-| `quak.repository-base-path`               | the absolute base path where repositories will be stored     | `$PWD/repositories` |
+| `quak.repositories-base-path`             | the absolute base path where repositories will be stored     | `$PWD/repositories` |
 | `quak.repositories[].name`                | the verbose, unique name of the repository                   |                     |
-| `quak.repositories[].storage-path`        | the relative, physical storage location of the artifacts<br />The absolute path is constructed via `quak.repository-base-path+quak.repositories[].storage-path` |                     |
+| `quak.repositories[].storage-path`        | the relative, physical storage location of the artifacts<br />The absolute path is constructed via `quak.repositories-base-path+quak.repositories[].storage-path` |                     |
 | `quak.repositories[].base-url`            | the URL the repository will be served at                     |                     |
 | `quak.repositories[].allow-redeploy`      | are redeployments of identical artifact versions allowed (hint: for **snapshots**, this is typically **true** whereas for **release** repositories this is typically **false**) | **true**            |
 | `quak.repositories[].is-private`          | private repositories can only be accessed by authenticated users | **false**           |
