@@ -72,6 +72,13 @@ public interface QuakConfiguration {
 	public int maxConcurrentCleanUpTasks();
 	
 	/**
+	 * @return
+	 * 		base path where repositories are stored.
+	 */
+	@WithDefault("repositories/")
+	public Path repositoriesBasePath();
+	
+	/**
 	 * @return list of repositories defined in quak configuration.
 	 */
 	public List<Repository> repositories();
