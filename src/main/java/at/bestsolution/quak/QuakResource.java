@@ -205,16 +205,16 @@ public class QuakResource {
 		}
 		
 		if ( Files.isDirectory( file ) ) {
-			List<DirectoryItem> items = new ArrayList<>();
+			List<QuakDirectoryListItem> items = new ArrayList<>();
 			if ( !repository.getStoragePath().equals( file ) ) {
-				items.add( new DirectoryItem( "drive_folder_upload", "..", "..", "-", getLastModified( file ) ) );		
+				items.add( new QuakDirectoryListItem( "drive_folder_upload", "..", "..", "-", getLastModified( file ) ) );		
 			}
 			try {
 				Stream<java.nio.file.Path> paths = Files.list( file );
 				try {
 					items.addAll( paths.sorted().map( p -> {
 						if ( Files.isDirectory( p ) ) {
-							return new DirectoryItem( "folder", p.getFileName().toString(), p.getFileName().toString() + "/", "-", getLastModified( p ) );
+							return new QuakDirectoryListItem( "folder", p.getFileName().toString(), p.getFileName().toString() + "/", "-", getLastModified( p ) );
 						} 
 						else {
 							long size;
@@ -224,7 +224,7 @@ public class QuakResource {
 							catch ( IOException e ) {
 								size = -1;
 							}
-							return new DirectoryItem("description", p.getFileName().toString(), p.getFileName().toString(), getFormattedFileSize( size ), getLastModified( p ));
+							return new QuakDirectoryListItem("description", p.getFileName().toString(), p.getFileName().toString(), getFormattedFileSize( size ), getLastModified( p ));
 						}
 					} ).toList() );
 				}
@@ -291,24 +291,5 @@ public class QuakResource {
 		}
 		
 		return Response.ok().build();
-	}
-	
-	/**
-	 * Represents a directory item to be listed.
-	 */
-	public static class DirectoryItem {
-		public String name;
-		public String path;
-		public String lastModified;
-		public String fileSize;
-		public String icon;
-		
-		public DirectoryItem(String icon, String name, String path, String fileSize, String lastModified) {
-			this.name = name;
-			this.path = path;
-			this.fileSize = fileSize;
-			this.lastModified = lastModified;
-			this.icon = icon;
-		}
 	}
 }
