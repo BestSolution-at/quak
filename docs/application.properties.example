@@ -12,6 +12,12 @@ quak.http.max-body-size = 1000M
 # if this is not set, it will default to $PWD/repositories
 quak.repositories-base-path = /var/quak
 
+# enable logging to a file
+# if not enabled, quak will log to STDOUT/STDERR
+quak.log-file.enable = true
+quak.log-file.path = /var/log/quak.log
+quak.log-file.level = WARN
+
 # first repostory called "blueprint"
 # ------------------
 # define the repo's unique name
