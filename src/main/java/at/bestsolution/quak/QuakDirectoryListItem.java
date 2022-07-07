@@ -73,11 +73,11 @@ public class QuakDirectoryListItem {
 	 * 		Last modification date of the list item.
 	 */
 	public QuakDirectoryListItem( String icon, String name, String path, String fileSize, String lastModified ) {
-		this.name = name;
-		this.path = path;
-		this.fileSize = fileSize;
-		this.lastModified = lastModified;
-		this.icon = icon;
+		setName( name );
+		setPath( path );
+		setFileSize( fileSize );
+		setLastModified( lastModified );
+		setIcon( icon );
 	}
 
 	/**
