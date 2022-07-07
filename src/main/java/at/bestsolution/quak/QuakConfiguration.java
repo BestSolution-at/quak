@@ -25,6 +25,7 @@
 
 package at.bestsolution.quak;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -70,6 +71,12 @@ public interface QuakConfiguration {
 	 */
 	@WithDefault("5")
 	public int maxConcurrentCleanUpTasks();
+	
+	/**
+	 * @return
+	 * 		log file configuration of quak.
+	 */
+	public LogFile logFile();
 	
 	/**
 	 * @return
@@ -295,5 +302,29 @@ public interface QuakConfiguration {
 		 */
 		@WithDefault("false")
 		public boolean mayPublish();
+	}
+	
+	/**
+	 * Represents a quak log file configuration.
+	 */
+	public interface LogFile {
+		
+		/**
+		 * @return
+		 * 		if file logging should be enabled.
+		 */
+		public boolean enable();
+		
+		/**
+		 * @return
+		 * 		the name of the file in which logs will be written.
+		 */
+		public File path();
+		
+		/**
+		 * @return
+		 * 		the level of logs to be written into the file.
+		 */
+		public String level();
 	}
 }
