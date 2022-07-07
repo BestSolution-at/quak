@@ -28,6 +28,7 @@ package at.bestsolution.quak;
 
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.StringTokenizer;
 
 import javax.inject.Inject;
@@ -78,16 +79,16 @@ public class QuakSecurityInterceptor implements ContainerRequestFilter {
 		LOG.debugf( "Request received at: %s", context.getUriInfo().getRequestUri().toString() );
 		final SecurityContext securityContext = context.getSecurityContext();
 		final List<String> authorizationHeader = context.getHeaders().get( AUTHORIZATION_PROPERTY );
-		final QuakRepository repository = securityValidator.getQuakRepository( context.getUriInfo().getPath() );
+		final Optional<QuakRepository> repository = securityValidator.getQuakRepository( context.getUriInfo().getPath() );
 		QuakAuthorizationRequest request = new QuakAuthorizationRequest( context.getUriInfo().getPath(), null, null, 
 				context.getMethod().equals( HttpMethod.PUT.toString() ) || context.getMethod().equals( HttpMethod.POST.toString() ) );
 		
-		if ( repository == null ) {
+		if ( repository.isEmpty() ) {
 			LOG.errorf( "No repository found for path: %s", request.getUrlPath() );
 			context.abortWith( Response.status( Status.NOT_FOUND ).build() );
 		}
-		else if ( isAuthorizationRequired( request, repository ) ) {
-			LOG.debugf( "Validating user authentication for repository: %s", repository.getName() );
+		else if ( isAuthorizationRequired( request, repository.get() ) ) {
+			LOG.debugf( "Validating user authentication for repository: %s", repository.get().getName() );
 			// Check if any authentication is provided.
 			if ( !isAuthenticationProvided( authorizationHeader ) || securityContext == null ) {
 				LOG.debug( "No credentials given for authentication." );

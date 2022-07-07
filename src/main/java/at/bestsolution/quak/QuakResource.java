@@ -198,8 +198,13 @@ public class QuakResource {
 		LOG.debugf( "Get request received with: %s", urlInfo.getRequestUri() );
 		String path = urlInfo.getPath();
 		
-		QuakRepository repository = securityValidator.getQuakRepository( path );	
-		java.nio.file.Path file = resolveFileSystemPath( repository, path );
+		Optional<QuakRepository> repository = securityValidator.getQuakRepository( path );
+		if ( repository.isEmpty() ) {
+			LOG.errorf( "No repository found for path: %s", path );
+			return Response.status( Status.NOT_FOUND ).build();
+		}
+		
+		java.nio.file.Path file = resolveFileSystemPath( repository.get(), path );
 		
 		if ( file == null ) {
 			LOG.errorf( "Can not resolve path: %s", path );
@@ -208,7 +213,7 @@ public class QuakResource {
 		
 		if ( Files.isDirectory( file ) ) {
 			List<DirectoryItem> items = new ArrayList<>();
-			if ( !repository.getStoragePath().equals( file ) ) {
+			if ( !repository.get().getStoragePath().equals( file ) ) {
 				items.add( new DirectoryItem( "drive_folder_upload", "..", "..", "-", getLastModified( file ) ) );		
 			}
 			try {
@@ -255,8 +260,13 @@ public class QuakResource {
 		LOG.infof( "Upload request received with: %s", urlInfo.getRequestUri() );
 		String path = urlInfo.getPath();
 		
-		QuakRepository repository = securityValidator.getQuakRepository( path );
-		java.nio.file.Path file = resolveFileSystemPath( repository, path );
+		Optional<QuakRepository> repository = securityValidator.getQuakRepository( path );
+		if ( repository.isEmpty() ) {
+			LOG.errorf( "No repository found for path: %s", path );
+			return Response.status( Status.NOT_FOUND ).build();
+		}
+		
+		java.nio.file.Path file = resolveFileSystemPath( repository.get(), path );
 		
 		if ( file == null ) {
 			LOG.errorf( "Can not resolve path: %s", path );
@@ -269,8 +279,8 @@ public class QuakResource {
 		try {
 			Files.createDirectories( file.getParent() );
 			if ( Files.exists( file ) ) {
-				if ( !repository.isAllowRedeploy() && !file.getFileName().toString().startsWith( "maven-metadata.xml" ) ) {
-					LOG.infof( "Redeploy for %s is not allowed. Artifact (%s) is NOT uploaded.", repository.getName(), file.getFileName() );
+				if ( !repository.get().isAllowRedeploy() && !file.getFileName().toString().startsWith( "maven-metadata.xml" ) ) {
+					LOG.infof( "Redeploy for %s is not allowed. Artifact (%s) is NOT uploaded.", repository.get().getName(), file.getFileName() );
 					return Response.status( Status.METHOD_NOT_ALLOWED ).entity( "Redeployment not allowed" ).build();
 				}
 				Files.copy( messageBody, file, StandardCopyOption.REPLACE_EXISTING );	
@@ -284,7 +294,7 @@ public class QuakResource {
 			return Response.serverError().build();
 		}
 		
-		LOG.infof( "Artifact (%s) is successfully uploaded for repository: %s", file.getFileName(), repository.getName() );
+		LOG.infof( "Artifact (%s) is successfully uploaded for repository: %s", file.getFileName(), repository.get().getName() );
 		
 		// If maven-metadata-xml is uploaded, asynchronous CleanUp task will be started.
 		if ( file.getFileName().toString().equals( "maven-metadata.xml" ) ) {
