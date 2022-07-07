@@ -28,7 +28,6 @@ package at.bestsolution.quak;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.FileTime;
 import java.text.DecimalFormat;
@@ -40,7 +39,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.enterprise.event.Observes;
@@ -228,7 +226,7 @@ public class QuakResource {
 							}
 							return new DirectoryItem("description", p.getFileName().toString(), p.getFileName().toString(), getFormattedFileSize( size ), getLastModified( p ));
 						}
-					} ).collect( Collectors.toList() ) );
+					} ).toList() );
 				}
 				finally {
 					paths.close();
