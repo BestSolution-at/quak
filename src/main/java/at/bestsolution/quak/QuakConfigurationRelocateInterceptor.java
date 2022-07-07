@@ -68,6 +68,9 @@ public class QuakConfigurationRelocateInterceptor extends RelocateConfigSourceIn
 		else if ( name.startsWith( "mp.jwt.verify.issuer" ) ) {
 			return name.replaceFirst( "mp\\.jwt\\.verify\\.issuer", "quak.jwt.issuer-name" );
 		}
+		else if ( name.startsWith( "quarkus.log.file." ) ) {
+			return name.replaceFirst( "quarkus\\.log\\.file\\.", "quak.log-file." );
+		}
 
 		return name;
 	};
