@@ -28,6 +28,7 @@ package at.bestsolution.quak;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.FileTime;
 import java.text.DecimalFormat;
@@ -46,7 +47,6 @@ import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -66,7 +66,7 @@ import io.quarkus.runtime.StartupEvent;
 /**
  * Represents a quak instance.
  */
-@Path("/{path: .*}")
+@javax.ws.rs.Path("/{path: .*}")
 public class QuakResource {
 	
 	@Inject
@@ -111,7 +111,7 @@ public class QuakResource {
 	 * @param p path of the file to be checked.
 	 * @return String text displaying last modify date.
 	 */
-	private static String getLastModified(java.nio.file.Path p) {
+	private static String getLastModified(Path p) {
 		try {
 			FileTime time = Files.getLastModifiedTime( p );
 			return DateTimeFormatter.ofPattern( "dd-MMM-yyyy HH:mm", Locale.ENGLISH ).format( LocalDateTime.ofInstant( time.toInstant(), ZoneId.systemDefault() ) );
@@ -128,10 +128,10 @@ public class QuakResource {
 	 * @param url current URL path.
 	 * @return path for file or null if no match.
 	 */
-	private java.nio.file.Path resolveFileSystemPath(QuakRepository repository, String url) {
+	private Path resolveFileSystemPath(QuakRepository repository, String url) {
 		int length = repository.getBaseUrl().length();
 		String relativeURL = url.substring( length );
-		java.nio.file.Path repositoriesBase = configurationController.getConfiguration().repositoriesBasePath();
+		Path repositoriesBase = configurationController.getConfiguration().repositoriesBasePath();
 		
 		if ( relativeURL.length() > 0 && relativeURL.charAt( 0 ) == '/' ) {
 			relativeURL = relativeURL.substring( 1 );
@@ -169,7 +169,7 @@ public class QuakResource {
 		return formatted;
 	}
 	
-	private Response getResponseForFileType(java.nio.file.Path filePath) {
+	private Response getResponseForFileType(Path filePath) {
 		if ( !Files.exists( filePath ) && !Files.isRegularFile( filePath ) ) {
 			LOG.errorf( "File (%s) does not exist or could not be read.", filePath.toAbsolutePath() );
 			return Response.status( Response.Status.NOT_FOUND ).build();
@@ -197,7 +197,7 @@ public class QuakResource {
 		String path = urlInfo.getPath();
 		
 		QuakRepository repository = securityValidator.getQuakRepository( path );	
-		java.nio.file.Path file = resolveFileSystemPath( repository, path );
+		Path file = resolveFileSystemPath( repository, path );
 		
 		if ( file == null ) {
 			LOG.errorf( "Can not resolve path: %s", path );
@@ -209,7 +209,7 @@ public class QuakResource {
 			if ( !repository.getStoragePath().equals( file ) ) {
 				items.add( new QuakDirectoryListItem( "drive_folder_upload", "..", "..", "-", getLastModified( file ) ) );		
 			}
-			try ( Stream<java.nio.file.Path> paths = Files.list( file ) ) {
+			try ( Stream<Path> paths = Files.list( file ) ) {
 				items.addAll( paths.sorted().map( p -> {
 					if ( Files.isDirectory( p ) ) {
 						return new QuakDirectoryListItem( "folder", p.getFileName().toString(), p.getFileName().toString() + "/", "-", getLastModified( p ) );
@@ -248,7 +248,7 @@ public class QuakResource {
 		String path = urlInfo.getPath();
 		
 		QuakRepository repository = securityValidator.getQuakRepository( path );
-		java.nio.file.Path file = resolveFileSystemPath( repository, path );
+		Path file = resolveFileSystemPath( repository, path );
 		
 		if ( file == null ) {
 			LOG.errorf( "Can not resolve path: %s", path );
