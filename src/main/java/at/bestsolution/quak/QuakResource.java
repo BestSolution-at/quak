@@ -209,28 +209,22 @@ public class QuakResource {
 			if ( !repository.getStoragePath().equals( file ) ) {
 				items.add( new QuakDirectoryListItem( "drive_folder_upload", "..", "..", "-", getLastModified( file ) ) );		
 			}
-			try {
-				Stream<java.nio.file.Path> paths = Files.list( file );
-				try {
-					items.addAll( paths.sorted().map( p -> {
-						if ( Files.isDirectory( p ) ) {
-							return new QuakDirectoryListItem( "folder", p.getFileName().toString(), p.getFileName().toString() + "/", "-", getLastModified( p ) );
+			try ( Stream<java.nio.file.Path> paths = Files.list( file ) ) {
+				items.addAll( paths.sorted().map( p -> {
+					if ( Files.isDirectory( p ) ) {
+						return new QuakDirectoryListItem( "folder", p.getFileName().toString(), p.getFileName().toString() + "/", "-", getLastModified( p ) );
+					} 
+					else {
+						long size;
+						try {
+							size = Files.size( p );
 						} 
-						else {
-							long size;
-							try {
-								size = Files.size( p );
-							} 
-							catch ( IOException e ) {
-								size = -1;
-							}
-							return new QuakDirectoryListItem("description", p.getFileName().toString(), p.getFileName().toString(), getFormattedFileSize( size ), getLastModified( p ));
+						catch ( IOException e ) {
+							size = -1;
 						}
-					} ).toList() );
-				}
-				finally {
-					paths.close();
-				}
+						return new QuakDirectoryListItem("description", p.getFileName().toString(), p.getFileName().toString(), getFormattedFileSize( size ), getLastModified( p ));
+					}
+				} ).toList() );
 			} 
 			catch ( IOException e ) {
 				LOG.error( "Exception while reading directories!", e );
