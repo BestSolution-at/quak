@@ -28,6 +28,7 @@ package at.bestsolution.quak;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -82,8 +83,14 @@ public class QuakSecurityValidator {
 	 * @return true if authorized, false if not.
 	 */
 	public boolean isUserAuthorized( QuakAuthorizationRequest request ) {
-		return getQuakRepository( request.getUrlPath() ).getUserPermissions().stream().anyMatch( p -> p.getUsername().equals( request.getUsername() ) 
-				&& ( !request.isWrite() || p.isMayPublish() ) && p.getUrlPathPatterns().stream().anyMatch( pa -> pa.matcher( request.getUrlPath() ).matches() ) );
+		Optional<QuakRepository> repository = getQuakRepository( request.getUrlPath() );
+		if ( repository.isPresent() ) {
+			return repository.get().getUserPermissions().stream().anyMatch( p -> p.getUsername().equals( request.getUsername() ) 
+					&& ( !request.isWrite() || p.isMayPublish() ) && p.getUrlPathPatterns().stream().anyMatch( pa -> pa.matcher( request.getUrlPath() ).matches() ) );
+		} 
+		else {
+			return false;
+		}
 	}
 	
 	/**
@@ -101,7 +108,7 @@ public class QuakSecurityValidator {
 	 * @param urlPath URL path of the upload request.
 	 * @return Repository a quak repository or null in case of no match.
 	 */
-	public QuakRepository getQuakRepository( String urlPath ) {
-		return repositories.stream().filter( r -> urlPath.startsWith( r.getBaseUrl() ) ).findFirst().orElse( null );
+	public Optional<QuakRepository> getQuakRepository( String urlPath ) {
+		return Optional.ofNullable( repositories.stream().filter( r -> urlPath.startsWith( r.getBaseUrl() ) ).findFirst().orElse( null ) );
 	}
 }
