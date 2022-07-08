@@ -123,10 +123,14 @@ public class QuakResource {
 	}
 	
 	/**
-	 * Extracts the path for the artifact file.
-	 * @param repository repository configuration of the artifact.
-	 * @param url current URL path.
-	 * @return path for file or null if no match.
+	 * Resolves the path for file or directory in accordance with quak and repository configuration.
+	 * 
+	 * @param repository 
+	 * 		Repository configuration to be applied.
+	 * @param url 
+	 * 		Current URL path.
+	 * @return path 
+	 * 		Resolved path for file or directory.
 	 */
 	private java.nio.file.Path resolveFileSystemPath(QuakRepository repository, String url) {
 		int length = repository.getBaseUrl().length();
@@ -196,7 +200,13 @@ public class QuakResource {
 		LOG.debugf( "Get request received with: %s", urlInfo.getRequestUri() );
 		String path = urlInfo.getPath();
 		
-		QuakRepository repository = securityValidator.getQuakRepository( path );	
+		Optional<QuakRepository> repositoryOp = securityValidator.getQuakRepository( path );
+		if ( repositoryOp.isEmpty() ) {
+			LOG.errorf( "No repository found for path: %s", path );
+			return Response.status( Status.NOT_FOUND ).build();
+		}
+		
+		QuakRepository repository = repositoryOp.get();
 		java.nio.file.Path file = resolveFileSystemPath( repository, path );
 		
 		if ( file == null ) {
@@ -247,7 +257,13 @@ public class QuakResource {
 		LOG.infof( "Upload request received with: %s", urlInfo.getRequestUri() );
 		String path = urlInfo.getPath();
 		
-		QuakRepository repository = securityValidator.getQuakRepository( path );
+		Optional<QuakRepository> repositoryOp = securityValidator.getQuakRepository( path );
+		if ( repositoryOp.isEmpty() ) {
+			LOG.errorf( "No repository found for path: %s", path );
+			return Response.status( Status.NOT_FOUND ).build();
+		}
+		
+		QuakRepository repository = repositoryOp.get();
 		java.nio.file.Path file = resolveFileSystemPath( repository, path );
 		
 		if ( file == null ) {
