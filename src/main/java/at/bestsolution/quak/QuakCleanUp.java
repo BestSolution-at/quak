@@ -119,8 +119,7 @@ public class QuakCleanUp implements Runnable {
 			// If version is empty it is root metadata-xml, no clean-up required.
 			if ( !version.isEmpty() && !timestamp.isEmpty() ) {
 				String buildFilesPrefix = String.format( "%s-%s-%s-%s", artifactId, versionNo, timestamp, buildNumber );
-				Stream<Path> filePaths = Files.list( path );
-				try {
+				try ( Stream<Path> filePaths = Files.list( path ) ) {
 					filePaths.filter( fp -> !fp.toFile().getName().startsWith( MAVEN_METADATA_XML_FILE_NAME )
 											&& !fp.toFile().getName().startsWith( buildFilesPrefix )
 											&& fp.toFile().lastModified() < metadataTimestamp )
@@ -133,9 +132,6 @@ public class QuakCleanUp implements Runnable {
 								}
 							} );
 				} 
-				finally {
-					filePaths.close();
-				}
 			}
 		} 
 		catch ( ParserConfigurationException | SAXException | IOException | XPathExpressionException e ) {
