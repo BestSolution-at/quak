@@ -17,7 +17,8 @@
     		<h5><i>{urlPath}</i></h5>
 		</div>
 		<div style="float: right">
-			{folderCount} directories and {fileCount} files
+			{folderCount} {#if folderCount > 1} directories	{#else} directory {/if}
+			{fileCount} {#if fileCount > 1} files {#else} file {/if} 
 		</div>
         <table class="table">
           <thead class="table-light">
