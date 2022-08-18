@@ -239,8 +239,9 @@ public class QuakResource {
 			catch ( IOException e ) {
 				LOG.error( "Exception while reading directories!", e );
 			}
-			
-			return Response.ok( directory.data( "items", items ).render(), MediaType.TEXT_HTML ).build();
+			long folderCount = items.stream().filter( i -> i.icon().equals( "folder" ) ).count();
+			long fileCount = items.stream().filter( i -> i.icon().equals( "description" ) ).count();
+			return Response.ok( directory.data( "items", items, "repositoryName", repository.getName(), "urlPath", path, "folderCount", folderCount, "fileCount", fileCount ).render(), MediaType.TEXT_HTML ).build();
 		}
 			
 		return getResponseForFileType( file );

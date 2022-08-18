@@ -12,6 +12,14 @@
 </head>
 <body style="padding: 40px;">
     <main>
+		<div style="float: left">
+			<h3>{repositoryName}</h3>
+    		<h5><i>{urlPath}</i></h5>
+		</div>
+		<div style="float: right">
+			{folderCount} {#if folderCount > 1} directories	{#else} directory {/if}
+			{fileCount} {#if fileCount > 1} files {#else} file {/if} 
+		</div>
         <table class="table">
           <thead class="table-light">
             <tr>
